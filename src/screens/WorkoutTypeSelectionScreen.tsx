@@ -54,66 +54,45 @@ export const WorkoutTypeSelectionScreen: FC = function WorkoutTypeSelectionScree
   const [goalWorkout, setGoalWorkout] = useState<any>(null)
   const [pacerWorkout, setPacerWorkout] = useState<any>(null)
   const [workoutName, setWorkoutName] = useState("")
-  const [previewWorkout, setPreviewWorkout] = useState<WorkoutPlan | null>(null)
 
-  const createPreviewWorkout = () => {
-    try {
-      let workout: WorkoutPlan
+  const createWorkoutPlan = (): WorkoutPlan => {
+    switch (selectedType) {
+      case "goal":
+        if (!goalWorkout) throw new Error("Goal workout not configured")
+        return {
+          type: "goal",
+          workout: {
+            activity,
+            location: selectedLocation,
+            goal: goalWorkout.goal,
+          },
+        }
 
-      switch (selectedType) {
-        case "goal":
-          if (goalWorkout) {
-            workout = {
-              type: "goal",
-              workout: {
-                activity,
-                location: selectedLocation,
-                goal: goalWorkout.goal,
-              },
-            }
-          } else {
-            throw new Error("Please configure your goal workout first")
-          }
-          break
+      case "pacer":
+        if (!pacerWorkout) throw new Error("Pacer workout not configured")
+        return {
+          type: "pacer",
+          workout: {
+            activity,
+            location: selectedLocation,
+            distance: pacerWorkout.distance,
+            time: pacerWorkout.time,
+          },
+        }
 
-        case "pacer":
-          if (pacerWorkout) {
-            workout = {
-              type: "pacer",
-              workout: {
-                activity,
-                location: selectedLocation,
-                distance: pacerWorkout.distance,
-                time: pacerWorkout.time,
-              },
-            }
-          } else {
-            throw new Error("Please configure your pacer workout first")
-          }
-          break
+      case "custom":
+        if (!customWorkout) throw new Error("Custom workout not configured")
+        return {
+          type: "custom",
+          workout: {
+            activity,
+            location: selectedLocation,
+            ...customWorkout,
+          },
+        }
 
-        case "custom":
-          if (customWorkout) {
-            workout = {
-              type: "custom",
-              workout: {
-                activity,
-                location: selectedLocation,
-                ...customWorkout,
-              },
-            }
-          } else {
-            throw new Error("Please configure your custom workout first")
-          }
-          break
-
-        default:
-          throw new Error("Invalid workout type")
-      }
-
-      setPreviewWorkout(workout)
-    } catch (error) {
-      Alert.alert("Error", error instanceof Error ? error.message : "Failed to create preview")
+      default:
+        throw new Error("Invalid workout type")
     }
   }
 
@@ -124,58 +103,7 @@ export const WorkoutTypeSelectionScreen: FC = function WorkoutTypeSelectionScree
     }
 
     try {
-      let workout: WorkoutPlan
-
-      switch (selectedType) {
-        case "goal":
-          if (goalWorkout) {
-            workout = {
-              type: "goal",
-              workout: {
-                activity,
-                location: selectedLocation,
-                goal: goalWorkout.goal,
-              },
-            }
-          } else {
-            throw new Error("Please configure your goal workout first")
-          }
-          break
-
-        case "pacer":
-          if (pacerWorkout) {
-            workout = {
-              type: "pacer",
-              workout: {
-                activity,
-                location: selectedLocation,
-                distance: pacerWorkout.distance,
-                time: pacerWorkout.time,
-              },
-            }
-          } else {
-            throw new Error("Please configure your pacer workout first")
-          }
-          break
-
-        case "custom":
-          if (customWorkout) {
-            workout = {
-              type: "custom",
-              workout: {
-                activity,
-                location: selectedLocation,
-                ...customWorkout,
-              },
-            }
-          } else {
-            throw new Error("Please configure your custom workout first")
-          }
-          break
-
-        default:
-          throw new Error("Invalid workout type")
-      }
+      const workout = createWorkoutPlan()
 
       // Save the workout directly
       const savedWorkout = {
@@ -349,92 +277,66 @@ export const WorkoutTypeSelectionScreen: FC = function WorkoutTypeSelectionScree
           </View>
         )}
 
-        {/* Action Buttons */}
-        <View style={$section}>
-          <View style={$buttonContainer}>
-            {/* Preview Button */}
-            <TouchableOpacity
-              style={[
-                $previewButton,
-                ((selectedType === "goal" && !goalWorkout) ||
-                  (selectedType === "pacer" && !pacerWorkout) ||
-                  (selectedType === "custom" && !customWorkout)) &&
-                  $previewButtonDisabled,
-              ]}
-              onPress={createPreviewWorkout}
-              disabled={
-                (selectedType === "goal" && !goalWorkout) ||
-                (selectedType === "pacer" && !pacerWorkout) ||
-                (selectedType === "custom" && !customWorkout)
-              }
-            >
-              <Text
-                style={[
-                  $previewButtonText,
-                  ((selectedType === "goal" && !goalWorkout) ||
-                    (selectedType === "pacer" && !pacerWorkout) ||
-                    (selectedType === "custom" && !customWorkout)) &&
-                    $previewButtonTextDisabled,
-                ]}
-              >
-                Preview Workout
-              </Text>
-            </TouchableOpacity>
-
-            {/* Save Button */}
-            <TouchableOpacity
-              style={[
-                $saveButton,
-                ((selectedType === "goal" && !goalWorkout) ||
-                  (selectedType === "pacer" && !pacerWorkout) ||
-                  (selectedType === "custom" && !customWorkout) ||
-                  !workoutName.trim()) &&
-                  $saveButtonDisabled,
-              ]}
-              onPress={createAndSaveWorkout}
-              disabled={
-                (selectedType === "goal" && !goalWorkout) ||
-                (selectedType === "pacer" && !pacerWorkout) ||
-                (selectedType === "custom" && !customWorkout) ||
-                !workoutName.trim()
-              }
-            >
-              <Text
-                style={[
-                  $saveButtonText,
-                  ((selectedType === "goal" && !goalWorkout) ||
-                    (selectedType === "pacer" && !pacerWorkout) ||
-                    (selectedType === "custom" && !customWorkout) ||
-                    !workoutName.trim()) &&
-                    $saveButtonTextDisabled,
-                ]}
-              >
-                {(selectedType === "goal" && !goalWorkout) ||
-                (selectedType === "pacer" && !pacerWorkout) ||
-                (selectedType === "custom" && !customWorkout)
-                  ? "Configure Workout First"
-                  : !workoutName.trim()
-                    ? "Enter Workout Name"
-                    : "Save Workout"}
-              </Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-
-        {/* Preview Workout */}
-        {previewWorkout && (
+        {/* Workout Preview */}
+        {((selectedType === "goal" && goalWorkout) ||
+          (selectedType === "pacer" && pacerWorkout) ||
+          (selectedType === "custom" && customWorkout)) && (
           <View style={$section}>
             <Text style={$sectionTitle}>Workout Preview</Text>
             <View style={$previewContainer}>
               <PreviewWorkoutButton
-                workoutPlan={previewWorkout}
+                workoutPlan={createWorkoutPlan()}
                 onButtonPress={handlePreviewButtonPress}
                 label="Start Workout"
                 style={$previewButtonStyle}
+                buttonColor={colors.tint}
+                textColor={colors.palette.neutral100}
+                cornerRadius={16}
+                fontSize={16}
               />
             </View>
           </View>
         )}
+
+        {/* Save Button */}
+        <View style={$section}>
+          <TouchableOpacity
+            style={[
+              $saveButton,
+              ((selectedType === "goal" && !goalWorkout) ||
+                (selectedType === "pacer" && !pacerWorkout) ||
+                (selectedType === "custom" && !customWorkout) ||
+                !workoutName.trim()) &&
+                $saveButtonDisabled,
+            ]}
+            onPress={createAndSaveWorkout}
+            disabled={
+              (selectedType === "goal" && !goalWorkout) ||
+              (selectedType === "pacer" && !pacerWorkout) ||
+              (selectedType === "custom" && !customWorkout) ||
+              !workoutName.trim()
+            }
+          >
+            <Text
+              style={[
+                $saveButtonText,
+                ((selectedType === "goal" && !goalWorkout) ||
+                  (selectedType === "pacer" && !pacerWorkout) ||
+                  (selectedType === "custom" && !customWorkout) ||
+                  !workoutName.trim()) &&
+                  $saveButtonTextDisabled,
+              ]}
+            >
+              {(selectedType === "goal" && !goalWorkout) ||
+              (selectedType === "pacer" && !pacerWorkout) ||
+              (selectedType === "custom" && !customWorkout)
+                ? "Configure Workout First"
+                : !workoutName.trim()
+                  ? "Enter Workout Name"
+                  : "Save Workout"}
+            </Text>
+          </TouchableOpacity>
+        </View>
       </ScrollView>
     </Screen>
   )
@@ -592,37 +494,6 @@ const $nameInputField: TextStyle = {
   fontFamily: typography.primary.normal,
 }
 
-// Button Container
-const $buttonContainer: ViewStyle = {
-  gap: 12,
-}
-
-// Preview Button
-const $previewButton: ViewStyle = {
-  backgroundColor: colors.background,
-  borderRadius: 16,
-  paddingVertical: 18,
-  alignItems: "center",
-  borderWidth: 2,
-  borderColor: colors.tint,
-}
-
-const $previewButtonDisabled: ViewStyle = {
-  backgroundColor: colors.palette.neutral100,
-  borderColor: colors.border,
-}
-
-const $previewButtonText: TextStyle = {
-  fontSize: 16,
-  fontWeight: "700",
-  color: colors.tint,
-  fontFamily: typography.primary.bold,
-}
-
-const $previewButtonTextDisabled: TextStyle = {
-  color: colors.textDim,
-}
-
 // Save Button
 const $saveButton: ViewStyle = {
   backgroundColor: colors.tint,
@@ -661,5 +532,11 @@ const $previewContainer: ViewStyle = {
 const $previewButtonStyle: ViewStyle = {
   height: 56,
   width: "100%",
-  borderRadius: 12,
+  borderRadius: 16,
+  backgroundColor: colors.tint,
+  shadowColor: colors.palette.neutral900,
+  shadowOffset: { width: 0, height: 4 },
+  shadowOpacity: 0.3,
+  shadowRadius: 8,
+  elevation: 8,
 }
