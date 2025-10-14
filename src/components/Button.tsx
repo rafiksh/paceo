@@ -10,6 +10,7 @@ import {
 
 import { useAppTheme } from "@/theme/context"
 import { $styles } from "@/theme/styles"
+import { radius } from "@/theme/spacing"
 import type { ThemedStyle, ThemedStyleArray } from "@/theme/types"
 
 import { Text, TextProps } from "./Text"
@@ -180,7 +181,7 @@ export function Button(props: ButtonProps) {
 
 const $baseViewStyle: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   minHeight: 56,
-  borderRadius: 4,
+  borderRadius: radius.md,
   justifyContent: "center",
   alignItems: "center",
   paddingVertical: spacing.sm,

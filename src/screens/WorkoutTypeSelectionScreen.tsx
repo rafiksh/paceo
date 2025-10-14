@@ -9,6 +9,7 @@ import type {
   HKWorkoutSessionLocationType,
 } from "expo-workoutkit"
 
+import { Button } from "@/components/Button"
 import { CustomWorkoutBuilder } from "@/components/CustomWorkoutBuilder"
 import { GoalSelector } from "@/components/GoalSelector"
 import { LocationDropdown, type Location } from "@/components/LocationDropdown"
@@ -17,6 +18,7 @@ import { Text } from "@/components/Text"
 import { TextField } from "@/components/TextField"
 import { WorkoutStorage } from "@/services/WorkoutStorage"
 import { colors } from "@/theme/colors"
+import { radius } from "@/theme/spacing"
 import { typography } from "@/theme/typography"
 
 // Workout types configuration
@@ -291,7 +293,7 @@ export const WorkoutTypeSelectionScreen: FC = function WorkoutTypeSelectionScree
                 style={$previewButtonStyle}
                 buttonColor={colors.tint}
                 textColor={colors.palette.neutral100}
-                cornerRadius={16}
+                cornerRadius={radius.md}
                 fontSize={16}
               />
             </View>
@@ -300,15 +302,16 @@ export const WorkoutTypeSelectionScreen: FC = function WorkoutTypeSelectionScree
 
         {/* Save Button */}
         <View style={$section}>
-          <TouchableOpacity
-            style={[
-              $saveButton,
-              ((selectedType === "goal" && !goalWorkout) ||
-                (selectedType === "pacer" && !pacerWorkout) ||
-                (selectedType === "custom" && !customWorkout) ||
-                !workoutName.trim()) &&
-                $saveButtonDisabled,
-            ]}
+          <Button
+            text={
+              (selectedType === "goal" && !goalWorkout) ||
+              (selectedType === "pacer" && !pacerWorkout) ||
+              (selectedType === "custom" && !customWorkout)
+                ? "Configure Workout First"
+                : !workoutName.trim()
+                  ? "Enter Workout Name"
+                  : "Save Workout"
+            }
             onPress={createAndSaveWorkout}
             disabled={
               (selectedType === "goal" && !goalWorkout) ||
@@ -316,26 +319,7 @@ export const WorkoutTypeSelectionScreen: FC = function WorkoutTypeSelectionScree
               (selectedType === "custom" && !customWorkout) ||
               !workoutName.trim()
             }
-          >
-            <Text
-              style={[
-                $saveButtonText,
-                ((selectedType === "goal" && !goalWorkout) ||
-                  (selectedType === "pacer" && !pacerWorkout) ||
-                  (selectedType === "custom" && !customWorkout) ||
-                  !workoutName.trim()) &&
-                  $saveButtonTextDisabled,
-              ]}
-            >
-              {(selectedType === "goal" && !goalWorkout) ||
-              (selectedType === "pacer" && !pacerWorkout) ||
-              (selectedType === "custom" && !customWorkout)
-                ? "Configure Workout First"
-                : !workoutName.trim()
-                  ? "Enter Workout Name"
-                  : "Save Workout"}
-            </Text>
-          </TouchableOpacity>
+          />
         </View>
       </ScrollView>
     </Screen>
@@ -494,36 +478,6 @@ const $nameInputField: TextStyle = {
   fontFamily: typography.primary.normal,
 }
 
-// Save Button
-const $saveButton: ViewStyle = {
-  backgroundColor: colors.tint,
-  borderRadius: 16,
-  paddingVertical: 18,
-  alignItems: "center",
-  shadowColor: colors.palette.neutral900,
-  shadowOffset: { width: 0, height: 4 },
-  shadowOpacity: 0.3,
-  shadowRadius: 8,
-  elevation: 8,
-}
-
-const $saveButtonDisabled: ViewStyle = {
-  backgroundColor: colors.palette.neutral100,
-  shadowOpacity: 0,
-  elevation: 0,
-}
-
-const $saveButtonText: TextStyle = {
-  fontSize: 16,
-  fontWeight: "700",
-  color: colors.palette.neutral100,
-  fontFamily: typography.primary.bold,
-}
-
-const $saveButtonTextDisabled: TextStyle = {
-  color: colors.textDim,
-}
-
 // Preview Container
 const $previewContainer: ViewStyle = {
   alignItems: "center",
@@ -532,7 +486,7 @@ const $previewContainer: ViewStyle = {
 const $previewButtonStyle: ViewStyle = {
   height: 56,
   width: "100%",
-  borderRadius: 16,
+  borderRadius: radius.md,
   backgroundColor: colors.tint,
   shadowColor: colors.palette.neutral900,
   shadowOffset: { width: 0, height: 4 },
