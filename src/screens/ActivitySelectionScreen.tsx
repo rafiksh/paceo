@@ -37,7 +37,7 @@ export const ActivitySelectionScreen: FC = function ActivitySelectionScreen() {
   const handleActivitySelect = (activity: HKWorkoutActivityType) => {
     // Navigate to workout type selection with activity, staying within tabs
     router.push({
-      pathname: "/(tabs)/workout-type",
+      pathname: "/(tabs)/builder/configure",
       params: {
         activity,
       },
