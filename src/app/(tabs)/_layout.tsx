@@ -1,8 +1,9 @@
 import { Tabs } from "expo-router"
-import { HomeIcon, BookmarkIcon } from "react-native-heroicons/outline"
+import { HomeIcon, BookmarkIcon, ChatBubbleLeftRightIcon } from "react-native-heroicons/outline"
 import {
   HomeIcon as HomeIconSolid,
   BookmarkIcon as BookmarkIconSolid,
+  ChatBubbleLeftRightIcon as ChatBubbleLeftRightIconSolid,
 } from "react-native-heroicons/solid"
 
 import { colors } from "@/theme/colors"
@@ -47,6 +48,19 @@ export default function TabLayout() {
           title: "Saved",
           tabBarIcon: ({ color, focused, size }) => (
             <TabIcon Icon={focused ? BookmarkIconSolid : BookmarkIcon} color={color} size={size} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="ai"
+        options={{
+          title: "AI",
+          tabBarIcon: ({ color, focused, size }) => (
+            <TabIcon
+              Icon={focused ? ChatBubbleLeftRightIconSolid : ChatBubbleLeftRightIcon}
+              color={color}
+              size={size}
+            />
           ),
         }}
       />

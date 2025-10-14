@@ -1,0 +1,601 @@
+import { FC, useState, useRef, useEffect } from "react"
+import { View, ViewStyle, ScrollView, Alert, KeyboardAvoidingView, Platform } from "react-native"
+import type { TextStyle } from "react-native"
+import * as SecureStore from "expo-secure-store"
+import OpenAI from "openai"
+import { ChatBubbleLeftRightIcon } from "react-native-heroicons/outline"
+
+import { Button } from "@/components/Button"
+import { Screen } from "@/components/Screen"
+import { Text } from "@/components/Text"
+import { TextField } from "@/components/TextField"
+import { WorkoutStorage } from "@/services/WorkoutStorage"
+import { colors } from "@/theme/colors"
+import { radius } from "@/theme/spacing"
+import { typography } from "@/theme/typography"
+import { WorkoutParser, type ParsedWorkout } from "@/utils/WorkoutParser"
+
+interface Message {
+  id: string
+  role: "user" | "assistant"
+  content: string
+  timestamp: Date
+}
+
+export const AIChatScreen: FC = () => {
+  const [apiKey, setApiKey] = useState("")
+  const [messages, setMessages] = useState<Message[]>([])
+  const [inputText, setInputText] = useState("")
+  const [isLoading, setIsLoading] = useState(false)
+  const [hasApiKey, setHasApiKey] = useState(false)
+  const [pendingWorkout, setPendingWorkout] = useState<ParsedWorkout | null>(null)
+  const scrollViewRef = useRef<ScrollView>(null)
+
+  useEffect(() => {
+    // Load saved API key
+    loadApiKey()
+  }, [])
+
+  const loadApiKey = async () => {
+    try {
+      const savedKey = await SecureStore.getItemAsync("paceo_openai_key")
+      if (savedKey) {
+        setApiKey(savedKey)
+        setHasApiKey(true)
+      }
+    } catch {
+      console.log("No saved API key found")
+    }
+  }
+
+  const saveApiKey = async () => {
+    if (!apiKey.trim()) {
+      Alert.alert("Error", "Please enter your OpenAI API key")
+      return
+    }
+
+    try {
+      await SecureStore.setItemAsync("paceo_openai_key", apiKey.trim())
+      setHasApiKey(true)
+      Alert.alert("Success", "API key saved securely!")
+    } catch {
+      Alert.alert("Error", "Failed to save API key")
+    }
+  }
+
+  const sendMessage = async () => {
+    if (!inputText.trim() || isLoading) return
+
+    const userMessage: Message = {
+      id: Date.now().toString(),
+      role: "user",
+      content: inputText.trim(),
+      timestamp: new Date(),
+    }
+
+    setMessages((prev) => [...prev, userMessage])
+    setInputText("")
+    setIsLoading(true)
+
+    try {
+      const openai = new OpenAI({
+        apiKey: apiKey,
+        dangerouslyAllowBrowser: true, // Only for development
+      })
+
+      // Check if user is asking for a workout
+      const isWorkoutRequest =
+        inputText.toLowerCase().includes("workout") ||
+        inputText.toLowerCase().includes("exercise") ||
+        inputText.toLowerCase().includes("training") ||
+        inputText.toLowerCase().includes("routine")
+
+      const systemPrompt = isWorkoutRequest
+        ? "You are a helpful AI assistant for a fitness app called Paceo. When users ask for workouts, create detailed workout plans in the specified JSON format. For other questions, provide helpful fitness advice."
+        : "You are a helpful AI assistant for a fitness app called Paceo. Help users with workout planning, fitness advice, and health-related questions."
+
+      const userPrompt = isWorkoutRequest
+        ? WorkoutParser.getWorkoutCreationPrompt(inputText.trim())
+        : inputText.trim()
+
+      const response = await openai.chat.completions.create({
+        model: "gpt-3.5-turbo",
+        messages: [
+          {
+            role: "system",
+            content: systemPrompt,
+          },
+          ...messages.map((msg) => ({
+            role: msg.role,
+            content: msg.content,
+          })),
+          {
+            role: "user",
+            content: userPrompt,
+          },
+        ],
+        max_tokens: 1000,
+        temperature: 0.7,
+      })
+
+      const assistantResponse =
+        response.choices[0]?.message?.content || "Sorry, I couldn't generate a response."
+
+      const assistantMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        role: "assistant",
+        content: assistantResponse,
+        timestamp: new Date(),
+      }
+
+      setMessages((prev) => [...prev, assistantMessage])
+
+      // Check if the response contains workout data
+      if (isWorkoutRequest && WorkoutParser.containsWorkoutData(assistantResponse)) {
+        const parsedWorkout = WorkoutParser.parseWorkoutFromAI(assistantResponse)
+        if (parsedWorkout) {
+          setPendingWorkout(parsedWorkout)
+        }
+      }
+    } catch (error) {
+      console.error("OpenAI API Error:", error)
+
+      let errorMessage = "Failed to get response from AI. Please try again."
+
+      if (error instanceof Error) {
+        if (error.message.includes("429") || error.message.includes("quota")) {
+          errorMessage = "OpenAI API quota exceeded. Please check your billing or try again later."
+        } else if (error.message.includes("401") || error.message.includes("unauthorized")) {
+          errorMessage = "Invalid API key. Please check your OpenAI API key and try again."
+        } else if (error.message.includes("network") || error.message.includes("fetch")) {
+          errorMessage = "Network error. Please check your internet connection and try again."
+        }
+      }
+
+      Alert.alert("Error", errorMessage)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const clearChat = () => {
+    Alert.alert("Clear Chat", "Are you sure you want to clear all messages?", [
+      { text: "Cancel", style: "cancel" },
+      { text: "Clear", style: "destructive", onPress: () => setMessages([]) },
+    ])
+  }
+
+  const resetApiKey = () => {
+    Alert.alert("Reset API Key", "Are you sure you want to reset your API key?", [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Reset",
+        style: "destructive",
+        onPress: async () => {
+          try {
+            await SecureStore.deleteItemAsync("paceo_openai_key")
+            setApiKey("")
+            setHasApiKey(false)
+            setMessages([])
+          } catch {
+            Alert.alert("Error", "Failed to reset API key")
+          }
+        },
+      },
+    ])
+  }
+
+  const saveWorkout = async () => {
+    if (!pendingWorkout) return
+
+    try {
+      const savedWorkout = {
+        id: WorkoutStorage.generateId(),
+        name: pendingWorkout.name,
+        workoutPlan: pendingWorkout.workoutPlan,
+        createdAt: new Date(),
+        activity: pendingWorkout.activity,
+        location: pendingWorkout.location,
+      }
+
+      await WorkoutStorage.saveWorkout(savedWorkout)
+      setPendingWorkout(null)
+      Alert.alert("Success", `Workout "${pendingWorkout.name}" saved successfully!`)
+    } catch (error) {
+      console.error("Error saving workout:", error)
+      Alert.alert("Error", "Failed to save workout")
+    }
+  }
+
+  const dismissWorkout = () => {
+    setPendingWorkout(null)
+  }
+
+  if (!hasApiKey) {
+    return (
+      <Screen style={$root} preset="scroll">
+        <View style={$container}>
+          <View style={$header}>
+            <ChatBubbleLeftRightIcon size={32} color={colors.tint} />
+            <Text style={$title}>AI Assistant</Text>
+            <Text style={$subtitle}>Get personalized fitness advice</Text>
+          </View>
+
+          <View style={$apiKeySection}>
+            <Text style={$sectionTitle}>OpenAI API Key</Text>
+            <Text style={$description}>
+              Enter your OpenAI API key to start chatting with our AI assistant. Your key is stored
+              securely using device encryption and never leaves your device.
+            </Text>
+
+            <TextField
+              placeholder="sk-..."
+              value={apiKey}
+              onChangeText={setApiKey}
+              secureTextEntry
+            />
+
+            <Button text="Save API Key" onPress={saveApiKey} />
+          </View>
+
+          <View style={$infoSection}>
+            <Text style={$infoTitle}>How to get your API key:</Text>
+            <Text style={$infoText}>1. Visit platform.openai.com</Text>
+            <Text style={$infoText}>2. Sign up or log in</Text>
+            <Text style={$infoText}>3. Go to API Keys section</Text>
+            <Text style={$infoText}>4. Create a new secret key</Text>
+            <Text style={$infoText}>5. Copy and paste it here</Text>
+          </View>
+        </View>
+      </Screen>
+    )
+  }
+
+  return (
+    <Screen style={$root} preset="scroll">
+      <View style={$header}>
+        <ChatBubbleLeftRightIcon size={24} color={colors.tint} />
+        <Text style={$title}>AI Assistant</Text>
+        <Button text="Clear" onPress={clearChat} style={$clearButton} />
+      </View>
+
+      <KeyboardAvoidingView
+        style={$keyboardAvoidingView}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+      >
+        <ScrollView
+          ref={scrollViewRef}
+          style={$messagesContainer}
+          contentContainerStyle={$messagesContent}
+          onContentSizeChange={() => scrollViewRef.current?.scrollToEnd({ animated: true })}
+        >
+          {messages.length === 0 ? (
+            <View style={$emptyState}>
+              <ChatBubbleLeftRightIcon size={48} color={colors.textDim} />
+              <Text style={$emptyTitle}>Start a conversation</Text>
+              <Text style={$emptySubtitle}>
+                Ask me anything about fitness, workouts, or health!
+              </Text>
+            </View>
+          ) : (
+            messages.map((message) => (
+              <View
+                key={message.id}
+                style={[
+                  $messageContainer,
+                  message.role === "user" ? $userMessage : $assistantMessage,
+                ]}
+              >
+                <Text style={$messageText}>{message.content}</Text>
+                <Text style={$messageTime}>
+                  {message.timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                </Text>
+              </View>
+            ))
+          )}
+
+          {isLoading && (
+            <View style={[$messageContainer, $assistantMessage]}>
+              <Text style={$messageText}>Thinking...</Text>
+            </View>
+          )}
+
+          {/* Workout Confirmation */}
+          {pendingWorkout && (
+            <View style={$workoutConfirmation}>
+              <Text style={$workoutTitle}>🎯 Workout Created!</Text>
+              <Text style={$workoutName}>{pendingWorkout.name}</Text>
+              <Text style={$workoutDetails}>
+                {pendingWorkout.activity} • {pendingWorkout.location}
+              </Text>
+              <View style={$workoutActions}>
+                <Button text="Save Workout" onPress={saveWorkout} style={$saveWorkoutButton} />
+                <Button text="Dismiss" onPress={dismissWorkout} style={$dismissButton} />
+              </View>
+            </View>
+          )}
+        </ScrollView>
+
+        <View style={$inputContainer}>
+          <View style={$inputRow}>
+            <View style={$messageInput}>
+              <TextField
+                placeholder="Ask me anything about fitness..."
+                value={inputText}
+                onChangeText={setInputText}
+                multiline
+                maxLength={500}
+              />
+            </View>
+            <Button
+              text="Send"
+              onPress={sendMessage}
+              disabled={!inputText.trim() || isLoading}
+              style={$sendButton}
+            />
+          </View>
+        </View>
+      </KeyboardAvoidingView>
+
+      <View style={$footer}>
+        <Button text="Reset API Key" onPress={resetApiKey} style={$resetButton} />
+      </View>
+    </Screen>
+  )
+}
+
+// Styles
+const $root: ViewStyle = {
+  flex: 1,
+  backgroundColor: colors.background,
+}
+
+const $keyboardAvoidingView: ViewStyle = {
+  flex: 1,
+  flexDirection: "column",
+}
+
+const $container: ViewStyle = {
+  flex: 1,
+  padding: 20,
+}
+
+const $header: ViewStyle = {
+  flexDirection: "row",
+  alignItems: "center",
+  justifyContent: "space-between",
+  paddingVertical: 16,
+  paddingHorizontal: 20,
+  borderBottomWidth: 1,
+  borderBottomColor: colors.border,
+}
+
+const $title: TextStyle = {
+  fontSize: 20,
+  fontWeight: "700",
+  color: colors.text,
+  fontFamily: typography.primary.bold,
+  marginLeft: 12,
+  flex: 1,
+}
+
+const $subtitle: TextStyle = {
+  fontSize: 14,
+  color: colors.textDim,
+  fontFamily: typography.primary.normal,
+  marginTop: 4,
+}
+
+const $apiKeySection: ViewStyle = {
+  marginTop: 32,
+  padding: 20,
+  backgroundColor: colors.background,
+  borderRadius: radius.lg,
+  borderWidth: 1,
+  borderColor: colors.border,
+}
+
+const $sectionTitle: TextStyle = {
+  fontSize: 18,
+  fontWeight: "600",
+  color: colors.text,
+  fontFamily: typography.primary.semiBold,
+  marginBottom: 8,
+}
+
+const $description: TextStyle = {
+  fontSize: 14,
+  color: colors.textDim,
+  fontFamily: typography.primary.normal,
+  lineHeight: 20,
+  marginBottom: 20,
+}
+
+const $infoSection: ViewStyle = {
+  marginTop: 24,
+  padding: 16,
+  backgroundColor: colors.palette.neutral200,
+  borderRadius: radius.md,
+}
+
+const $infoTitle: TextStyle = {
+  fontSize: 16,
+  fontWeight: "600",
+  color: colors.text,
+  fontFamily: typography.primary.semiBold,
+  marginBottom: 12,
+}
+
+const $infoText: TextStyle = {
+  fontSize: 14,
+  color: colors.textDim,
+  fontFamily: typography.primary.normal,
+  marginBottom: 4,
+}
+
+const $clearButton: ViewStyle = {
+  backgroundColor: colors.background,
+  borderWidth: 1,
+  borderColor: colors.border,
+}
+
+const $messagesContainer: ViewStyle = {
+  flex: 1,
+  paddingHorizontal: 20,
+  flexGrow: 1,
+}
+
+const $messagesContent: ViewStyle = {
+  paddingVertical: 16,
+  paddingBottom: 20,
+}
+
+const $emptyState: ViewStyle = {
+  flex: 1,
+  alignItems: "center",
+  justifyContent: "center",
+  paddingVertical: 60,
+}
+
+const $emptyTitle: TextStyle = {
+  fontSize: 18,
+  fontWeight: "600",
+  color: colors.text,
+  fontFamily: typography.primary.semiBold,
+  marginTop: 16,
+  marginBottom: 8,
+}
+
+const $emptySubtitle: TextStyle = {
+  fontSize: 14,
+  color: colors.textDim,
+  fontFamily: typography.primary.normal,
+  textAlign: "center",
+  lineHeight: 20,
+}
+
+const $messageContainer: ViewStyle = {
+  marginBottom: 12,
+  padding: 16,
+  borderRadius: radius.md,
+  maxWidth: "85%",
+}
+
+const $userMessage: ViewStyle = {
+  backgroundColor: colors.tint,
+  alignSelf: "flex-end",
+}
+
+const $assistantMessage: ViewStyle = {
+  backgroundColor: colors.palette.neutral200,
+  alignSelf: "flex-start",
+}
+
+const $messageText: TextStyle = {
+  fontSize: 16,
+  color: colors.text,
+  fontFamily: typography.primary.normal,
+  lineHeight: 22,
+}
+
+const $messageTime: TextStyle = {
+  fontSize: 12,
+  color: colors.textDim,
+  fontFamily: typography.primary.normal,
+  marginTop: 4,
+  textAlign: "right",
+}
+
+const $inputContainer: ViewStyle = {
+  padding: 20,
+  borderTopWidth: 1,
+  borderTopColor: colors.border,
+  backgroundColor: colors.background,
+}
+
+const $inputRow: ViewStyle = {
+  flexDirection: "row",
+  alignItems: "flex-end",
+  gap: 12,
+}
+
+const $messageInput: ViewStyle = {
+  flex: 1,
+  minHeight: 40,
+  maxHeight: 120,
+}
+
+const $sendButton: ViewStyle = {
+  minWidth: 80,
+}
+
+const $footer: ViewStyle = {
+  padding: 20,
+  borderTopWidth: 1,
+  borderTopColor: colors.border,
+  backgroundColor: colors.background,
+}
+
+const $resetButton: ViewStyle = {
+  backgroundColor: colors.background,
+  borderWidth: 1,
+  borderColor: colors.border,
+}
+
+// Workout Confirmation Styles
+const $workoutConfirmation: ViewStyle = {
+  marginHorizontal: 20,
+  marginVertical: 12,
+  padding: 20,
+  backgroundColor: colors.tint,
+  borderRadius: radius.lg,
+  shadowColor: colors.palette.neutral900,
+  shadowOffset: { width: 0, height: 4 },
+  shadowOpacity: 0.3,
+  shadowRadius: 8,
+  elevation: 8,
+}
+
+const $workoutTitle: TextStyle = {
+  fontSize: 18,
+  fontWeight: "700",
+  color: colors.palette.neutral100,
+  fontFamily: typography.primary.bold,
+  textAlign: "center",
+  marginBottom: 8,
+}
+
+const $workoutName: TextStyle = {
+  fontSize: 16,
+  fontWeight: "600",
+  color: colors.palette.neutral100,
+  fontFamily: typography.primary.semiBold,
+  textAlign: "center",
+  marginBottom: 4,
+}
+
+const $workoutDetails: TextStyle = {
+  fontSize: 14,
+  color: colors.palette.neutral200,
+  fontFamily: typography.primary.normal,
+  textAlign: "center",
+  marginBottom: 16,
+  textTransform: "capitalize",
+}
+
+const $workoutActions: ViewStyle = {
+  flexDirection: "row",
+  gap: 12,
+}
+
+const $saveWorkoutButton: ViewStyle = {
+  flex: 1,
+  backgroundColor: colors.palette.neutral100,
+}
+
+const $dismissButton: ViewStyle = {
+  flex: 1,
+  backgroundColor: "transparent",
+  borderWidth: 1,
+  borderColor: colors.palette.neutral100,
+}
