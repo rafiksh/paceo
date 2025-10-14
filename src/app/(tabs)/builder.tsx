@@ -1,5 +1,5 @@
-import { WorkoutBuilderScreenFinal } from "@/screens/WorkoutBuilderScreenFinal"
+import { WorkoutBuilderAdvanced } from "@/screens/WorkoutBuilderAdvanced"
 
 export default function BuilderScreen() {
-  return <WorkoutBuilderScreenFinal />
+  return <WorkoutBuilderAdvanced />
 }
