@@ -20,7 +20,7 @@ export const SavedWorkoutsScreenFinal: FC = function SavedWorkoutsScreenFinal() 
   const loadWorkouts = async () => {
     try {
       const workouts = await WorkoutStorage.getWorkouts()
-      setSavedWorkouts(workouts)
+      setSavedWorkouts(workouts.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime()))
     } catch (error) {
       console.error("Error loading workouts:", error)
     } finally {
@@ -83,7 +83,13 @@ export const SavedWorkoutsScreenFinal: FC = function SavedWorkoutsScreenFinal() 
                     <View style={$workoutTitleContainer}>
                       <Text style={$workoutName}>{savedWorkout.name}</Text>
                       <Text style={$workoutDate}>
-                        {savedWorkout.createdAt.toLocaleDateString()}
+                        {savedWorkout.createdAt.toLocaleDateString("en-US", {
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
                       </Text>
                     </View>
                     <TouchableOpacity
