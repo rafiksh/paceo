@@ -14,6 +14,8 @@ import { GoalSelector } from "@/components/GoalSelector"
 import { LocationDropdown, type Location } from "@/components/LocationDropdown"
 import { Screen } from "@/components/Screen"
 import { Text } from "@/components/Text"
+import { TextField } from "@/components/TextField"
+import { WorkoutStorage } from "@/services/WorkoutStorage"
 import { colors } from "@/theme/colors"
 import { typography } from "@/theme/typography"
 
@@ -52,6 +54,7 @@ export const WorkoutTypeSelectionScreen: FC = function WorkoutTypeSelectionScree
   const [customWorkout, setCustomWorkout] = useState<any>(null)
   const [goalWorkout, setGoalWorkout] = useState<any>(null)
   const [pacerWorkout, setPacerWorkout] = useState<any>(null)
+  const [workoutName, setWorkoutName] = useState("")
 
   const createWorkout = () => {
     try {
@@ -110,8 +113,38 @@ export const WorkoutTypeSelectionScreen: FC = function WorkoutTypeSelectionScree
 
       setGeneratedWorkout(workout)
       Alert.alert("Success", "Workout created successfully!")
+    } catch (error) {
+      Alert.alert("Error", error instanceof Error ? error.message : "Failed to create workout")
+    }
+  }
+
+  const saveWorkout = async () => {
+    if (!generatedWorkout) {
+      Alert.alert("Error", "No workout to save")
+      return
+    }
+
+    if (!workoutName.trim()) {
+      Alert.alert("Error", "Please enter a workout name")
+      return
+    }
+
+    try {
+      const savedWorkout = {
+        id: WorkoutStorage.generateId(),
+        name: workoutName.trim(),
+        workoutPlan: generatedWorkout,
+        createdAt: new Date(),
+        activity: activity,
+        location: selectedLocation,
+      }
+
+      await WorkoutStorage.saveWorkout(savedWorkout)
+      Alert.alert("Success", "Workout saved successfully!")
+      setWorkoutName("")
+      setGeneratedWorkout(null)
     } catch {
-      Alert.alert("Error", "Failed to create workout")
+      Alert.alert("Error", "Failed to save workout")
     }
   }
 
@@ -291,6 +324,27 @@ export const WorkoutTypeSelectionScreen: FC = function WorkoutTypeSelectionScree
                 onButtonPress={handleButtonPress}
                 style={$previewButton}
               />
+            </View>
+
+            {/* Save Workout */}
+            <View style={$saveContainer}>
+              <Text style={$saveLabel}>Save Workout</Text>
+              <Text style={$saveInputLabel}>Workout Name</Text>
+              <TextField
+                value={workoutName}
+                onChangeText={setWorkoutName}
+                placeholder="Enter a name for your workout..."
+                autoCapitalize="words"
+                returnKeyType="done"
+                containerStyle={$saveInputContainer}
+                style={$saveInputField}
+              />
+
+              {workoutName.trim() && (
+                <TouchableOpacity style={$saveWorkoutButton} onPress={saveWorkout}>
+                  <Text style={$saveWorkoutButtonText}>Save Workout</Text>
+                </TouchableOpacity>
+              )}
             </View>
           </View>
         )}
@@ -482,4 +536,56 @@ const $previewButton: ViewStyle = {
   backgroundColor: colors.palette.neutral100,
   borderWidth: 1,
   borderColor: colors.border,
+}
+
+// Save Workout Styles
+const $saveContainer: ViewStyle = {
+  marginTop: 20,
+  padding: 16,
+  backgroundColor: colors.background,
+  borderRadius: 12,
+  borderWidth: 1,
+  borderColor: colors.border,
+}
+
+const $saveLabel: TextStyle = {
+  fontSize: 16,
+  fontWeight: "600",
+  color: colors.text,
+  fontFamily: typography.primary.semiBold,
+  marginBottom: 12,
+}
+
+const $saveInputLabel: TextStyle = {
+  fontSize: 14,
+  fontWeight: "500",
+  color: colors.textDim,
+  fontFamily: typography.primary.medium,
+  marginBottom: 8,
+}
+
+const $saveInputContainer: ViewStyle = {
+  marginBottom: 12,
+}
+
+const $saveInputField: TextStyle = {
+  fontSize: 14,
+  fontWeight: "400",
+  color: colors.text,
+  fontFamily: typography.primary.normal,
+}
+
+const $saveWorkoutButton: ViewStyle = {
+  backgroundColor: colors.palette.neutral900,
+  borderRadius: 8,
+  paddingVertical: 12,
+  paddingHorizontal: 16,
+  alignItems: "center",
+}
+
+const $saveWorkoutButtonText: TextStyle = {
+  fontSize: 16,
+  fontWeight: "700",
+  color: colors.palette.neutral100,
+  fontFamily: typography.primary.bold,
 }
