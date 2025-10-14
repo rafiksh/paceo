@@ -25,10 +25,13 @@ export const LocationCard: FC<LocationCardProps> = ({ location, isSelected, onPr
       style={[$locationCard, isSelected && $locationCardSelected]}
       onPress={onPress}
     >
-      <View style={[$locationIconContainer, { backgroundColor: location.color }]}>
-        <Text style={$locationIcon}>{location.icon}</Text>
+      <View style={$locationContent}>
+        <View style={[$locationIconContainer, { backgroundColor: location.color }]}>
+          <Text style={$locationIcon}>{location.icon}</Text>
+        </View>
+        <Text style={[$locationLabel, isSelected && $locationLabelSelected]}>{location.label}</Text>
       </View>
-      <Text style={[$locationLabel, isSelected && $locationLabelSelected]}>{location.label}</Text>
+      <View style={[$locationRadio, isSelected && $locationRadioSelected]} />
     </TouchableOpacity>
   )
 }
@@ -36,30 +39,39 @@ export const LocationCard: FC<LocationCardProps> = ({ location, isSelected, onPr
 // Styles
 const $locationCard: ViewStyle = {
   flex: 1,
+  flexDirection: "row",
   alignItems: "center",
-  padding: 20,
-  backgroundColor: colors.palette.neutral100,
-  borderRadius: 16,
-  borderWidth: 2,
+  justifyContent: "space-between",
+  paddingVertical: 12,
+  paddingHorizontal: 16,
+  backgroundColor: colors.background,
+  borderRadius: 12,
+  borderWidth: 1,
   borderColor: colors.border,
 }
 
 const $locationCardSelected: ViewStyle = {
-  backgroundColor: colors.palette.neutral900,
-  borderColor: colors.palette.neutral900,
+  backgroundColor: colors.tint,
+  borderColor: colors.tint,
+}
+
+const $locationContent: ViewStyle = {
+  flexDirection: "row",
+  alignItems: "center",
+  flex: 1,
 }
 
 const $locationIconContainer: ViewStyle = {
-  width: 48,
-  height: 48,
-  borderRadius: 24,
+  width: 32,
+  height: 32,
+  borderRadius: 16,
   alignItems: "center",
   justifyContent: "center",
-  marginBottom: 12,
+  marginRight: 12,
 }
 
 const $locationIcon: TextStyle = {
-  fontSize: 24,
+  fontSize: 16,
 }
 
 const $locationLabel: TextStyle = {
@@ -67,9 +79,22 @@ const $locationLabel: TextStyle = {
   fontWeight: "600",
   color: colors.text,
   fontFamily: typography.primary.semiBold,
-  textAlign: "center",
 }
 
 const $locationLabelSelected: TextStyle = {
   color: colors.palette.neutral100,
+}
+
+const $locationRadio: ViewStyle = {
+  width: 16,
+  height: 16,
+  borderRadius: 8,
+  borderWidth: 2,
+  borderColor: colors.border,
+  backgroundColor: colors.background,
+}
+
+const $locationRadioSelected: ViewStyle = {
+  borderColor: colors.palette.neutral100,
+  backgroundColor: colors.palette.neutral100,
 }

@@ -9,28 +9,28 @@ import { colors } from "@/theme/colors"
 import { typography } from "@/theme/typography"
 
 interface GoalSelectorProps {
-  goal: WorkoutGoal
+  goal: WorkoutGoal | null | undefined
   onGoalChange: (goal: WorkoutGoal) => void
 }
 
 export const GoalSelector: FC<GoalSelectorProps> = ({ goal, onGoalChange }) => {
   const [goalType, setGoalType] = useState<"open" | "time" | "distance" | "energy">(
-    goal.type === "open" ? "open" : goal.type,
+    goal?.type === "open" ? "open" : goal?.type || "time",
   )
   const [value, setValue] = useState(
-    goal.type === "open"
+    goal?.type === "open"
       ? ""
-      : goal.type === "time" || goal.type === "distance" || goal.type === "energy"
-        ? goal.value.toString()
+      : goal?.type === "time" || goal?.type === "distance" || goal?.type === "energy"
+        ? goal?.value?.toString() || ""
         : "",
   )
   const [unit, setUnit] = useState<string>(
-    goal.type === "time"
-      ? goal.unit
-      : goal.type === "distance"
-        ? goal.unit
-        : goal.type === "energy"
-          ? goal.unit
+    goal?.type === "time"
+      ? goal?.unit || "minutes"
+      : goal?.type === "distance"
+        ? goal?.unit || "kilometers"
+        : goal?.type === "energy"
+          ? goal?.unit || "calories"
           : "minutes",
   )
 

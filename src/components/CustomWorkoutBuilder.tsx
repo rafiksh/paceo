@@ -12,7 +12,7 @@ import { colors } from "@/theme/colors"
 import { typography } from "@/theme/typography"
 
 interface CustomWorkoutBuilderProps {
-  workout: CustomWorkout
+  workout: CustomWorkout | null
   onWorkoutChange: (workout: CustomWorkout) => void
 }
 
@@ -20,7 +20,7 @@ export const CustomWorkoutBuilder: FC<CustomWorkoutBuilderProps> = ({
   workout,
   onWorkoutChange,
 }) => {
-  const [displayName, setDisplayName] = useState(workout.displayName || "")
+  const [displayName, setDisplayName] = useState(workout?.displayName || "")
 
   const handleDisplayNameChange = (value: string) => {
     setDisplayName(value)
@@ -38,7 +38,7 @@ export const CustomWorkoutBuilder: FC<CustomWorkoutBuilderProps> = ({
   }
 
   const handleBlockChange = (blockIndex: number, block: IntervalBlock) => {
-    const newBlocks = [...workout.blocks]
+    const newBlocks = [...(workout?.blocks || [])]
     newBlocks[blockIndex] = block
     onWorkoutChange({
       ...workout,
@@ -64,13 +64,13 @@ export const CustomWorkoutBuilder: FC<CustomWorkoutBuilderProps> = ({
     }
     onWorkoutChange({
       ...workout,
-      blocks: [...workout.blocks, newBlock],
+      blocks: [...(workout?.blocks || []), newBlock],
     })
   }
 
   const removeBlock = (blockIndex: number) => {
-    if (workout.blocks.length > 1) {
-      const newBlocks = workout.blocks.filter((_, index) => index !== blockIndex)
+    if ((workout?.blocks?.length || 0) > 1) {
+      const newBlocks = (workout?.blocks || []).filter((_, index) => index !== blockIndex)
       onWorkoutChange({
         ...workout,
         blocks: newBlocks,
@@ -97,10 +97,10 @@ export const CustomWorkoutBuilder: FC<CustomWorkoutBuilderProps> = ({
       <Text style={$label}>Warmup (Optional)</Text>
       <View style={$section}>
         <TouchableOpacity
-          style={[$toggleButton, workout.warmup && $toggleButtonSelected]}
+          style={[$toggleButton, workout?.warmup && $toggleButtonSelected]}
           onPress={() =>
             handleWarmupChange(
-              workout.warmup
+              workout?.warmup
                 ? undefined
                 : {
                     goal: {
@@ -112,12 +112,12 @@ export const CustomWorkoutBuilder: FC<CustomWorkoutBuilderProps> = ({
             )
           }
         >
-          <Text style={[$toggleButtonText, workout.warmup && $toggleButtonTextSelected]}>
-            {workout.warmup ? "Remove Warmup" : "Add Warmup"}
+          <Text style={[$toggleButtonText, workout?.warmup && $toggleButtonTextSelected]}>
+            {workout?.warmup ? "Remove Warmup" : "Add Warmup"}
           </Text>
         </TouchableOpacity>
 
-        {workout.warmup && (
+        {workout?.warmup && (
           <View style={$goalContainer}>
             <GoalSelector
               goal={workout.warmup.goal}
@@ -142,7 +142,7 @@ export const CustomWorkoutBuilder: FC<CustomWorkoutBuilderProps> = ({
       </View>
 
       <Text style={$label}>Interval Blocks</Text>
-      {workout.blocks.map((block, index) => (
+      {(workout?.blocks || []).map((block, index) => (
         <IntervalBlockBuilder
           key={index}
           block={block}
@@ -158,10 +158,10 @@ export const CustomWorkoutBuilder: FC<CustomWorkoutBuilderProps> = ({
       <Text style={$label}>Cooldown (Optional)</Text>
       <View style={$section}>
         <TouchableOpacity
-          style={[$toggleButton, workout.cooldown && $toggleButtonSelected]}
+          style={[$toggleButton, workout?.cooldown && $toggleButtonSelected]}
           onPress={() =>
             handleCooldownChange(
-              workout.cooldown
+              workout?.cooldown
                 ? undefined
                 : {
                     goal: {
@@ -173,12 +173,12 @@ export const CustomWorkoutBuilder: FC<CustomWorkoutBuilderProps> = ({
             )
           }
         >
-          <Text style={[$toggleButtonText, workout.cooldown && $toggleButtonTextSelected]}>
-            {workout.cooldown ? "Remove Cooldown" : "Add Cooldown"}
+          <Text style={[$toggleButtonText, workout?.cooldown && $toggleButtonTextSelected]}>
+            {workout?.cooldown ? "Remove Cooldown" : "Add Cooldown"}
           </Text>
         </TouchableOpacity>
 
-        {workout.cooldown && (
+        {workout?.cooldown && (
           <View style={$goalContainer}>
             <GoalSelector
               goal={workout.cooldown.goal}
