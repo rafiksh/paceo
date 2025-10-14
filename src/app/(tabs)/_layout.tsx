@@ -42,12 +42,6 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="workout-type"
-        options={{
-          href: null, // Hide from tab bar
-        }}
-      />
-      <Tabs.Screen
         name="saved"
         options={{
           title: "Saved",
