@@ -11,9 +11,7 @@
   },
   "newArchEnabled": true,
   "jsEngine": "hermes",
-  "assetBundlePatterns": [
-    "**/*"
-  ],
+  "assetBundlePatterns": ["**/*"],
   "android": {
     "icon": "./assets/images/app-icon-android-legacy.png",
     "package": "com.rafiksh.paceo",
@@ -55,7 +53,8 @@
       }
     ],
     "expo-build-properties",
-    "expo-router"
+    "expo-router",
+    "expo-workoutkit"
   ],
   "experiments": {
     "tsconfigPaths": true,
