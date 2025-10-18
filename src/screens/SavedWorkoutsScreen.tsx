@@ -1,7 +1,7 @@
-import { FC, useState, useEffect } from "react"
+import { FC, useState, useCallback } from "react"
 import { View, ViewStyle, ScrollView, TouchableOpacity, Alert } from "react-native"
 import type { TextStyle } from "react-native"
-import { router } from "expo-router"
+import { router, useFocusEffect } from "expo-router"
 import { PreviewWorkoutButton } from "expo-workoutkit"
 import { TrashIcon, HeartIcon, HomeIcon, SunIcon, EyeIcon } from "react-native-heroicons/outline"
 
@@ -14,41 +14,54 @@ export const SavedWorkoutsScreen: FC = function SavedWorkoutsScreen() {
   const [savedWorkouts, setSavedWorkouts] = useState<SavedWorkout[]>([])
   const [loading, setLoading] = useState(true)
 
-  const getWorkoutSummary = (workoutPlan: any): string => {
-    if (!workoutPlan || !workoutPlan.type) {
+  const getWorkoutSummary = (workoutPlan: unknown): string => {
+    if (!workoutPlan || typeof workoutPlan !== "object") {
       return "Workout Plan"
     }
 
-    switch (workoutPlan.type) {
-      case "goal":
-        if (workoutPlan.workout?.goal?.type === "time" && workoutPlan.workout.goal.value) {
-          return `Goal: ${workoutPlan.workout.goal.value} ${workoutPlan.workout.goal.unit || "min"}`
-        } else if (
-          workoutPlan.workout?.goal?.type === "distance" &&
-          workoutPlan.workout.goal.value
-        ) {
-          return `Goal: ${workoutPlan.workout.goal.value} ${workoutPlan.workout.goal.unit || "km"}`
+    const plan = workoutPlan as Record<string, unknown>
+    if (!plan.type) {
+      return "Workout Plan"
+    }
+
+    switch (plan.type) {
+      case "goal": {
+        const workout = plan.workout as Record<string, unknown> | undefined
+        const goal = workout?.goal as Record<string, unknown> | undefined
+        if (goal?.type === "time" && goal.value) {
+          return `Goal: ${goal.value} ${goal.unit || "min"}`
+        } else if (goal?.type === "distance" && goal.value) {
+          return `Goal: ${goal.value} ${goal.unit || "km"}`
         } else {
           return "Open Goal Workout"
         }
-      case "pacer":
-        const distance = workoutPlan.workout?.distance?.value
-        const time = workoutPlan.workout?.time?.value
-        if (distance && time) {
-          return `${distance}km in ${time}min`
+      }
+      case "pacer": {
+        const workout = plan.workout as Record<string, unknown> | undefined
+        const distance = workout?.distance as Record<string, unknown> | undefined
+        const time = workout?.time as Record<string, unknown> | undefined
+        if (distance?.value && time?.value) {
+          return `${distance.value}km in ${time.value}min`
         }
         return "Pacer Workout"
-      case "custom":
-        const blockCount = workoutPlan.workout?.blocks?.length || 0
+      }
+      case "custom": {
+        const workout = plan.workout as Record<string, unknown> | undefined
+        const blocks = workout?.blocks as unknown[] | undefined
+        const blockCount = blocks?.length || 0
         return `Custom: ${blockCount} interval${blockCount !== 1 ? "s" : ""}`
+      }
       default:
         return "Workout Plan"
     }
   }
 
-  useEffect(() => {
-    loadWorkouts()
-  }, [])
+  useFocusEffect(
+    useCallback(() => {
+      setLoading(true)
+      loadWorkouts()
+    }, []),
+  )
 
   const loadWorkouts = async () => {
     try {

@@ -1,3 +1,4 @@
+import React from "react"
 import { Tabs } from "expo-router"
 import {
   WrenchScrewdriverIcon,
@@ -77,6 +78,14 @@ export default function TabLayout() {
 }
 
 // Enhanced tab icon component
-function TabIcon({ Icon, color, size }: { Icon: any; color: string; size: number }) {
-  return <Icon size={size} color={color} strokeWidth={2} />
+function TabIcon({
+  Icon,
+  color,
+  size,
+}: {
+  Icon: React.ComponentType<{ color: string; size: number }>
+  color: string
+  size: number
+}) {
+  return <Icon size={size} color={color} />
 }

@@ -1,15 +1,14 @@
-import { FC, useState } from "react"
+import { FC } from "react"
 import { View, ViewStyle, TouchableOpacity, ScrollView } from "react-native"
 import type { TextStyle } from "react-native"
 import type { CustomWorkout, IntervalBlock, WorkoutStep } from "expo-workoutkit"
+import { TrashIcon } from "react-native-heroicons/solid"
 
-import { AlertSelector } from "@/components/AlertSelector"
+import { AlertDisplay } from "@/components/AlertDisplay"
 import { GoalSelector } from "@/components/GoalSelector"
 import { IntervalBlockBuilder } from "@/components/IntervalBlockBuilder"
 import { Text } from "@/components/Text"
-import { TextField } from "@/components/TextField"
 import { colors } from "@/theme/colors"
-import { typography } from "@/theme/typography"
 
 interface CustomWorkoutBuilderProps {
   workout: CustomWorkout | null
@@ -20,17 +19,18 @@ export const CustomWorkoutBuilder: FC<CustomWorkoutBuilderProps> = ({
   workout,
   onWorkoutChange,
 }) => {
-  const [displayName, setDisplayName] = useState(workout?.displayName || "")
-
-  const handleDisplayNameChange = (value: string) => {
-    setDisplayName(value)
-    onWorkoutChange({
-      ...workout,
-      displayName: value,
-    })
-  }
-
+  const createInitialWorkout = (overrides: Partial<CustomWorkout> = {}) => ({
+    activity: "running" as const,
+    location: "outdoor" as const,
+    displayName: "Custom Workout",
+    blocks: [],
+    ...overrides,
+  })
   const handleWarmupChange = (warmup: WorkoutStep | undefined) => {
+    if (!workout) {
+      onWorkoutChange(createInitialWorkout({ warmup }))
+      return
+    }
     onWorkoutChange({
       ...workout,
       warmup,
@@ -38,7 +38,8 @@ export const CustomWorkoutBuilder: FC<CustomWorkoutBuilderProps> = ({
   }
 
   const handleBlockChange = (blockIndex: number, block: IntervalBlock) => {
-    const newBlocks = [...(workout?.blocks || [])]
+    if (!workout) return
+    const newBlocks = [...(workout.blocks || [])]
     newBlocks[blockIndex] = block
     onWorkoutChange({
       ...workout,
@@ -62,86 +63,97 @@ export const CustomWorkoutBuilder: FC<CustomWorkoutBuilderProps> = ({
       ],
       iterations: 1,
     }
-    onWorkoutChange({
-      ...workout,
-      blocks: [...(workout?.blocks || []), newBlock],
-    })
-  }
 
-  const removeBlock = (blockIndex: number) => {
-    if ((workout?.blocks?.length || 0) > 1) {
-      const newBlocks = (workout?.blocks || []).filter((_, index) => index !== blockIndex)
+    if (!workout) {
+      onWorkoutChange(createInitialWorkout({ blocks: [newBlock] }))
+    } else {
       onWorkoutChange({
         ...workout,
-        blocks: newBlocks,
+        blocks: [...(workout.blocks || []), newBlock],
       })
     }
   }
 
+  const removeBlock = (blockIndex: number) => {
+    if (!workout) return
+    const newBlocks = (workout.blocks || []).filter((_, index) => index !== blockIndex)
+    onWorkoutChange({
+      ...workout,
+      blocks: newBlocks,
+    })
+  }
+
   const handleCooldownChange = (cooldown: WorkoutStep | undefined) => {
+    if (!workout) {
+      onWorkoutChange(createInitialWorkout({ cooldown }))
+      return
+    }
     onWorkoutChange({
       ...workout,
       cooldown,
     })
   }
 
+  // Unified Remove Button Component
+  const RemoveButton: FC<{ onPress: () => void }> = ({ onPress }) => (
+    <TouchableOpacity style={$removeButton} onPress={onPress}>
+      <TrashIcon size={18} color={colors.error} />
+    </TouchableOpacity>
+  )
+
   return (
     <ScrollView showsVerticalScrollIndicator={false} style={$container}>
-      <Text style={$label}>Workout Name</Text>
-      <TextField
-        placeholder="Enter workout name"
-        value={displayName}
-        onChangeText={handleDisplayNameChange}
-      />
-
-      <Text style={$label}>Warmup (Optional)</Text>
+      <Text preset="formLabel" size="md" style={$label}>
+        Warmup (Optional)
+      </Text>
       <View style={$section}>
-        <TouchableOpacity
-          style={[$toggleButton, workout?.warmup && $toggleButtonSelected]}
-          onPress={() =>
-            handleWarmupChange(
-              workout?.warmup
-                ? undefined
-                : {
-                    goal: {
-                      type: "time",
-                      value: 5,
-                      unit: "minutes",
-                    },
-                  },
-            )
-          }
-        >
-          <Text style={[$toggleButtonText, workout?.warmup && $toggleButtonTextSelected]}>
-            {workout?.warmup ? "Remove Warmup" : "Add Warmup"}
-          </Text>
-        </TouchableOpacity>
-
-        {workout?.warmup && (
-          <View style={$goalContainer}>
-            <GoalSelector
-              goal={workout.warmup.goal}
-              onGoalChange={(goal) =>
-                handleWarmupChange({
-                  ...workout.warmup!,
-                  goal,
-                })
-              }
-            />
-            <AlertSelector
-              alert={workout.warmup.alert}
-              onAlertChange={(alert) =>
-                handleWarmupChange({
-                  ...workout.warmup!,
-                  alert,
-                })
-              }
-            />
-          </View>
+        {!workout?.warmup ? (
+          <TouchableOpacity
+            style={$addButton}
+            onPress={() =>
+              handleWarmupChange({
+                goal: {
+                  type: "time",
+                  value: 5,
+                  unit: "minutes",
+                },
+              })
+            }
+          >
+            <Text preset="formLabel" size="sm" style={$addButtonText}>
+              + Add Warmup
+            </Text>
+          </TouchableOpacity>
+        ) : (
+          <>
+            <RemoveButton onPress={() => handleWarmupChange(undefined)} />
+            <View style={$goalContainer}>
+              <GoalSelector
+                goal={workout.warmup.goal}
+                onGoalChange={(goal) =>
+                  handleWarmupChange({
+                    ...workout.warmup!,
+                    goal,
+                  })
+                }
+              />
+              <AlertDisplay
+                alert={workout.warmup.alert}
+                onAlertChange={(alert) =>
+                  handleWarmupChange({
+                    ...workout.warmup!,
+                    alert,
+                  })
+                }
+              />
+            </View>
+          </>
         )}
       </View>
 
-      <Text style={$label}>Interval Blocks</Text>
+      <Text preset="formLabel" size="md" style={$label}>
+        Interval Blocks
+      </Text>
       {(workout?.blocks || []).map((block, index) => (
         <IntervalBlockBuilder
           key={index}
@@ -152,53 +164,56 @@ export const CustomWorkoutBuilder: FC<CustomWorkoutBuilderProps> = ({
       ))}
 
       <TouchableOpacity style={$addBlockButton} onPress={addBlock}>
-        <Text style={$addBlockText}>+ Add Block</Text>
+        <Text preset="formLabel" size="md" style={$addBlockText}>
+          + Add Block
+        </Text>
       </TouchableOpacity>
 
-      <Text style={$label}>Cooldown (Optional)</Text>
+      <Text preset="formLabel" size="md" style={$label}>
+        Cooldown (Optional)
+      </Text>
       <View style={$section}>
-        <TouchableOpacity
-          style={[$toggleButton, workout?.cooldown && $toggleButtonSelected]}
-          onPress={() =>
-            handleCooldownChange(
-              workout?.cooldown
-                ? undefined
-                : {
-                    goal: {
-                      type: "time",
-                      value: 5,
-                      unit: "minutes",
-                    },
-                  },
-            )
-          }
-        >
-          <Text style={[$toggleButtonText, workout?.cooldown && $toggleButtonTextSelected]}>
-            {workout?.cooldown ? "Remove Cooldown" : "Add Cooldown"}
-          </Text>
-        </TouchableOpacity>
-
-        {workout?.cooldown && (
-          <View style={$goalContainer}>
-            <GoalSelector
-              goal={workout.cooldown.goal}
-              onGoalChange={(goal) =>
-                handleCooldownChange({
-                  ...workout.cooldown!,
-                  goal,
-                })
-              }
-            />
-            <AlertSelector
-              alert={workout.cooldown.alert}
-              onAlertChange={(alert) =>
-                handleCooldownChange({
-                  ...workout.cooldown!,
-                  alert,
-                })
-              }
-            />
-          </View>
+        {!workout?.cooldown ? (
+          <TouchableOpacity
+            style={$addButton}
+            onPress={() =>
+              handleCooldownChange({
+                goal: {
+                  type: "time",
+                  value: 5,
+                  unit: "minutes",
+                },
+              })
+            }
+          >
+            <Text preset="formLabel" size="sm" style={$addButtonText}>
+              + Add Cooldown
+            </Text>
+          </TouchableOpacity>
+        ) : (
+          <>
+            <RemoveButton onPress={() => handleCooldownChange(undefined)} />
+            <View style={$goalContainer}>
+              <GoalSelector
+                goal={workout.cooldown.goal}
+                onGoalChange={(goal) =>
+                  handleCooldownChange({
+                    ...workout.cooldown!,
+                    goal,
+                  })
+                }
+              />
+              <AlertDisplay
+                alert={workout.cooldown.alert}
+                onAlertChange={(alert) =>
+                  handleCooldownChange({
+                    ...workout.cooldown!,
+                    alert,
+                  })
+                }
+              />
+            </View>
+          </>
         )}
       </View>
     </ScrollView>
@@ -211,10 +226,6 @@ const $container: ViewStyle = {
 }
 
 const $label: TextStyle = {
-  fontSize: 16,
-  fontWeight: "600",
-  color: colors.text,
-  fontFamily: typography.primary.semiBold,
   marginBottom: 12,
   marginTop: 20,
 }
@@ -226,32 +237,6 @@ const $section: ViewStyle = {
   borderWidth: 1,
   borderColor: colors.border,
   marginBottom: 16,
-}
-
-const $toggleButton: ViewStyle = {
-  backgroundColor: colors.background,
-  borderRadius: 12,
-  paddingVertical: 12,
-  paddingHorizontal: 16,
-  alignItems: "center",
-  borderWidth: 1,
-  borderColor: colors.border,
-}
-
-const $toggleButtonSelected: ViewStyle = {
-  backgroundColor: colors.error,
-  borderColor: colors.error,
-}
-
-const $toggleButtonText: TextStyle = {
-  fontSize: 14,
-  fontWeight: "600",
-  color: colors.text,
-  fontFamily: typography.primary.semiBold,
-}
-
-const $toggleButtonTextSelected: TextStyle = {
-  color: colors.palette.neutral100,
 }
 
 const $goalContainer: ViewStyle = {
@@ -268,8 +253,31 @@ const $addBlockButton: ViewStyle = {
 }
 
 const $addBlockText: TextStyle = {
-  fontSize: 16,
-  fontWeight: "600",
   color: colors.palette.neutral100,
-  fontFamily: typography.primary.semiBold,
+}
+
+const $addButton: ViewStyle = {
+  backgroundColor: colors.tint,
+  borderRadius: 12,
+  paddingVertical: 12,
+  paddingHorizontal: 16,
+  alignItems: "center",
+  borderWidth: 1,
+  borderColor: colors.tint,
+}
+
+const $addButtonText: TextStyle = {
+  color: colors.palette.neutral100,
+}
+
+const $removeButton: ViewStyle = {
+  backgroundColor: colors.palette.neutral200,
+  borderRadius: 8,
+  padding: 12,
+  borderWidth: 1,
+  borderColor: colors.border,
+  marginBottom: 16,
+  alignSelf: "flex-start",
+  alignItems: "center",
+  justifyContent: "center",
 }

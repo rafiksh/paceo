@@ -6,7 +6,52 @@ import type { WorkoutGoal } from "expo-workoutkit"
 import { Text } from "@/components/Text"
 import { TextField } from "@/components/TextField"
 import { colors } from "@/theme/colors"
-import { typography } from "@/theme/typography"
+
+type UnitType =
+  | "seconds"
+  | "minutes"
+  | "hours"
+  | "meters"
+  | "kilometers"
+  | "yards"
+  | "miles"
+  | "feet"
+  | "calories"
+  | "kilocalories"
+  | "joules"
+  | "kilojoules"
+
+// Mapping from display abbreviations to actual unit values
+const unitMapping: Record<string, UnitType> = {
+  sec: "seconds",
+  min: "minutes",
+  hr: "hours",
+  m: "meters",
+  km: "kilometers",
+  yd: "yards",
+  mi: "miles",
+  ft: "feet",
+  cal: "calories",
+  kcal: "kilocalories",
+  J: "joules",
+  kJ: "kilojoules",
+}
+
+// Reverse mapping from actual unit values to display abbreviations
+const reverseUnitMapping: Record<UnitType, string> = {
+  seconds: "sec",
+  minutes: "min",
+  hours: "hr",
+  meters: "m",
+  kilometers: "km",
+  yards: "yd",
+  miles: "mi",
+  feet: "ft",
+  calories: "cal",
+  kilocalories: "kcal",
+  joules: "J",
+  kilojoules: "kJ",
+}
 
 interface GoalSelectorProps {
   goal: WorkoutGoal | null | undefined
@@ -14,72 +59,69 @@ interface GoalSelectorProps {
 }
 
 export const GoalSelector: FC<GoalSelectorProps> = ({ goal, onGoalChange }) => {
-  const [goalType, setGoalType] = useState<"open" | "time" | "distance" | "energy">(
-    goal?.type === "open" ? "open" : goal?.type || "time",
+  const [goalType, setGoalType] = useState<"time" | "distance" | "energy">(
+    goal?.type === "time" || goal?.type === "distance" || goal?.type === "energy"
+      ? goal.type
+      : "time",
   )
   const [value, setValue] = useState(
-    goal?.type === "open"
-      ? ""
-      : goal?.type === "time" || goal?.type === "distance" || goal?.type === "energy"
-        ? goal?.value?.toString() || ""
-        : "",
+    goal?.type === "time" || goal?.type === "distance" || goal?.type === "energy"
+      ? goal?.value?.toString() || ""
+      : "",
   )
   const [unit, setUnit] = useState<string>(
     goal?.type === "time"
-      ? goal?.unit || "minutes"
+      ? reverseUnitMapping[goal?.unit as UnitType] || "min"
       : goal?.type === "distance"
-        ? goal?.unit || "kilometers"
+        ? reverseUnitMapping[goal?.unit as UnitType] || "km"
         : goal?.type === "energy"
-          ? goal?.unit || "calories"
-          : "minutes",
+          ? reverseUnitMapping[goal?.unit as UnitType] || "cal"
+          : "min",
   )
 
-  const handleGoalTypeChange = (type: "open" | "time" | "distance" | "energy") => {
+  const handleGoalTypeChange = (type: "time" | "distance" | "energy") => {
     setGoalType(type)
-    if (type === "open") {
-      onGoalChange({ type: "open" })
-    } else {
-      const newGoal = {
-        type,
-        value: parseInt(value) || 1,
-        unit: unit as any,
-      } as WorkoutGoal
-      onGoalChange(newGoal)
-    }
+    // Set default unit for the new type
+    const defaultUnits = getUnitsForType(type)
+    const newUnit = defaultUnits[0] // Use first unit as default
+    setUnit(newUnit)
+
+    const newGoal = {
+      type,
+      value: parseInt(value) || 1,
+      unit: unitMapping[newUnit] as UnitType,
+    } as WorkoutGoal
+    onGoalChange(newGoal)
   }
 
   const handleValueChange = (newValue: string) => {
     setValue(newValue)
-    if (goalType !== "open") {
-      const newGoal = {
-        type: goalType,
-        value: parseInt(newValue) || 1,
-        unit: unit as any,
-      } as WorkoutGoal
-      onGoalChange(newGoal)
-    }
+    const newGoal = {
+      type: goalType,
+      value: parseInt(newValue) || 1,
+      unit: unitMapping[unit] as UnitType,
+    } as WorkoutGoal
+    onGoalChange(newGoal)
   }
 
   const handleUnitChange = (newUnit: string) => {
     setUnit(newUnit)
-    if (goalType !== "open") {
-      const newGoal = {
-        type: goalType,
-        value: parseInt(value) || 1,
-        unit: newUnit as any,
-      } as WorkoutGoal
-      onGoalChange(newGoal)
-    }
+    const newGoal = {
+      type: goalType,
+      value: parseInt(value) || 1,
+      unit: unitMapping[newUnit] as UnitType,
+    } as WorkoutGoal
+    onGoalChange(newGoal)
   }
 
   const getUnitsForType = (type: string) => {
     switch (type) {
       case "time":
-        return ["seconds", "minutes", "hours"]
+        return ["sec", "min", "hr"]
       case "distance":
-        return ["meters", "kilometers", "yards", "miles", "feet"]
+        return ["m", "km", "yd", "mi", "ft"]
       case "energy":
-        return ["calories", "kilocalories", "joules", "kilojoules"]
+        return ["cal", "kcal", "J", "kJ"]
       default:
         return []
     }
@@ -87,10 +129,11 @@ export const GoalSelector: FC<GoalSelectorProps> = ({ goal, onGoalChange }) => {
 
   return (
     <View style={$container}>
-      <Text style={$label}>Goal Type</Text>
+      <Text preset="formLabel" size="sm">
+        Goal Type
+      </Text>
       <View style={$goalTypeGrid}>
         {[
-          { key: "open", label: "Open" },
           { key: "time", label: "Time" },
           { key: "distance", label: "Distance" },
           { key: "energy", label: "Energy" },
@@ -98,41 +141,45 @@ export const GoalSelector: FC<GoalSelectorProps> = ({ goal, onGoalChange }) => {
           <TouchableOpacity
             key={type.key}
             style={[$goalTypeButton, goalType === type.key && $goalTypeButtonSelected]}
-            onPress={() => handleGoalTypeChange(type.key as any)}
+            onPress={() => handleGoalTypeChange(type.key as "time" | "distance" | "energy")}
           >
-            <Text style={[$goalTypeLabel, goalType === type.key && $goalTypeLabelSelected]}>
+            <Text
+              preset="formLabel"
+              size="sm"
+              style={goalType === type.key && $goalTypeLabelSelected}
+            >
               {type.label}
             </Text>
           </TouchableOpacity>
         ))}
       </View>
 
-      {goalType !== "open" && (
-        <>
-          <Text style={$label}>Unit</Text>
-          <View style={$unitGrid}>
-            {getUnitsForType(goalType).map((unitOption) => (
-              <TouchableOpacity
-                key={unitOption}
-                style={[$unitButton, unit === unitOption && $unitButtonSelected]}
-                onPress={() => handleUnitChange(unitOption)}
-              >
-                <Text style={[$unitText, unit === unitOption && $unitTextSelected]}>
-                  {unitOption}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </View>
+      <Text preset="formLabel" size="sm">
+        Unit
+      </Text>
+      <View style={$unitGrid}>
+        {getUnitsForType(goalType).map((unitOption) => (
+          <TouchableOpacity
+            key={unitOption}
+            style={[$unitButton, unit === unitOption && $unitButtonSelected]}
+            onPress={() => handleUnitChange(unitOption)}
+          >
+            <Text preset="formLabel" size="xs" style={unit === unitOption && $unitTextSelected}>
+              {unitOption}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </View>
 
-          <Text style={$label}>Value</Text>
-          <TextField
-            placeholder="Enter value"
-            value={value}
-            onChangeText={handleValueChange}
-            keyboardType="numeric"
-          />
-        </>
-      )}
+      <Text preset="formLabel" size="sm">
+        Value
+      </Text>
+      <TextField
+        placeholder="Enter value"
+        value={value}
+        onChangeText={handleValueChange}
+        keyboardType="numeric"
+      />
     </View>
   )
 }
@@ -146,15 +193,6 @@ const $container: ViewStyle = {
   borderColor: colors.border,
 }
 
-const $label: TextStyle = {
-  fontSize: 14,
-  fontWeight: "600",
-  color: colors.text,
-  fontFamily: typography.primary.semiBold,
-  marginBottom: 12,
-  marginTop: 16,
-}
-
 const $goalTypeGrid: ViewStyle = {
   flexDirection: "row",
   flexWrap: "wrap",
@@ -163,7 +201,7 @@ const $goalTypeGrid: ViewStyle = {
 }
 
 const $goalTypeButton: ViewStyle = {
-  width: "48%",
+  flex: 1,
   alignItems: "center",
   justifyContent: "center",
   paddingVertical: 12,
@@ -177,14 +215,6 @@ const $goalTypeButton: ViewStyle = {
 const $goalTypeButtonSelected: ViewStyle = {
   backgroundColor: colors.tint,
   borderColor: colors.tint,
-}
-
-const $goalTypeLabel: TextStyle = {
-  fontSize: 14,
-  fontWeight: "600",
-  color: colors.text,
-  fontFamily: typography.primary.semiBold,
-  textAlign: "center",
 }
 
 const $goalTypeLabelSelected: TextStyle = {
@@ -211,13 +241,6 @@ const $unitButton: ViewStyle = {
 const $unitButtonSelected: ViewStyle = {
   backgroundColor: colors.tint,
   borderColor: colors.tint,
-}
-
-const $unitText: TextStyle = {
-  fontSize: 13,
-  fontWeight: "700",
-  color: colors.text,
-  fontFamily: typography.primary.bold,
 }
 
 const $unitTextSelected: TextStyle = {

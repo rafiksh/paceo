@@ -2,8 +2,9 @@ import { FC, useState } from "react"
 import { View, ViewStyle, TouchableOpacity, ScrollView } from "react-native"
 import type { TextStyle } from "react-native"
 import type { IntervalBlock, IntervalStep } from "expo-workoutkit"
+import { TrashIcon } from "react-native-heroicons/solid"
 
-import { AlertSelector } from "@/components/AlertSelector"
+import { AlertDisplay } from "@/components/AlertDisplay"
 import { GoalSelector } from "@/components/GoalSelector"
 import { Text } from "@/components/Text"
 import { TextField } from "@/components/TextField"
@@ -72,7 +73,7 @@ export const IntervalBlockBuilder: FC<IntervalBlockBuilderProps> = ({
       <View style={$header}>
         <Text style={$title}>Interval Block</Text>
         <TouchableOpacity style={$deleteButton} onPress={onDelete}>
-          <Text style={$deleteButtonText}>🗑️</Text>
+          <TrashIcon size={18} color={colors.error} />
         </TouchableOpacity>
       </View>
 
@@ -127,7 +128,7 @@ export const IntervalBlockBuilder: FC<IntervalBlockBuilderProps> = ({
               }
             />
 
-            <AlertSelector
+            <AlertDisplay
               alert={step.step.alert}
               onAlertChange={(alert) =>
                 handleStepChange(index, {
@@ -172,14 +173,13 @@ const $title: TextStyle = {
 }
 
 const $deleteButton: ViewStyle = {
-  padding: 8,
-  backgroundColor: colors.error,
+  backgroundColor: colors.palette.neutral200,
   borderRadius: 8,
-}
-
-const $deleteButtonText: TextStyle = {
-  fontSize: 16,
-  color: colors.palette.neutral100,
+  padding: 12,
+  borderWidth: 1,
+  borderColor: colors.border,
+  alignItems: "center",
+  justifyContent: "center",
 }
 
 const $label: TextStyle = {

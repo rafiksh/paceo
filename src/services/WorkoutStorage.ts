@@ -31,7 +31,7 @@ export class WorkoutStorage {
 
       const workouts = JSON.parse(workoutsJson)
       // Convert createdAt strings back to Date objects
-      return workouts.map((workout: any) => ({
+      return workouts.map((workout: Record<string, unknown>) => ({
         ...workout,
         createdAt: new Date(workout.createdAt),
       }))

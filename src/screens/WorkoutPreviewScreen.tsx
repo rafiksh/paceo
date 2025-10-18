@@ -1,6 +1,7 @@
 import { FC } from "react"
 import { View, ViewStyle, TouchableOpacity } from "react-native"
 import type { TextStyle } from "react-native"
+import type { CustomWorkout, SingleGoalWorkout } from "expo-workoutkit"
 import { XMarkIcon, HomeIcon, SunIcon } from "react-native-heroicons/outline"
 
 import { Screen } from "@/components/Screen"
@@ -19,36 +20,66 @@ export const WorkoutPreviewScreen: FC<WorkoutPreviewScreenProps> = function Work
 }) {
   const { workoutPlan } = workout
 
+  // Type guards for workout types
+  const isCustomWorkout = (workout: unknown): workout is CustomWorkout => {
+    return Boolean(workout && typeof workout === "object" && "blocks" in workout)
+  }
+
+  const isSingleGoalWorkout = (workout: unknown): workout is SingleGoalWorkout => {
+    return Boolean(workout && typeof workout === "object" && "goal" in workout)
+  }
+
   // Helper functions for extracting workout data
-  const getGoalDisplay = (goal: any): string => {
-    if (!goal) return "No goal set"
-    if (goal.type === "open") return "Open goal"
-    return `${goal.value} ${goal.unit}`
+  const getGoalDisplay = (goal: unknown): string => {
+    if (!goal || typeof goal !== "object") return "No goal set"
+    const goalObj = goal as Record<string, unknown>
+    if (goalObj.type === "open") return "Open goal"
+    return `${goalObj.value || 0} ${goalObj.unit || ""}`
   }
 
-  const getAlertDisplay = (alert: any): string => {
-    if (!alert) return ""
-    const target = alert.target
-    if (!target) return `${alert.type} alert`
-    return `${alert.type} alert (${target.min}-${target.max} ${target.unit})`
+  const getAlertDisplay = (alert: unknown): string => {
+    if (!alert || typeof alert !== "object") return ""
+    const alertObj = alert as Record<string, unknown>
+    const target = alertObj.target as Record<string, unknown> | undefined
+    if (!target) return `${alertObj.type} alert`
+    return `${alertObj.type} alert (${target.min}-${target.max} ${target.unit})`
   }
 
-  const getStepDisplay = (step: any): { duration: string; purpose: string; alerts: string[] } => {
-    const goal = step?.step?.goal || step?.goal
+  const getStepDisplay = (
+    step: unknown,
+  ): { duration: string; purpose: string; alerts: string[] } => {
+    if (!step || typeof step !== "object") {
+      return { duration: "No duration", purpose: "Unknown", alerts: [] }
+    }
+    const stepObj = step as Record<string, unknown>
+    const goal = stepObj.step ? (stepObj.step as Record<string, unknown>).goal : stepObj.goal
     const duration = getGoalDisplay(goal)
-    const purpose = step?.purpose || "Unknown"
-    const alerts = step?.step?.alert ? [getAlertDisplay(step.step.alert)] : []
+    const purpose = (stepObj.purpose as string) || "Unknown"
+    const alerts =
+      stepObj.step && (stepObj.step as Record<string, unknown>).alert
+        ? [getAlertDisplay((stepObj.step as Record<string, unknown>).alert)]
+        : []
 
     return { duration, purpose, alerts }
   }
 
   const getBlockSummary = (
-    block: any,
+    block: unknown,
   ): { iterations: number; totalSteps: number; stepTypes: string[] } => {
-    const iterations = block?.iterations || 0
-    const steps = block?.steps || []
+    if (!block || typeof block !== "object") {
+      return { iterations: 0, totalSteps: 0, stepTypes: [] }
+    }
+    const blockObj = block as Record<string, unknown>
+    const iterations = (blockObj.iterations as number) || 0
+    const steps = (blockObj.steps as unknown[]) || []
     const totalSteps = steps.length
-    const stepTypes = steps.map((step: any) => step?.purpose || "Unknown")
+    const stepTypes = steps.map((step: unknown) => {
+      if (step && typeof step === "object") {
+        const stepObj = step as Record<string, unknown>
+        return (stepObj.purpose as string) || "Unknown"
+      }
+      return "Unknown"
+    })
 
     return { iterations, totalSteps, stepTypes }
   }
@@ -57,9 +88,55 @@ export const WorkoutPreviewScreen: FC<WorkoutPreviewScreenProps> = function Work
     // Debug logging
     console.log("Workout Plan:", JSON.stringify(workoutPlan, null, 2))
     console.log("Workout Type:", workoutPlan.type)
-    console.log("Workout Blocks:", (workoutPlan.workout as any)?.blocks)
-    console.log("Workout Warmup:", (workoutPlan.workout as any)?.warmup)
-    console.log("Workout Cooldown:", (workoutPlan.workout as any)?.cooldown)
+    // Type-safe access to workout properties
+    const workoutData = workoutPlan.workout
+    if (workoutData && "blocks" in workoutData) {
+      console.log("Workout Blocks:", workoutData.blocks)
+    }
+    if (workoutData && "warmup" in workoutData) {
+      console.log("Workout Warmup:", workoutData.warmup)
+    }
+    if (workoutData && "cooldown" in workoutData) {
+      console.log("Workout Cooldown:", workoutData.cooldown)
+    }
+
+    // Helper variables for complex expressions
+    const warmupGoal = isCustomWorkout(workoutPlan.workout)
+      ? getGoalDisplay(workoutPlan.workout.warmup?.goal)
+      : "No warmup"
+
+    // Helper function to render steps
+    const renderSteps = (block: unknown) => {
+      const blockObj = block as Record<string, unknown>
+      const steps = blockObj.steps as unknown[] | undefined
+      return steps?.map((step: unknown, stepIndex: number) => {
+        const stepDisplay = getStepDisplay(step)
+        return (
+          <View key={stepIndex} style={$stepCard}>
+            <View style={$stepContent}>
+              <Text preset="formLabel" size="sm" style={$stepDuration}>
+                {stepDisplay.duration}
+              </Text>
+              <Text preset="formHelper" size="xs" style={$stepPurpose}>
+                {stepDisplay.purpose}
+              </Text>
+            </View>
+
+            {stepDisplay.alerts.length > 0 && (
+              <View style={$stepAlerts}>
+                {stepDisplay.alerts.map((alert, alertIndex) => (
+                  <View key={alertIndex} style={$alertBadge}>
+                    <Text preset="formHelper" size="xs" style={$alertText}>
+                      {alert}
+                    </Text>
+                  </View>
+                ))}
+              </View>
+            )}
+          </View>
+        )
+      })
+    }
 
     return (
       <>
@@ -92,7 +169,9 @@ export const WorkoutPreviewScreen: FC<WorkoutPreviewScreenProps> = function Work
               <Text preset="heading" size="xl" style={$goalValue}>
                 {workoutPlan.workout?.goal?.type === "open"
                   ? "Open Goal"
-                  : `${(workoutPlan.workout?.goal as any)?.value || "Open"} ${(workoutPlan.workout?.goal as any)?.unit || ""}`}
+                  : isSingleGoalWorkout(workoutPlan.workout)
+                    ? `${workoutPlan.workout.goal?.value || "Open"} ${workoutPlan.workout.goal?.unit || ""}`
+                    : "Open goal"}
               </Text>
               <Text preset="formHelper" style={$goalType}>
                 {workoutPlan.workout?.goal?.type === "time" && "Time-based goal"}
@@ -158,7 +237,7 @@ export const WorkoutPreviewScreen: FC<WorkoutPreviewScreenProps> = function Work
                 Has Cooldown: {workoutPlan.workout?.cooldown ? "Yes" : "No"}
               </Text>
               <Text preset="formHelper" style={$blockDescription}>
-                Warmup Goal: {getGoalDisplay((workoutPlan.workout as any)?.warmup?.goal)}
+                Warmup Goal: {warmupGoal}
               </Text>
               <Text preset="formHelper" style={$blockDescription}>
                 First Block Steps: {workoutPlan.workout?.blocks?.[0]?.steps?.length || 0}
@@ -189,17 +268,21 @@ export const WorkoutPreviewScreen: FC<WorkoutPreviewScreenProps> = function Work
                 <View style={$stepCard}>
                   <View style={$stepContent}>
                     <Text preset="formLabel" size="sm" style={$stepDuration}>
-                      {getGoalDisplay((workoutPlan.workout as any).warmup.goal)}
+                      {isCustomWorkout(workoutPlan.workout)
+                        ? getGoalDisplay(workoutPlan.workout.warmup?.goal)
+                        : "No warmup goal"}
                     </Text>
                     <Text preset="formHelper" size="xs" style={$stepPurpose}>
                       Preparation phase
                     </Text>
                   </View>
-                  {(workoutPlan.workout as any).warmup.alert && (
+                  {isCustomWorkout(workoutPlan.workout) && workoutPlan.workout.warmup?.alert && (
                     <View style={$stepAlerts}>
                       <View style={$alertBadge}>
                         <Text preset="formHelper" size="xs" style={$alertText}>
-                          {getAlertDisplay((workoutPlan.workout as any).warmup.alert)}
+                          {isCustomWorkout(workoutPlan.workout)
+                            ? getAlertDisplay(workoutPlan.workout.warmup?.alert)
+                            : "No alert"}
                         </Text>
                       </View>
                     </View>
@@ -209,7 +292,7 @@ export const WorkoutPreviewScreen: FC<WorkoutPreviewScreenProps> = function Work
             )}
 
             {/* Workout Blocks */}
-            {workoutPlan.workout?.blocks?.map((block: any, blockIndex: number) => {
+            {workoutPlan.workout?.blocks?.map((block: unknown, blockIndex: number) => {
               const blockSummary = getBlockSummary(block)
               return (
                 <View key={blockIndex} style={$blockCard}>
@@ -232,35 +315,7 @@ export const WorkoutPreviewScreen: FC<WorkoutPreviewScreenProps> = function Work
                   </View>
 
                   {/* Steps */}
-                  <View style={$stepsContainer}>
-                    {block.steps?.map((step: any, stepIndex: number) => {
-                      const stepDisplay = getStepDisplay(step)
-                      return (
-                        <View key={stepIndex} style={$stepCard}>
-                          <View style={$stepContent}>
-                            <Text preset="formLabel" size="sm" style={$stepDuration}>
-                              {stepDisplay.duration}
-                            </Text>
-                            <Text preset="formHelper" size="xs" style={$stepPurpose}>
-                              {stepDisplay.purpose}
-                            </Text>
-                          </View>
-
-                          {stepDisplay.alerts.length > 0 && (
-                            <View style={$stepAlerts}>
-                              {stepDisplay.alerts.map((alert, alertIndex) => (
-                                <View key={alertIndex} style={$alertBadge}>
-                                  <Text preset="formHelper" size="xs" style={$alertText}>
-                                    {alert}
-                                  </Text>
-                                </View>
-                              ))}
-                            </View>
-                          )}
-                        </View>
-                      )
-                    })}
-                  </View>
+                  <View style={$stepsContainer}>{renderSteps(block)}</View>
                 </View>
               )
             })}
@@ -283,17 +338,21 @@ export const WorkoutPreviewScreen: FC<WorkoutPreviewScreenProps> = function Work
                 <View style={$stepCard}>
                   <View style={$stepContent}>
                     <Text preset="formLabel" size="sm" style={$stepDuration}>
-                      {getGoalDisplay((workoutPlan.workout.cooldown as any).goal)}
+                      {isCustomWorkout(workoutPlan.workout)
+                        ? getGoalDisplay(workoutPlan.workout.cooldown?.goal)
+                        : "No cooldown goal"}
                     </Text>
                     <Text preset="formHelper" size="xs" style={$stepPurpose}>
                       Recovery phase
                     </Text>
                   </View>
-                  {(workoutPlan.workout.cooldown as any).alert && (
+                  {isCustomWorkout(workoutPlan.workout) && workoutPlan.workout.cooldown?.alert && (
                     <View style={$stepAlerts}>
                       <View style={$alertBadge}>
                         <Text preset="formHelper" size="xs" style={$alertText}>
-                          {getAlertDisplay((workoutPlan.workout.cooldown as any).alert)}
+                          {isCustomWorkout(workoutPlan.workout)
+                            ? getAlertDisplay(workoutPlan.workout.cooldown?.alert)
+                            : "No alert"}
                         </Text>
                       </View>
                     </View>
