@@ -1,7 +1,11 @@
 import { Tabs } from "expo-router"
-import { HomeIcon, BookmarkIcon, ChatBubbleLeftRightIcon } from "react-native-heroicons/outline"
 import {
-  HomeIcon as HomeIconSolid,
+  WrenchScrewdriverIcon,
+  BookmarkIcon,
+  ChatBubbleLeftRightIcon,
+} from "react-native-heroicons/outline"
+import {
+  WrenchScrewdriverIcon as WrenchScrewdriverIconSolid,
   BookmarkIcon as BookmarkIconSolid,
   ChatBubbleLeftRightIcon as ChatBubbleLeftRightIconSolid,
 } from "react-native-heroicons/solid"
@@ -38,7 +42,11 @@ export default function TabLayout() {
         options={{
           title: "Builder",
           tabBarIcon: ({ color, focused, size }) => (
-            <TabIcon Icon={focused ? HomeIconSolid : HomeIcon} color={color} size={size} />
+            <TabIcon
+              Icon={focused ? WrenchScrewdriverIconSolid : WrenchScrewdriverIcon}
+              color={color}
+              size={size}
+            />
           ),
         }}
       />
