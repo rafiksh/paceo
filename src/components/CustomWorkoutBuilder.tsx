@@ -95,7 +95,7 @@ export const CustomWorkoutBuilder: FC<CustomWorkoutBuilderProps> = ({
 
   return (
     <ScrollView showsVerticalScrollIndicator={false} style={$container}>
-      <Text preset="formLabel" size="md" style={$label}>
+      <Text preset="formLabel" size="md" style={$warmupLabel}>
         Warmup (Optional)
       </Text>
       {!workout?.warmup ? (
@@ -201,6 +201,9 @@ const $container: ViewStyle = {
   flex: 1,
 }
 
+const $warmupLabel: TextStyle = {
+  marginBottom: 8,
+}
 const $label: TextStyle = {
   marginBottom: 8,
   marginTop: 20,
