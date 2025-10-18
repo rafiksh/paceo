@@ -8,6 +8,7 @@ import type {
   HKWorkoutActivityType,
   HKWorkoutSessionLocationType,
 } from "expo-workoutkit"
+import { ArrowLeftIcon } from "react-native-heroicons/outline"
 
 import { Button } from "@/components/Button"
 import { CustomWorkoutBuilder } from "@/components/CustomWorkoutBuilder"
@@ -19,7 +20,6 @@ import { TextField } from "@/components/TextField"
 import { WorkoutStorage } from "@/services/WorkoutStorage"
 import { colors } from "@/theme/colors"
 import { radius } from "@/theme/spacing"
-import { typography } from "@/theme/typography"
 
 // Workout types configuration
 const WORKOUT_TYPES = [
@@ -147,20 +147,26 @@ export const WorkoutConfigurationScreen: FC = function WorkoutConfigurationScree
   }
 
   return (
-    <Screen preset="scroll" contentContainerStyle={$container}>
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={$scrollContent}>
-        {/* Header */}
-        <View style={$header}>
-          <TouchableOpacity style={$backButton} onPress={handleBack}>
-            <Text style={$backButtonText}>← Back</Text>
-          </TouchableOpacity>
-          <Text style={$title}>Choose Workout Type</Text>
-          <Text style={$subtitle}>{activity.charAt(0).toUpperCase() + activity.slice(1)}</Text>
+    <Screen preset="fixed" contentContainerStyle={$container} safeAreaEdges={["top"]}>
+      <View style={$header}>
+        <TouchableOpacity style={$backButton} onPress={handleBack}>
+          <ArrowLeftIcon size={20} color={colors.text} />
+        </TouchableOpacity>
+        <View style={$headerContent}>
+          <Text preset="heading" size="lg">
+            Configure Workout
+          </Text>
+          <Text preset="formHelper" size="md">
+            {activity.charAt(0).toUpperCase() + activity.slice(1)}
+          </Text>
         </View>
-
+      </View>
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={$scrollContent}>
         {/* Workout Name Input */}
         <View style={$section}>
-          <Text style={$sectionTitle}>Workout Name</Text>
+          <Text preset="subheading" size="md">
+            Workout Name
+          </Text>
           <TextField
             value={workoutName}
             onChangeText={setWorkoutName}
@@ -168,13 +174,14 @@ export const WorkoutConfigurationScreen: FC = function WorkoutConfigurationScree
             autoCapitalize="words"
             returnKeyType="done"
             containerStyle={$nameInputContainer}
-            style={$nameInputField}
           />
         </View>
 
         {/* Location Selection */}
         <View style={$section}>
-          <Text style={$sectionTitle}>Location</Text>
+          <Text preset="subheading" size="md">
+            Location
+          </Text>
           <LocationDropdown
             locations={LOCATIONS}
             selectedLocation={selectedLocation}
@@ -186,7 +193,9 @@ export const WorkoutConfigurationScreen: FC = function WorkoutConfigurationScree
 
         {/* Workout Type Selection */}
         <View style={$section}>
-          <Text style={$sectionTitle}>Workout Type</Text>
+          <Text preset="subheading" size="md">
+            Workout Type
+          </Text>
           <View style={$workoutTypeContainer}>
             {WORKOUT_TYPES.map((type) => (
               <TouchableOpacity
@@ -199,6 +208,8 @@ export const WorkoutConfigurationScreen: FC = function WorkoutConfigurationScree
               >
                 <View style={$workoutTypeContent}>
                   <Text
+                    preset="formLabel"
+                    size="sm"
                     style={[
                       $workoutTypeLabel,
                       selectedType === type.key && $workoutTypeLabelSelected,
@@ -207,6 +218,8 @@ export const WorkoutConfigurationScreen: FC = function WorkoutConfigurationScree
                     {type.label}
                   </Text>
                   <Text
+                    preset="formHelper"
+                    size="xs"
                     style={[
                       $workoutTypeDescription,
                       selectedType === type.key && $workoutTypeDescriptionSelected,
@@ -229,7 +242,9 @@ export const WorkoutConfigurationScreen: FC = function WorkoutConfigurationScree
         {/* Goal Workout Configuration */}
         {selectedType === "goal" && (
           <View style={$section}>
-            <Text style={$sectionTitle}>Configure Goal</Text>
+            <Text preset="subheading" size="md">
+              Configure Goal
+            </Text>
             <GoalSelector
               goal={goalWorkout?.goal}
               onGoalChange={(goal) =>
@@ -245,9 +260,13 @@ export const WorkoutConfigurationScreen: FC = function WorkoutConfigurationScree
         {/* Pacer Workout Configuration */}
         {selectedType === "pacer" && (
           <View style={$section}>
-            <Text style={$sectionTitle}>Configure Pace</Text>
+            <Text preset="subheading" size="md">
+              Configure Pace
+            </Text>
             <View style={$pacerContainer}>
-              <Text style={$pacerLabel}>Distance</Text>
+              <Text preset="formLabel" size="sm">
+                Distance
+              </Text>
               <GoalSelector
                 goal={pacerWorkout?.distance}
                 onGoalChange={(distance) =>
@@ -257,7 +276,9 @@ export const WorkoutConfigurationScreen: FC = function WorkoutConfigurationScree
                   })
                 }
               />
-              <Text style={$pacerLabel}>Time</Text>
+              <Text preset="formLabel" size="sm">
+                Time
+              </Text>
               <GoalSelector
                 goal={pacerWorkout?.time}
                 onGoalChange={(time) =>
@@ -274,7 +295,9 @@ export const WorkoutConfigurationScreen: FC = function WorkoutConfigurationScree
         {/* Custom Workout Builder */}
         {selectedType === "custom" && (
           <View style={$section}>
-            <Text style={$sectionTitle}>Configure Custom Workout</Text>
+            <Text preset="subheading" size="md">
+              Configure Custom Workout
+            </Text>
             <CustomWorkoutBuilder workout={customWorkout} onWorkoutChange={setCustomWorkout} />
           </View>
         )}
@@ -284,7 +307,9 @@ export const WorkoutConfigurationScreen: FC = function WorkoutConfigurationScree
           (selectedType === "pacer" && pacerWorkout) ||
           (selectedType === "custom" && customWorkout)) && (
           <View style={$section}>
-            <Text style={$sectionTitle}>Workout Preview</Text>
+            <Text preset="subheading" size="md">
+              Workout Preview
+            </Text>
             <View style={$previewContainer}>
               <PreviewWorkoutButton
                 workoutPlan={createWorkoutPlan()}
@@ -329,79 +354,52 @@ export const WorkoutConfigurationScreen: FC = function WorkoutConfigurationScree
 // Styles
 const $container: ViewStyle = {
   flex: 1,
-  backgroundColor: colors.background,
 }
 
 const $scrollContent: ViewStyle = {
-  paddingBottom: 40,
+  paddingVertical: 40,
+  paddingHorizontal: 24,
 }
 
 const $header: ViewStyle = {
-  paddingHorizontal: 24,
-  paddingVertical: 40,
+  flexDirection: "row",
   alignItems: "center",
+  paddingHorizontal: 24,
+  paddingVertical: 16,
+  gap: 16,
 }
 
 const $backButton: ViewStyle = {
-  alignSelf: "flex-start",
-  marginBottom: 20,
-  paddingVertical: 8,
-  paddingHorizontal: 16,
+  width: 40,
+  height: 40,
+  borderRadius: 20,
   backgroundColor: colors.palette.neutral100,
-  borderRadius: 8,
+  alignItems: "center",
+  justifyContent: "center",
   borderWidth: 1,
   borderColor: colors.border,
 }
 
-const $backButtonText: TextStyle = {
-  fontSize: 14,
-  fontWeight: "600",
-  color: colors.text,
-  fontFamily: typography.primary.semiBold,
-}
-
-const $title: TextStyle = {
-  fontSize: 32,
-  fontWeight: "800",
-  color: colors.text,
-  fontFamily: typography.primary.bold,
-  marginBottom: 8,
-  letterSpacing: -0.5,
-}
-
-const $subtitle: TextStyle = {
-  fontSize: 16,
-  fontWeight: "400",
-  color: colors.textDim,
-  fontFamily: typography.primary.normal,
-  textAlign: "center",
+const $headerContent: ViewStyle = {
+  flex: 1,
 }
 
 const $section: ViewStyle = {
-  paddingHorizontal: 24,
   marginBottom: 32,
-}
-
-const $sectionTitle: TextStyle = {
-  fontSize: 20,
-  fontWeight: "700",
-  color: colors.text,
-  fontFamily: typography.primary.bold,
-  marginBottom: 20,
-  letterSpacing: -0.3,
 }
 
 // Workout Type Styles
 const $workoutTypeContainer: ViewStyle = {
-  gap: 8,
+  flexDirection: "row",
+  gap: 12,
 }
 
 const $workoutTypeOption: ViewStyle = {
-  flexDirection: "row",
+  flex: 1,
   alignItems: "center",
-  justifyContent: "space-between",
+  justifyContent: "center",
   paddingVertical: 16,
-  paddingHorizontal: 20,
+  paddingHorizontal: 12,
   backgroundColor: colors.background,
   borderRadius: 12,
   borderWidth: 1,
@@ -414,15 +412,13 @@ const $workoutTypeOptionSelected: ViewStyle = {
 }
 
 const $workoutTypeContent: ViewStyle = {
-  flex: 1,
+  alignItems: "center",
+  marginBottom: 8,
 }
 
 const $workoutTypeLabel: TextStyle = {
-  fontSize: 16,
-  fontWeight: "600",
-  color: colors.text,
-  fontFamily: typography.primary.semiBold,
-  marginBottom: 2,
+  textAlign: "center",
+  marginBottom: 4,
 }
 
 const $workoutTypeLabelSelected: TextStyle = {
@@ -430,10 +426,8 @@ const $workoutTypeLabelSelected: TextStyle = {
 }
 
 const $workoutTypeDescription: TextStyle = {
-  fontSize: 14,
-  fontWeight: "400",
-  color: colors.textDim,
-  fontFamily: typography.primary.normal,
+  textAlign: "center",
+  fontSize: 11,
 }
 
 const $workoutTypeDescriptionSelected: TextStyle = {
@@ -441,9 +435,9 @@ const $workoutTypeDescriptionSelected: TextStyle = {
 }
 
 const $workoutTypeRadio: ViewStyle = {
-  width: 20,
-  height: 20,
-  borderRadius: 10,
+  width: 16,
+  height: 16,
+  borderRadius: 8,
   borderWidth: 2,
   borderColor: colors.border,
   backgroundColor: colors.background,
@@ -459,23 +453,8 @@ const $pacerContainer: ViewStyle = {
   gap: 16,
 }
 
-const $pacerLabel: TextStyle = {
-  fontSize: 16,
-  fontWeight: "600",
-  color: colors.text,
-  fontFamily: typography.primary.semiBold,
-  marginBottom: 8,
-}
-
 const $nameInputContainer: ViewStyle = {
   marginBottom: 0,
-}
-
-const $nameInputField: TextStyle = {
-  fontSize: 16,
-  fontWeight: "400",
-  color: colors.text,
-  fontFamily: typography.primary.normal,
 }
 
 // Preview Container
