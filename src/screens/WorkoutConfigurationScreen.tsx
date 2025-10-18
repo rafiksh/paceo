@@ -25,18 +25,15 @@ import { radius } from "@/theme/spacing"
 const WORKOUT_TYPES = [
   {
     key: "goal",
-    label: "Goal Workout",
-    description: "Set a specific target",
+    label: "Goal",
   },
   {
     key: "pacer",
-    label: "Pacer Workout",
-    description: "Maintain consistent pace",
+    label: "Pacer",
   },
   {
     key: "custom",
-    label: "Custom Workout",
-    description: "Complex intervals with blocks",
+    label: "Custom",
   },
 ]
 
@@ -206,34 +203,16 @@ export const WorkoutConfigurationScreen: FC = function WorkoutConfigurationScree
                 ]}
                 onPress={() => setSelectedType(type.key as any)}
               >
-                <View style={$workoutTypeContent}>
-                  <Text
-                    preset="formLabel"
-                    size="sm"
-                    style={[
-                      $workoutTypeLabel,
-                      selectedType === type.key && $workoutTypeLabelSelected,
-                    ]}
-                  >
-                    {type.label}
-                  </Text>
-                  <Text
-                    preset="formHelper"
-                    size="xs"
-                    style={[
-                      $workoutTypeDescription,
-                      selectedType === type.key && $workoutTypeDescriptionSelected,
-                    ]}
-                  >
-                    {type.description}
-                  </Text>
-                </View>
-                <View
+                <Text
+                  preset="formLabel"
+                  size="sm"
                   style={[
-                    $workoutTypeRadio,
-                    selectedType === type.key && $workoutTypeRadioSelected,
+                    $workoutTypeLabel,
+                    selectedType === type.key && $workoutTypeLabelSelected,
                   ]}
-                />
+                >
+                  {type.label}
+                </Text>
               </TouchableOpacity>
             ))}
           </View>
@@ -404,6 +383,7 @@ const $workoutTypeOption: ViewStyle = {
   borderRadius: 12,
   borderWidth: 1,
   borderColor: colors.border,
+  gap: 4,
 }
 
 const $workoutTypeOptionSelected: ViewStyle = {
@@ -411,41 +391,12 @@ const $workoutTypeOptionSelected: ViewStyle = {
   borderColor: colors.tint,
 }
 
-const $workoutTypeContent: ViewStyle = {
-  alignItems: "center",
-  marginBottom: 8,
-}
-
 const $workoutTypeLabel: TextStyle = {
   textAlign: "center",
-  marginBottom: 4,
 }
 
 const $workoutTypeLabelSelected: TextStyle = {
   color: colors.palette.neutral100,
-}
-
-const $workoutTypeDescription: TextStyle = {
-  textAlign: "center",
-  fontSize: 11,
-}
-
-const $workoutTypeDescriptionSelected: TextStyle = {
-  color: colors.palette.neutral300,
-}
-
-const $workoutTypeRadio: ViewStyle = {
-  width: 16,
-  height: 16,
-  borderRadius: 8,
-  borderWidth: 2,
-  borderColor: colors.border,
-  backgroundColor: colors.background,
-}
-
-const $workoutTypeRadioSelected: ViewStyle = {
-  borderColor: colors.palette.neutral100,
-  backgroundColor: colors.palette.neutral100,
 }
 
 // Pacer Configuration Styles
