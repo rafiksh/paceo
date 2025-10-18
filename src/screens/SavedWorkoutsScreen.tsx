@@ -1,19 +1,62 @@
 import { FC, useState, useCallback } from "react"
-import { View, ViewStyle, ScrollView, TouchableOpacity, Alert } from "react-native"
+import { View, ViewStyle, ScrollView, Alert } from "react-native"
 import type { TextStyle } from "react-native"
 import { router, useFocusEffect } from "expo-router"
 import { PreviewWorkoutButton } from "expo-workoutkit"
 import { TrashIcon, HeartIcon, HomeIcon, SunIcon, EyeIcon } from "react-native-heroicons/outline"
 
+import { Button } from "@/components/Button"
 import { Screen } from "@/components/Screen"
 import { Text } from "@/components/Text"
 import { WorkoutStorage, type SavedWorkout } from "@/services/WorkoutStorage"
 import { colors } from "@/theme/colors"
 
-export const SavedWorkoutsScreen: FC = function SavedWorkoutsScreen() {
-  const [savedWorkouts, setSavedWorkouts] = useState<SavedWorkout[]>([])
-  const [loading, setLoading] = useState(true)
+// LoadingState Component
+const LoadingState: FC = () => (
+  <View style={$loadingContainer}>
+    <View style={$header}>
+      <Text preset="heading">Saved Workouts</Text>
+      <Text preset="subheading">Your saved workout plans</Text>
+    </View>
+    <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={$scrollContent}>
+      {[1, 2, 3].map((i) => (
+        <View key={i} style={$skeletonCard}>
+          <View style={$skeletonContent}>
+            <View style={$skeletonTitle} />
+            <View style={$skeletonDescription} />
+            <View style={$skeletonMeta} />
+          </View>
+          <View style={$skeletonButton} />
+        </View>
+      ))}
+    </ScrollView>
+  </View>
+)
 
+// EmptyState Component
+const EmptyState: FC = () => (
+  <View style={$emptyState}>
+    <View style={$emptyIconContainer}>
+      <HeartIcon size={40} color={colors.palette.neutral400} />
+    </View>
+    <Text preset="heading" size="md" style={$emptyTitle}>
+      No Saved Workouts
+    </Text>
+    <Text preset="formHelper" style={$emptyDescription}>
+      Create your first workout to see it here
+    </Text>
+  </View>
+)
+
+// WorkoutCard Component
+interface WorkoutCardProps {
+  workout: SavedWorkout
+  onPreview: (workout: SavedWorkout) => void
+  onDelete: (id: string) => void
+  onButtonPress: (message: string) => void
+}
+
+const WorkoutCard: FC<WorkoutCardProps> = ({ workout, onPreview, onDelete, onButtonPress }) => {
   const getWorkoutSummary = (workoutPlan: unknown): string => {
     if (!workoutPlan || typeof workoutPlan !== "object") {
       return "Workout Plan"
@@ -55,6 +98,73 @@ export const SavedWorkoutsScreen: FC = function SavedWorkoutsScreen() {
         return "Workout Plan"
     }
   }
+
+  return (
+    <View>
+      <View style={$workoutCard}>
+        {/* Workout Info */}
+        <View style={$workoutInfo}>
+          <Text preset="heading" size="sm" style={$workoutName}>
+            {workout.name}
+          </Text>
+          <Text preset="formHelper" size="xs" style={$workoutDescription}>
+            {getWorkoutSummary(workout.workoutPlan)}
+          </Text>
+          <View style={$workoutMeta}>
+            <View style={$metaItem}>
+              {workout.location === "indoor" ? (
+                <HomeIcon size={12} color={colors.palette.secondary500} />
+              ) : (
+                <SunIcon size={12} color={colors.palette.accent500} />
+              )}
+              <Text preset="formHelper" size="xxs" style={$metaText}>
+                {workout.location === "indoor" ? "Indoor" : "Outdoor"}
+              </Text>
+            </View>
+          </View>
+        </View>
+
+        {/* Action Buttons */}
+        <View style={$actionButtons}>
+          <Button
+            preset="default"
+            onPress={() => onPreview(workout)}
+            style={$iconButton}
+            textStyle={$iconButtonText}
+          >
+            <EyeIcon size={18} color={colors.tint} />
+          </Button>
+          <Button
+            preset="default"
+            onPress={() => onDelete(workout.id)}
+            style={$deleteIconButton}
+            textStyle={$iconButtonText}
+          >
+            <TrashIcon size={18} color={colors.palette.angry500} />
+          </Button>
+        </View>
+      </View>
+
+      {/* Workout Preview */}
+      <View style={$workoutPreview}>
+        <PreviewWorkoutButton
+          workoutPlan={workout.workoutPlan}
+          onButtonPress={({ nativeEvent }) => onButtonPress(nativeEvent.message)}
+          label="Start Workout"
+          buttonColor={colors.tint}
+          textColor={colors.palette.neutral100}
+          cornerRadius={12}
+          fontSize={16}
+          style={$startWorkoutButton}
+        />
+      </View>
+    </View>
+  )
+}
+
+export const SavedWorkoutsScreen: FC = function SavedWorkoutsScreen() {
+  const [savedWorkouts, setSavedWorkouts] = useState<SavedWorkout[]>([])
+  const [loading, setLoading] = useState(true)
 
   useFocusEffect(
     useCallback(() => {
@@ -108,22 +218,7 @@ export const SavedWorkoutsScreen: FC = function SavedWorkoutsScreen() {
   if (loading) {
     return (
       <Screen preset="fixed" contentContainerStyle={$container} safeAreaEdges={["top"]}>
-        <View style={$header}>
-          <Text preset="heading">Saved Workouts</Text>
-          <Text preset="subheading">Your saved workout plans</Text>
-        </View>
-        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={$scrollContent}>
-          {[1, 2, 3].map((i) => (
-            <View key={i} style={$skeletonCard}>
-              <View style={$skeletonContent}>
-                <View style={$skeletonTitle} />
-                <View style={$skeletonDescription} />
-                <View style={$skeletonMeta} />
-              </View>
-              <View style={$skeletonButton} />
-            </View>
-          ))}
-        </ScrollView>
+        <LoadingState />
       </Screen>
     )
   }
@@ -137,75 +232,17 @@ export const SavedWorkoutsScreen: FC = function SavedWorkoutsScreen() {
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={$scrollContent}>
         {savedWorkouts.length === 0 ? (
-          <View style={$emptyState}>
-            <View style={$emptyIconContainer}>
-              <HeartIcon size={40} color={colors.palette.neutral400} />
-            </View>
-            <Text preset="heading" size="md" style={$emptyTitle}>
-              No Saved Workouts
-            </Text>
-            <Text preset="formHelper" style={$emptyDescription}>
-              Create your first workout to see it here
-            </Text>
-          </View>
+          <EmptyState />
         ) : (
           <View style={$workoutsList}>
             {savedWorkouts.map((savedWorkout) => (
-              <View key={savedWorkout.id}>
-                <View style={$workoutCard}>
-                  {/* Workout Info */}
-                  <View style={$workoutInfo}>
-                    <Text preset="heading" size="sm" style={$workoutName}>
-                      {savedWorkout.name}
-                    </Text>
-                    <Text preset="formHelper" size="xs" style={$workoutDescription}>
-                      {getWorkoutSummary(savedWorkout.workoutPlan)}
-                    </Text>
-                    <View style={$workoutMeta}>
-                      <View style={$metaItem}>
-                        {savedWorkout.location === "indoor" ? (
-                          <HomeIcon size={12} color={colors.palette.secondary500} />
-                        ) : (
-                          <SunIcon size={12} color={colors.palette.accent500} />
-                        )}
-                        <Text preset="formHelper" size="xxs" style={$metaText}>
-                          {savedWorkout.location === "indoor" ? "Indoor" : "Outdoor"}
-                        </Text>
-                      </View>
-                    </View>
-                  </View>
-
-                  {/* Action Buttons */}
-                  <View style={$actionButtons}>
-                    <TouchableOpacity
-                      style={$previewIconButton}
-                      onPress={() => handlePreviewWorkout(savedWorkout)}
-                    >
-                      <EyeIcon size={16} color={colors.palette.neutral100} />
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                      style={$deleteButton}
-                      onPress={() => handleDeleteWorkout(savedWorkout.id)}
-                    >
-                      <TrashIcon size={16} color={colors.palette.neutral100} />
-                    </TouchableOpacity>
-                  </View>
-                </View>
-
-                {/* Workout Preview */}
-                <View style={$workoutPreview}>
-                  <PreviewWorkoutButton
-                    workoutPlan={savedWorkout.workoutPlan}
-                    onButtonPress={({ nativeEvent }) => handleButtonPress(nativeEvent.message)}
-                    label="Start Workout"
-                    buttonColor={colors.tint}
-                    textColor={colors.palette.neutral100}
-                    cornerRadius={12}
-                    fontSize={16}
-                    style={$startWorkoutButton}
-                  />
-                </View>
-              </View>
+              <WorkoutCard
+                key={savedWorkout.id}
+                workout={savedWorkout}
+                onPreview={handlePreviewWorkout}
+                onDelete={handleDeleteWorkout}
+                onButtonPress={handleButtonPress}
+              />
             ))}
           </View>
         )}
@@ -216,6 +253,10 @@ export const SavedWorkoutsScreen: FC = function SavedWorkoutsScreen() {
 
 // Modern Styles
 const $container: ViewStyle = {
+  flex: 1,
+}
+
+const $loadingContainer: ViewStyle = {
   flex: 1,
 }
 
@@ -235,38 +276,42 @@ const $workoutsList: ViewStyle = {
 
 const $workoutCard: ViewStyle = {
   flexDirection: "row",
-  alignItems: "center",
+  alignItems: "flex-start",
   justifyContent: "space-between",
   backgroundColor: colors.palette.neutral100,
-  padding: 16,
-  borderRadius: 12,
+  padding: 20,
+  borderRadius: 16,
   borderWidth: 1,
   borderColor: colors.border,
   shadowColor: colors.palette.neutral900,
   shadowOffset: { width: 0, height: 2 },
-  shadowOpacity: 0.1,
-  shadowRadius: 4,
-  elevation: 2,
+  shadowOpacity: 0.08,
+  shadowRadius: 8,
+  elevation: 3,
 }
 
 const $workoutInfo: ViewStyle = {
   flex: 1,
-  marginRight: 12,
+  marginRight: 16,
+  paddingTop: 2,
 }
 
 const $workoutName: TextStyle = {
   color: colors.text,
-  marginBottom: 4,
+  marginBottom: 6,
+  fontWeight: "600",
 }
 
 const $workoutDescription: TextStyle = {
   color: colors.textDim,
-  marginBottom: 8,
+  marginBottom: 12,
+  lineHeight: 18,
 }
 
 const $workoutMeta: ViewStyle = {
   flexDirection: "row",
-  gap: 12,
+  gap: 16,
+  alignItems: "center",
 }
 
 const $metaItem: ViewStyle = {
@@ -281,21 +326,45 @@ const $metaText: TextStyle = {
 
 const $actionButtons: ViewStyle = {
   flexDirection: "row",
-  gap: 8,
+  gap: 12,
+  alignItems: "flex-start",
+  paddingTop: 2,
 }
 
-const $previewIconButton: ViewStyle = {
-  width: 32,
-  height: 32,
-  borderRadius: 16,
-  backgroundColor: colors.tint,
-  alignItems: "center",
-  justifyContent: "center",
-  shadowColor: colors.tint,
-  shadowOffset: { width: 0, height: 2 },
-  shadowOpacity: 0.2,
-  shadowRadius: 4,
-  elevation: 2,
+const $iconButton: ViewStyle = {
+  width: 44,
+  height: 44,
+  borderRadius: 22,
+  padding: 0,
+  minHeight: 44,
+  backgroundColor: colors.palette.neutral100,
+  borderWidth: 1,
+  borderColor: colors.border,
+  shadowColor: colors.palette.neutral900,
+  shadowOffset: { width: 0, height: 1 },
+  shadowOpacity: 0.05,
+  shadowRadius: 2,
+  elevation: 1,
+}
+
+const $deleteIconButton: ViewStyle = {
+  width: 44,
+  height: 44,
+  borderRadius: 22,
+  padding: 0,
+  minHeight: 44,
+  backgroundColor: colors.palette.angry100,
+  borderWidth: 1,
+  borderColor: colors.palette.angry500,
+  shadowColor: colors.palette.angry500,
+  shadowOffset: { width: 0, height: 1 },
+  shadowOpacity: 0.1,
+  shadowRadius: 2,
+  elevation: 1,
+}
+
+const $iconButtonText: TextStyle = {
+  fontSize: 0, // Hide text, only show icon
 }
 
 const $startWorkoutButton: ViewStyle = {
@@ -303,22 +372,9 @@ const $startWorkoutButton: ViewStyle = {
   borderRadius: 12,
 }
 
-const $deleteButton: ViewStyle = {
-  width: 32,
-  height: 32,
-  borderRadius: 16,
-  backgroundColor: colors.palette.angry500,
-  alignItems: "center",
-  justifyContent: "center",
-  shadowColor: colors.palette.angry500,
-  shadowOffset: { width: 0, height: 2 },
-  shadowOpacity: 0.2,
-  shadowRadius: 4,
-  elevation: 2,
-}
-
 const $workoutPreview: ViewStyle = {
-  marginTop: 12,
+  marginTop: 16,
+  paddingHorizontal: 4,
 }
 
 // Loading States
