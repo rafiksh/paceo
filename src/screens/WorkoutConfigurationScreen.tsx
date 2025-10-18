@@ -13,7 +13,6 @@ import { ArrowLeftIcon } from "react-native-heroicons/outline"
 import { Button } from "@/components/Button"
 import { CustomWorkoutBuilder } from "@/components/CustomWorkoutBuilder"
 import { GoalSelector } from "@/components/GoalSelector"
-import { LocationDropdown, type Location } from "@/components/LocationDropdown"
 import { Screen } from "@/components/Screen"
 import { Text } from "@/components/Text"
 import { TextField } from "@/components/TextField"
@@ -37,10 +36,10 @@ const WORKOUT_TYPES = [
   },
 ]
 
-const LOCATIONS: Location[] = [
-  { value: "indoor", label: "Indoor", icon: "🏠", color: "#74B9FF" },
-  { value: "outdoor", label: "Outdoor", icon: "🌳", color: "#00B894" },
-  { value: "unknown", label: "Unknown", icon: "❓", color: "#636E72" },
+const LOCATIONS = [
+  { value: "indoor", label: "Indoor" },
+  { value: "outdoor", label: "Outdoor" },
+  { value: "unknown", label: "Unknown" },
 ]
 
 export const WorkoutConfigurationScreen: FC = function WorkoutConfigurationScreen() {
@@ -179,13 +178,29 @@ export const WorkoutConfigurationScreen: FC = function WorkoutConfigurationScree
           <Text preset="subheading" size="md">
             Location
           </Text>
-          <LocationDropdown
-            locations={LOCATIONS}
-            selectedLocation={selectedLocation}
-            onLocationChange={(location) =>
-              setSelectedLocation(location as HKWorkoutSessionLocationType)
-            }
-          />
+          <View style={$locationContainer}>
+            {LOCATIONS.map((location) => (
+              <TouchableOpacity
+                key={location.value}
+                style={[
+                  $locationOption,
+                  selectedLocation === location.value && $locationOptionSelected,
+                ]}
+                onPress={() => setSelectedLocation(location.value as HKWorkoutSessionLocationType)}
+              >
+                <Text
+                  preset="formLabel"
+                  size="sm"
+                  style={[
+                    $locationLabel,
+                    selectedLocation === location.value && $locationLabelSelected,
+                  ]}
+                >
+                  {location.label}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
         </View>
 
         {/* Workout Type Selection */}
@@ -396,6 +411,37 @@ const $workoutTypeLabel: TextStyle = {
 }
 
 const $workoutTypeLabelSelected: TextStyle = {
+  color: colors.palette.neutral100,
+}
+
+// Location Styles
+const $locationContainer: ViewStyle = {
+  flexDirection: "row",
+  gap: 12,
+}
+
+const $locationOption: ViewStyle = {
+  flex: 1,
+  alignItems: "center",
+  justifyContent: "center",
+  paddingVertical: 16,
+  paddingHorizontal: 12,
+  backgroundColor: colors.background,
+  borderRadius: 12,
+  borderWidth: 1,
+  borderColor: colors.border,
+}
+
+const $locationOptionSelected: ViewStyle = {
+  backgroundColor: colors.tint,
+  borderColor: colors.tint,
+}
+
+const $locationLabel: TextStyle = {
+  textAlign: "center",
+}
+
+const $locationLabelSelected: TextStyle = {
   color: colors.palette.neutral100,
 }
 
