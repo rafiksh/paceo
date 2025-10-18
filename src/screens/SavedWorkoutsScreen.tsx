@@ -7,7 +7,6 @@ import { Screen } from "@/components/Screen"
 import { Text } from "@/components/Text"
 import { WorkoutStorage, type SavedWorkout } from "@/services/WorkoutStorage"
 import { colors } from "@/theme/colors"
-import { typography } from "@/theme/typography"
 
 export const SavedWorkoutsScreen: FC = function SavedWorkoutsScreen() {
   const [savedWorkouts, setSavedWorkouts] = useState<SavedWorkout[]>([])
@@ -51,107 +50,107 @@ export const SavedWorkoutsScreen: FC = function SavedWorkoutsScreen() {
   }
 
   return (
-    <Screen preset="scroll" contentContainerStyle={$container}>
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={$scrollContent}>
-        {/* Modern Header */}
-        <View style={$header}>
-          <Text style={$title}>My Workouts</Text>
-          <Text style={$subtitle}>Your personal training collection</Text>
-        </View>
-
-        {/* Workouts List */}
-        <View style={$section}>
-          {loading ? (
-            <View style={$emptyState}>
-              <Text style={$emptyTitle}>Loading...</Text>
-            </View>
-          ) : savedWorkouts.length === 0 ? (
-            <View style={$emptyState}>
-              <Text style={$emptyIcon}>📝</Text>
-              <Text style={$emptyTitle}>No Workouts Yet</Text>
-              <Text style={$emptyDescription}>
-                Create your first workout in the Builder tab to get started with your fitness
-                journey.
-              </Text>
-            </View>
-          ) : (
-            <View style={$workoutsList}>
-              {savedWorkouts.map((savedWorkout) => (
-                <View key={savedWorkout.id} style={$workoutCard}>
-                  {/* Workout Header */}
-                  <View style={$workoutHeader}>
-                    <View style={$workoutTitleContainer}>
-                      <Text style={$workoutName}>{savedWorkout.name}</Text>
-                      <Text style={$workoutDate}>
-                        {savedWorkout.createdAt.toLocaleDateString("en-US", {
-                          year: "numeric",
-                          month: "long",
-                          day: "numeric",
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })}
-                      </Text>
-                    </View>
-                    <TouchableOpacity
-                      style={$deleteButton}
-                      onPress={() => handleDeleteWorkout(savedWorkout.id)}
-                    >
-                      <Text style={$deleteIcon}>🗑️</Text>
-                    </TouchableOpacity>
+    <Screen preset="scroll" contentContainerStyle={$container} safeAreaEdges={["top"]}>
+      <View style={$header}>
+        <Text preset="heading">My Workouts</Text>
+        <Text preset="subheading">Your personal training collection</Text>
+      </View>
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={$scrollContainer}>
+        {loading ? (
+          <View style={$emptyState}>
+            <Text preset="heading" size="lg">
+              Loading...
+            </Text>
+          </View>
+        ) : savedWorkouts.length === 0 ? (
+          <View style={$emptyState}>
+            <Text style={$emptyIcon}>📝</Text>
+            <Text preset="heading" size="lg">
+              No Workouts Yet
+            </Text>
+            <Text preset="subheading" size="md" style={$emptyDescription}>
+              Create your first workout in the Builder tab to get started with your fitness journey.
+            </Text>
+          </View>
+        ) : (
+          <View style={$workoutsList}>
+            {savedWorkouts.map((savedWorkout) => (
+              <View key={savedWorkout.id} style={$workoutCard}>
+                {/* Workout Header */}
+                <View style={$workoutHeader}>
+                  <View style={$workoutTitleContainer}>
+                    <Text preset="heading" size="lg">
+                      {savedWorkout.name}
+                    </Text>
+                    <Text preset="formHelper" size="xs" style={$workoutDate}>
+                      {savedWorkout.createdAt.toLocaleDateString("en-US", {
+                        year: "numeric",
+                        month: "long",
+                        day: "numeric",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </Text>
                   </View>
+                  <TouchableOpacity
+                    style={$deleteButton}
+                    onPress={() => handleDeleteWorkout(savedWorkout.id)}
+                  >
+                    <Text style={$deleteIcon}>🗑️</Text>
+                  </TouchableOpacity>
+                </View>
 
-                  {/* Workout Info */}
-                  <View style={$workoutInfo}>
-                    <View style={$workoutActivityContainer}>
-                      <Text style={$workoutActivityIcon}>
-                        {savedWorkout.activity === "running"
-                          ? "🏃‍♂️"
-                          : savedWorkout.activity === "cycling"
-                            ? "🚴‍♂️"
-                            : savedWorkout.activity === "swimming"
-                              ? "🏊‍♂️"
-                              : savedWorkout.activity === "walking"
-                                ? "🚶‍♂️"
-                                : savedWorkout.activity === "strengthTraining"
-                                  ? "🏋️‍♂️"
-                                  : savedWorkout.activity === "yoga"
-                                    ? "🧘‍♀️"
-                                    : "💪"}
-                      </Text>
-                      <Text style={$workoutActivity}>
-                        {savedWorkout.activity.charAt(0).toUpperCase() +
-                          savedWorkout.activity.slice(1)}
-                      </Text>
-                    </View>
-                    <View style={$workoutLocationContainer}>
-                      <Text style={$workoutLocationIcon}>
-                        {savedWorkout.location === "indoor" ? "🏠" : "🌳"}
-                      </Text>
-                      <Text style={$workoutLocation}>
-                        {savedWorkout.location.charAt(0).toUpperCase() +
-                          savedWorkout.location.slice(1)}
-                      </Text>
-                    </View>
+                {/* Workout Info */}
+                <View style={$workoutInfo}>
+                  <View style={$workoutActivityContainer}>
+                    <Text style={$workoutActivityIcon}>
+                      {savedWorkout.activity === "running"
+                        ? "🏃‍♂️"
+                        : savedWorkout.activity === "cycling"
+                          ? "🚴‍♂️"
+                          : savedWorkout.activity === "swimming"
+                            ? "🏊‍♂️"
+                            : savedWorkout.activity === "walking"
+                              ? "🚶‍♂️"
+                              : savedWorkout.activity === "strengthTraining"
+                                ? "🏋️‍♂️"
+                                : savedWorkout.activity === "yoga"
+                                  ? "🧘‍♀️"
+                                  : "💪"}
+                    </Text>
+                    <Text preset="formLabel" size="sm">
+                      {savedWorkout.activity.charAt(0).toUpperCase() +
+                        savedWorkout.activity.slice(1)}
+                    </Text>
                   </View>
-
-                  {/* Workout Preview */}
-                  <View style={$workoutPreview}>
-                    <PreviewWorkoutButton
-                      workoutPlan={savedWorkout.workoutPlan}
-                      onButtonPress={({ nativeEvent }) => handleButtonPress(nativeEvent.message)}
-                      label="Start Workout"
-                      buttonColor={colors.tint}
-                      textColor={colors.palette.neutral100}
-                      cornerRadius={12}
-                      fontSize={16}
-                      style={$previewButton}
-                    />
+                  <View style={$workoutLocationContainer}>
+                    <Text style={$workoutLocationIcon}>
+                      {savedWorkout.location === "indoor" ? "🏠" : "🌳"}
+                    </Text>
+                    <Text preset="formHelper" size="xs">
+                      {savedWorkout.location.charAt(0).toUpperCase() +
+                        savedWorkout.location.slice(1)}
+                    </Text>
                   </View>
                 </View>
-              ))}
-            </View>
-          )}
-        </View>
+
+                {/* Workout Preview */}
+                <View style={$workoutPreview}>
+                  <PreviewWorkoutButton
+                    workoutPlan={savedWorkout.workoutPlan}
+                    onButtonPress={({ nativeEvent }) => handleButtonPress(nativeEvent.message)}
+                    label="Start Workout"
+                    buttonColor={colors.tint}
+                    textColor={colors.palette.neutral100}
+                    cornerRadius={12}
+                    fontSize={16}
+                    style={$previewButton}
+                  />
+                </View>
+              </View>
+            ))}
+          </View>
+        )}
       </ScrollView>
     </Screen>
   )
@@ -163,7 +162,8 @@ const $container: ViewStyle = {
   backgroundColor: colors.background,
 }
 
-const $scrollContent: ViewStyle = {
+const $scrollContainer: ViewStyle = {
+  paddingHorizontal: 24,
   paddingBottom: 40,
 }
 
@@ -171,27 +171,6 @@ const $header: ViewStyle = {
   paddingHorizontal: 24,
   paddingVertical: 40,
   alignItems: "center",
-}
-
-const $title: TextStyle = {
-  fontSize: 32,
-  fontWeight: "800",
-  color: colors.text,
-  fontFamily: typography.primary.bold,
-  marginBottom: 8,
-  letterSpacing: -0.5,
-}
-
-const $subtitle: TextStyle = {
-  fontSize: 16,
-  fontWeight: "400",
-  color: colors.textDim,
-  fontFamily: typography.primary.normal,
-  textAlign: "center",
-}
-
-const $section: ViewStyle = {
-  paddingHorizontal: 24,
 }
 
 // Empty State
@@ -206,20 +185,7 @@ const $emptyIcon: TextStyle = {
   marginBottom: 24,
 }
 
-const $emptyTitle: TextStyle = {
-  fontSize: 24,
-  fontWeight: "700",
-  color: colors.text,
-  fontFamily: typography.primary.bold,
-  marginBottom: 12,
-  textAlign: "center",
-}
-
 const $emptyDescription: TextStyle = {
-  fontSize: 16,
-  fontWeight: "400",
-  color: colors.textDim,
-  fontFamily: typography.primary.normal,
   textAlign: "center",
   lineHeight: 24,
 }
@@ -253,20 +219,8 @@ const $workoutTitleContainer: ViewStyle = {
   flex: 1,
 }
 
-const $workoutName: TextStyle = {
-  fontSize: 20,
-  fontWeight: "800",
-  color: colors.text,
-  fontFamily: typography.primary.bold,
-  marginBottom: 4,
-  letterSpacing: -0.3,
-}
-
 const $workoutDate: TextStyle = {
-  fontSize: 13,
-  fontWeight: "500",
-  color: colors.textDim,
-  fontFamily: typography.primary.medium,
+  marginTop: 4,
 }
 
 const $workoutInfo: ViewStyle = {
@@ -290,13 +244,6 @@ const $workoutActivityIcon: TextStyle = {
   marginRight: 8,
 }
 
-const $workoutActivity: TextStyle = {
-  fontSize: 15,
-  fontWeight: "600",
-  color: colors.text,
-  fontFamily: typography.primary.semiBold,
-}
-
 const $workoutLocationContainer: ViewStyle = {
   flexDirection: "row",
   alignItems: "center",
@@ -305,13 +252,6 @@ const $workoutLocationContainer: ViewStyle = {
 const $workoutLocationIcon: TextStyle = {
   fontSize: 16,
   marginRight: 6,
-}
-
-const $workoutLocation: TextStyle = {
-  fontSize: 14,
-  fontWeight: "500",
-  color: colors.textDim,
-  fontFamily: typography.primary.medium,
 }
 
 const $workoutPreview: ViewStyle = {
