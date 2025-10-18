@@ -6,11 +6,11 @@ import { useForm, Controller } from "react-hook-form"
 import { CustomWorkoutBuilder } from "@/components/CustomWorkoutBuilder"
 import { Text } from "@/components/Text"
 import { TextField } from "@/components/TextField"
-import { colors } from "@/theme/colors"
 import { customWorkoutSchema, type CustomWorkoutFormData } from "@/types/WorkoutFormData"
 
 import { ButtonSelector } from "./ButtonSelector"
 import { FormSection } from "./FormSection"
+import { Button } from "../Button"
 
 interface CustomWorkoutFormProps {
   onSubmit: (data: CustomWorkoutFormData) => void
@@ -79,36 +79,18 @@ export const CustomWorkoutForm: FC<CustomWorkoutFormProps> = ({ onSubmit, initia
         )}
       />
       {errors.customWorkout && (
-        <Text preset="formHelper" size="xs" style={$errorText}>
+        <Text preset="formHelper" size="xs">
           {errors.customWorkout.message}
         </Text>
       )}
 
-      {/* Submit Button */}
-      <View style={$submitContainer}>
-        <CustomWorkoutSubmitButton onPress={handleSubmit(onSubmit)} disabled={!isValid} />
-      </View>
-    </View>
-  )
-}
-
-// Custom submit button component
-interface CustomWorkoutSubmitButtonProps {
-  onPress: () => void
-  disabled: boolean
-}
-
-const CustomWorkoutSubmitButton: FC<CustomWorkoutSubmitButtonProps> = ({ onPress, disabled }) => {
-  return (
-    <View style={$submitButton}>
-      <Text
-        preset="formLabel"
-        size="md"
-        style={[$submitButtonText, disabled && $submitButtonTextDisabled]}
-        onPress={disabled ? undefined : onPress}
-      >
-        {disabled ? "Complete Configuration" : "Save Custom Workout"}
-      </Text>
+      <Button
+        text={!isValid ? "Complete Configuration" : "Save Custom Workout"}
+        preset={!isValid ? "primary" : "default"}
+        onPress={handleSubmit(onSubmit)}
+        style={$submitButton}
+        disabled={!isValid}
+      />
     </View>
   )
 }
@@ -121,30 +103,6 @@ const $nameInputContainer: ViewStyle = {
   marginBottom: 0,
 }
 
-const $submitContainer: ViewStyle = {
-  marginTop: 24,
-  paddingVertical: 16,
-}
-
 const $submitButton: ViewStyle = {
-  backgroundColor: colors.tint,
-  paddingVertical: 16,
-  paddingHorizontal: 24,
-  borderRadius: 12,
-  alignItems: "center",
-  justifyContent: "center",
-  opacity: 1,
-}
-
-const $submitButtonText = {
-  color: colors.palette.neutral100,
-}
-
-const $submitButtonTextDisabled = {
-  opacity: 0.6,
-}
-
-const $errorText = {
-  color: colors.error,
-  marginTop: 4,
+  marginTop: 24,
 }

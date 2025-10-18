@@ -3,6 +3,7 @@ import { View, ViewStyle } from "react-native"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm, Controller } from "react-hook-form"
 
+import { Button } from "@/components/Button"
 import { PacerGoalSelector } from "@/components/PacerGoalSelector"
 import { Text } from "@/components/Text"
 import { TextField } from "@/components/TextField"
@@ -103,30 +104,13 @@ export const PacerWorkoutForm: FC<PacerWorkoutFormProps> = ({ onSubmit, initialD
       )}
 
       {/* Submit Button */}
-      <View style={$submitContainer}>
-        <PacerWorkoutSubmitButton onPress={handleSubmit(onSubmit)} disabled={!isValid} />
-      </View>
-    </View>
-  )
-}
-
-// Pacer submit button component
-interface PacerWorkoutSubmitButtonProps {
-  onPress: () => void
-  disabled: boolean
-}
-
-const PacerWorkoutSubmitButton: FC<PacerWorkoutSubmitButtonProps> = ({ onPress, disabled }) => {
-  return (
-    <View style={$submitButton}>
-      <Text
-        preset="formLabel"
-        size="md"
-        style={[$submitButtonText, disabled && $submitButtonTextDisabled]}
-        onPress={disabled ? undefined : onPress}
-      >
-        {disabled ? "Complete Configuration" : "Save Pacer Workout"}
-      </Text>
+      <Button
+        text={!isValid ? "Complete Configuration" : "Save Pacer Workout"}
+        preset={!isValid ? "primary" : "default"}
+        onPress={handleSubmit(onSubmit)}
+        style={$submitButton}
+        disabled={!isValid}
+      />
     </View>
   )
 }
@@ -139,27 +123,8 @@ const $nameInputContainer: ViewStyle = {
   marginBottom: 0,
 }
 
-const $submitContainer: ViewStyle = {
-  marginTop: 24,
-  paddingVertical: 16,
-}
-
 const $submitButton: ViewStyle = {
-  backgroundColor: colors.tint,
-  paddingVertical: 16,
-  paddingHorizontal: 24,
-  borderRadius: 12,
-  alignItems: "center",
-  justifyContent: "center",
-  opacity: 1,
-}
-
-const $submitButtonText = {
-  color: colors.palette.neutral100,
-}
-
-const $submitButtonTextDisabled = {
-  opacity: 0.6,
+  marginTop: 24,
 }
 
 const $errorText = {
