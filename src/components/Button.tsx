@@ -131,7 +131,7 @@ export function Button(props: ButtonProps) {
       themed($viewPresets[preset]),
       $viewStyleOverride,
       !!pressed && themed([$pressedViewPresets[preset], $pressedViewStyleOverride]),
-      !!disabled && $disabledViewStyleOverride,
+      !!disabled && themed([$disabledViewPresets[preset], $disabledViewStyleOverride]),
     ]
   }
   /**
@@ -144,7 +144,7 @@ export function Button(props: ButtonProps) {
       themed($textPresets[preset]),
       $textStyleOverride,
       !!pressed && themed([$pressedTextPresets[preset], $pressedTextStyleOverride]),
-      !!disabled && $disabledTextStyleOverride,
+      !!disabled && themed([$disabledTextPresets[preset], $disabledTextStyleOverride]),
     ]
   }
 
@@ -269,4 +269,22 @@ const $pressedTextPresets: Record<Presets, ThemedStyle<TextStyle>> = {
   ghost: () => ({ opacity: 0.9 }),
   primary: () => ({ opacity: 0.9 }),
   destructive: ({ colors }) => ({ opacity: 0.9, backgroundColor: colors.error }),
+}
+
+const $disabledViewPresets: Record<Presets, ThemedStyle<ViewStyle>> = {
+  default: ({ colors }) => ({ backgroundColor: colors.palette.neutral200 }),
+  filled: ({ colors }) => ({ backgroundColor: colors.palette.neutral200 }),
+  reversed: ({ colors }) => ({ backgroundColor: colors.palette.neutral300 }),
+  ghost: ({ colors }) => ({ backgroundColor: colors.transparent }),
+  primary: ({ colors }) => ({ backgroundColor: colors.palette.neutral300 }),
+  destructive: ({ colors }) => ({ backgroundColor: colors.palette.neutral300 }),
+}
+
+const $disabledTextPresets: Record<Presets, ThemedStyle<TextStyle>> = {
+  default: ({ colors }) => ({ color: colors.palette.neutral400 }),
+  filled: ({ colors }) => ({ color: colors.palette.neutral400 }),
+  reversed: ({ colors }) => ({ color: colors.palette.neutral400 }),
+  ghost: ({ colors }) => ({ color: colors.palette.neutral400 }),
+  primary: ({ colors }) => ({ color: colors.palette.neutral400 }),
+  destructive: ({ colors }) => ({ color: colors.palette.neutral400 }),
 }
