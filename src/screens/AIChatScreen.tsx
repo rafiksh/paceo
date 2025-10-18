@@ -1,6 +1,13 @@
 import { FC, useState, useRef, useEffect } from "react"
-import { View, ViewStyle, ScrollView, Alert, KeyboardAvoidingView, Platform } from "react-native"
-import type { TextStyle } from "react-native"
+import {
+  View,
+  ViewStyle,
+  ScrollView,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  TextStyle,
+} from "react-native"
 import * as SecureStore from "expo-secure-store"
 import OpenAI from "openai"
 import { ChatBubbleLeftRightIcon } from "react-native-heroicons/outline"
@@ -12,7 +19,6 @@ import { TextField } from "@/components/TextField"
 import { WorkoutStorage } from "@/services/WorkoutStorage"
 import { colors } from "@/theme/colors"
 import { radius } from "@/theme/spacing"
-import { typography } from "@/theme/typography"
 import { WorkoutParser, type ParsedWorkout } from "@/utils/WorkoutParser"
 
 interface Message {
@@ -213,17 +219,25 @@ export const AIChatScreen: FC = () => {
 
   if (!hasApiKey) {
     return (
-      <Screen style={$root} preset="scroll">
+      <Screen style={$root} preset="scroll" safeAreaEdges={["top"]}>
         <View style={$container}>
           <View style={$header}>
             <ChatBubbleLeftRightIcon size={32} color={colors.tint} />
-            <Text style={$title}>AI Assistant</Text>
-            <Text style={$subtitle}>Get personalized fitness advice</Text>
+            <View style={$titleContainer}>
+              <Text preset="heading" size="xl">
+                AI Assistant
+              </Text>
+              <Text preset="formHelper" size="sm" style={$subtitle}>
+                Get personalized fitness advice
+              </Text>
+            </View>
           </View>
 
           <View style={$apiKeySection}>
-            <Text style={$sectionTitle}>OpenAI API Key</Text>
-            <Text style={$description}>
+            <Text preset="subheading" size="lg">
+              OpenAI API Key
+            </Text>
+            <Text preset="formHelper" size="sm" style={$description}>
               Enter your OpenAI API key to start chatting with our AI assistant. Your key is stored
               securely using device encryption and never leaves your device.
             </Text>
@@ -239,12 +253,24 @@ export const AIChatScreen: FC = () => {
           </View>
 
           <View style={$infoSection}>
-            <Text style={$infoTitle}>How to get your API key:</Text>
-            <Text style={$infoText}>1. Visit platform.openai.com</Text>
-            <Text style={$infoText}>2. Sign up or log in</Text>
-            <Text style={$infoText}>3. Go to API Keys section</Text>
-            <Text style={$infoText}>4. Create a new secret key</Text>
-            <Text style={$infoText}>5. Copy and paste it here</Text>
+            <Text preset="subheading" size="md">
+              How to get your API key:
+            </Text>
+            <Text preset="formHelper" size="sm" style={$infoText}>
+              1. Visit platform.openai.com
+            </Text>
+            <Text preset="formHelper" size="sm" style={$infoText}>
+              2. Sign up or log in
+            </Text>
+            <Text preset="formHelper" size="sm" style={$infoText}>
+              3. Go to API Keys section
+            </Text>
+            <Text preset="formHelper" size="sm" style={$infoText}>
+              4. Create a new secret key
+            </Text>
+            <Text preset="formHelper" size="sm" style={$infoText}>
+              5. Copy and paste it here
+            </Text>
           </View>
         </View>
       </Screen>
@@ -255,7 +281,9 @@ export const AIChatScreen: FC = () => {
     <Screen style={$root} preset="scroll">
       <View style={$header}>
         <ChatBubbleLeftRightIcon size={24} color={colors.tint} />
-        <Text style={$title}>AI Assistant</Text>
+        <Text preset="subheading" size="lg">
+          AI Assistant
+        </Text>
         <Button text="Clear" onPress={clearChat} style={$clearButton} />
       </View>
 
@@ -272,8 +300,10 @@ export const AIChatScreen: FC = () => {
           {messages.length === 0 ? (
             <View style={$emptyState}>
               <ChatBubbleLeftRightIcon size={48} color={colors.textDim} />
-              <Text style={$emptyTitle}>Start a conversation</Text>
-              <Text style={$emptySubtitle}>
+              <Text preset="subheading" size="lg">
+                Start a conversation
+              </Text>
+              <Text preset="formHelper" size="sm" style={$emptySubtitle}>
                 Ask me anything about fitness, workouts, or health!
               </Text>
             </View>
@@ -286,8 +316,10 @@ export const AIChatScreen: FC = () => {
                   message.role === "user" ? $userMessage : $assistantMessage,
                 ]}
               >
-                <Text style={$messageText}>{message.content}</Text>
-                <Text style={$messageTime}>
+                <Text preset="default" size="sm">
+                  {message.content}
+                </Text>
+                <Text preset="formHelper" size="xxs" style={$messageTime}>
                   {message.timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                 </Text>
               </View>
@@ -296,16 +328,22 @@ export const AIChatScreen: FC = () => {
 
           {isLoading && (
             <View style={[$messageContainer, $assistantMessage]}>
-              <Text style={$messageText}>Thinking...</Text>
+              <Text preset="default" size="sm">
+                Thinking...
+              </Text>
             </View>
           )}
 
           {/* Workout Confirmation */}
           {pendingWorkout && (
             <View style={$workoutConfirmation}>
-              <Text style={$workoutTitle}>🎯 Workout Created!</Text>
-              <Text style={$workoutName}>{pendingWorkout.name}</Text>
-              <Text style={$workoutDetails}>
+              <Text preset="bold" size="lg" style={$workoutTitle}>
+                🎯 Workout Created!
+              </Text>
+              <Text preset="subheading" size="md" style={$workoutName}>
+                {pendingWorkout.name}
+              </Text>
+              <Text preset="formHelper" size="sm" style={$workoutDetails}>
                 {pendingWorkout.activity} • {pendingWorkout.location}
               </Text>
               <View style={$workoutActions}>
@@ -370,19 +408,12 @@ const $header: ViewStyle = {
   borderBottomColor: colors.border,
 }
 
-const $title: TextStyle = {
-  fontSize: 20,
-  fontWeight: "700",
-  color: colors.text,
-  fontFamily: typography.primary.bold,
-  marginLeft: 12,
+const $titleContainer: ViewStyle = {
   flex: 1,
+  marginLeft: 12,
 }
 
 const $subtitle: TextStyle = {
-  fontSize: 14,
-  color: colors.textDim,
-  fontFamily: typography.primary.normal,
   marginTop: 4,
 }
 
@@ -395,18 +426,7 @@ const $apiKeySection: ViewStyle = {
   borderColor: colors.border,
 }
 
-const $sectionTitle: TextStyle = {
-  fontSize: 18,
-  fontWeight: "600",
-  color: colors.text,
-  fontFamily: typography.primary.semiBold,
-  marginBottom: 8,
-}
-
 const $description: TextStyle = {
-  fontSize: 14,
-  color: colors.textDim,
-  fontFamily: typography.primary.normal,
   lineHeight: 20,
   marginBottom: 20,
 }
@@ -418,18 +438,7 @@ const $infoSection: ViewStyle = {
   borderRadius: radius.md,
 }
 
-const $infoTitle: TextStyle = {
-  fontSize: 16,
-  fontWeight: "600",
-  color: colors.text,
-  fontFamily: typography.primary.semiBold,
-  marginBottom: 12,
-}
-
 const $infoText: TextStyle = {
-  fontSize: 14,
-  color: colors.textDim,
-  fontFamily: typography.primary.normal,
   marginBottom: 4,
 }
 
@@ -457,21 +466,10 @@ const $emptyState: ViewStyle = {
   paddingVertical: 60,
 }
 
-const $emptyTitle: TextStyle = {
-  fontSize: 18,
-  fontWeight: "600",
-  color: colors.text,
-  fontFamily: typography.primary.semiBold,
-  marginTop: 16,
-  marginBottom: 8,
-}
-
 const $emptySubtitle: TextStyle = {
-  fontSize: 14,
-  color: colors.textDim,
-  fontFamily: typography.primary.normal,
   textAlign: "center",
   lineHeight: 20,
+  marginTop: 16,
 }
 
 const $messageContainer: ViewStyle = {
@@ -491,17 +489,7 @@ const $assistantMessage: ViewStyle = {
   alignSelf: "flex-start",
 }
 
-const $messageText: TextStyle = {
-  fontSize: 16,
-  color: colors.text,
-  fontFamily: typography.primary.normal,
-  lineHeight: 22,
-}
-
 const $messageTime: TextStyle = {
-  fontSize: 12,
-  color: colors.textDim,
-  fontFamily: typography.primary.normal,
   marginTop: 4,
   textAlign: "right",
 }
@@ -557,27 +545,19 @@ const $workoutConfirmation: ViewStyle = {
 }
 
 const $workoutTitle: TextStyle = {
-  fontSize: 18,
-  fontWeight: "700",
   color: colors.palette.neutral100,
-  fontFamily: typography.primary.bold,
   textAlign: "center",
   marginBottom: 8,
 }
 
 const $workoutName: TextStyle = {
-  fontSize: 16,
-  fontWeight: "600",
   color: colors.palette.neutral100,
-  fontFamily: typography.primary.semiBold,
   textAlign: "center",
   marginBottom: 4,
 }
 
 const $workoutDetails: TextStyle = {
-  fontSize: 14,
   color: colors.palette.neutral200,
-  fontFamily: typography.primary.normal,
   textAlign: "center",
   marginBottom: 16,
   textTransform: "capitalize",
