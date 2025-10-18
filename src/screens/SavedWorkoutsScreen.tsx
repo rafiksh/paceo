@@ -9,7 +9,7 @@ import { WorkoutStorage, type SavedWorkout } from "@/services/WorkoutStorage"
 import { colors } from "@/theme/colors"
 import { typography } from "@/theme/typography"
 
-export const SavedWorkoutsScreenFinal: FC = function SavedWorkoutsScreenFinal() {
+export const SavedWorkoutsScreen: FC = function SavedWorkoutsScreen() {
   const [savedWorkouts, setSavedWorkouts] = useState<SavedWorkout[]>([])
   const [loading, setLoading] = useState(true)
 
