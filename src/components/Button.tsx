@@ -15,7 +15,7 @@ import type { ThemedStyle, ThemedStyleArray } from "@/theme/types"
 
 import { Text, TextProps } from "./Text"
 
-type Presets = "default" | "filled" | "reversed" | "ghost" | "primary"
+type Presets = "default" | "filled" | "reversed" | "ghost" | "primary" | "destructive"
 
 export interface ButtonAccessoryProps {
   style: StyleProp<any>
@@ -239,6 +239,7 @@ const $viewPresets: Record<Presets, ThemedStyleArray<ViewStyle>> = {
     $baseViewStyle,
     ({ colors }) => ({ backgroundColor: colors.palette.primary500 }),
   ],
+  destructive: [$styles.row, $baseViewStyle, ({ colors }) => ({ backgroundColor: colors.error })],
 }
 
 const $textPresets: Record<Presets, ThemedStyleArray<TextStyle>> = {
@@ -247,6 +248,7 @@ const $textPresets: Record<Presets, ThemedStyleArray<TextStyle>> = {
   reversed: [$baseTextStyle, ({ colors }) => ({ color: colors.palette.neutral100 })],
   ghost: [$baseTextStyle],
   primary: [$baseTextStyle, ({ colors }) => ({ color: colors.palette.neutral100 })],
+  destructive: [$baseTextStyle, ({ colors }) => ({ color: colors.background })],
 }
 
 const $pressedViewPresets: Record<Presets, ThemedStyle<ViewStyle>> = {
@@ -257,6 +259,7 @@ const $pressedViewPresets: Record<Presets, ThemedStyle<ViewStyle>> = {
     backgroundColor: colors.transparent,
   }),
   primary: ({ colors }) => ({ backgroundColor: colors.palette.primary600 }),
+  destructive: ({ colors }) => ({ backgroundColor: colors.error }),
 }
 
 const $pressedTextPresets: Record<Presets, ThemedStyle<TextStyle>> = {
@@ -265,4 +268,5 @@ const $pressedTextPresets: Record<Presets, ThemedStyle<TextStyle>> = {
   reversed: () => ({ opacity: 0.9 }),
   ghost: () => ({ opacity: 0.9 }),
   primary: () => ({ opacity: 0.9 }),
+  destructive: ({ colors }) => ({ opacity: 0.9, backgroundColor: colors.error }),
 }
