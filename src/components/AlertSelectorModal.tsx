@@ -1,8 +1,8 @@
 import { FC, useState } from "react"
-import { View, ViewStyle, TouchableOpacity, Modal, ScrollView } from "react-native"
-import type { TextStyle } from "react-native"
+import { View, ViewStyle, Modal, ScrollView } from "react-native"
 import type { WorkoutAlert } from "expo-workoutkit"
 
+import { Button } from "@/components/Button"
 import { Text } from "@/components/Text"
 import { TextField } from "@/components/TextField"
 import { colors } from "@/theme/colors"
@@ -150,19 +150,11 @@ export const AlertSelectorModal: FC<AlertSelectorModalProps> = ({
     <Modal visible={visible} animationType="slide" presentationStyle="pageSheet">
       <View style={$modalContainer}>
         <View style={$header}>
-          <TouchableOpacity onPress={onClose} style={$closeButton}>
-            <Text preset="formLabel" size="md">
-              Cancel
-            </Text>
-          </TouchableOpacity>
+          <Button text="Cancel" onPress={onClose} preset="ghost" />
           <Text preset="heading" size="md">
             Configure Alert
           </Text>
-          <TouchableOpacity onPress={handleSave} style={$saveButton}>
-            <Text preset="formLabel" size="md" style={$saveButtonText}>
-              Save
-            </Text>
-          </TouchableOpacity>
+          <Button text="Save" onPress={handleSave} preset="primary" />
         </View>
 
         <ScrollView style={$content} showsVerticalScrollIndicator={false}>
@@ -178,19 +170,12 @@ export const AlertSelectorModal: FC<AlertSelectorModalProps> = ({
                 { key: "cadence", label: "Cadence" },
                 { key: "pace", label: "Pace" },
               ].map((type) => (
-                <TouchableOpacity
+                <Button
                   key={type.key}
-                  style={[$alertTypeButton, alertType === type.key && $alertTypeButtonSelected]}
+                  text={type.label}
                   onPress={() => handleAlertTypeChange(type.key as any)}
-                >
-                  <Text
-                    preset="formLabel"
-                    size="sm"
-                    style={[$alertTypeText, alertType === type.key && $alertTypeTextSelected]}
-                  >
-                    {type.label}
-                  </Text>
-                </TouchableOpacity>
+                  preset={alertType === type.key ? "primary" : "default"}
+                />
               ))}
             </View>
           </View>
@@ -231,19 +216,12 @@ export const AlertSelectorModal: FC<AlertSelectorModalProps> = ({
             </Text>
             <View style={$unitGrid}>
               {getUnitsForType(alertType).map((unitOption) => (
-                <TouchableOpacity
+                <Button
                   key={unitOption}
-                  style={[$unitButton, unit === unitOption && $unitButtonSelected]}
+                  text={unitOption}
                   onPress={() => handleUnitChange(unitOption)}
-                >
-                  <Text
-                    preset="formLabel"
-                    size="xs"
-                    style={[$unitText, unit === unitOption && $unitTextSelected]}
-                  >
-                    {unitOption}
-                  </Text>
-                </TouchableOpacity>
+                  preset={unit === unitOption ? "primary" : "default"}
+                />
               ))}
             </View>
           </View>
@@ -258,30 +236,19 @@ export const AlertSelectorModal: FC<AlertSelectorModalProps> = ({
                 { key: "average", label: "Average" },
                 { key: "maximum", label: "Maximum" },
               ].map((metricOption) => (
-                <TouchableOpacity
+                <Button
                   key={metricOption.key}
-                  style={[$metricButton, metric === metricOption.key && $metricButtonSelected]}
+                  text={metricOption.label}
                   onPress={() => handleMetricChange(metricOption.key as any)}
-                >
-                  <Text
-                    preset="formLabel"
-                    size="sm"
-                    style={[$metricText, metric === metricOption.key && $metricTextSelected]}
-                  >
-                    {metricOption.label}
-                  </Text>
-                </TouchableOpacity>
+                  preset={metric === metricOption.key ? "primary" : "default"}
+                />
               ))}
             </View>
           </View>
 
           {alert && (
             <View style={$removeSection}>
-              <TouchableOpacity style={$removeButton} onPress={handleRemove}>
-                <Text preset="formLabel" size="md" style={$removeButtonText}>
-                  Remove Alert
-                </Text>
-              </TouchableOpacity>
+              <Button text="Remove Alert" onPress={handleRemove} preset="destructive" />
             </View>
           )}
         </ScrollView>
@@ -305,160 +272,52 @@ const $header: ViewStyle = {
   borderBottomColor: colors.border,
 }
 
-const $closeButton: ViewStyle = {
-  paddingVertical: 8,
-  paddingHorizontal: 12,
-}
-
-const $saveButton: ViewStyle = {
-  paddingVertical: 8,
-  paddingHorizontal: 12,
-}
-
-const $saveButtonText: TextStyle = {
-  color: colors.tint,
-}
-
 const $content: ViewStyle = {
   flex: 1,
   paddingHorizontal: 20,
-  paddingTop: 8,
-  paddingBottom: 20,
+  paddingTop: 16,
+  paddingBottom: 24,
 }
 
 const $firstSection: ViewStyle = {
-  marginTop: 16,
-  marginBottom: 16,
+  marginBottom: 24,
 }
 
 const $section: ViewStyle = {
-  marginTop: 24,
-  marginBottom: 16,
+  marginBottom: 24,
 }
 
 const $alertTypeGrid: ViewStyle = {
   flexDirection: "row",
   flexWrap: "wrap",
+  gap: 8,
   marginTop: 12,
-  marginBottom: 8,
-}
-
-const $alertTypeButton: ViewStyle = {
-  flex: 1,
-  minWidth: "45%",
-  alignItems: "center",
-  justifyContent: "center",
-  paddingVertical: 12,
-  paddingHorizontal: 16,
-  backgroundColor: colors.background,
-  borderRadius: 12,
-  borderWidth: 1,
-  borderColor: colors.border,
-  marginRight: 8,
-  marginBottom: 8,
-}
-
-const $alertTypeButtonSelected: ViewStyle = {
-  backgroundColor: colors.tint,
-  borderColor: colors.tint,
-}
-
-const $alertTypeText: TextStyle = {
-  textAlign: "center",
-}
-
-const $alertTypeTextSelected: TextStyle = {
-  color: colors.palette.neutral100,
 }
 
 const $rangeContainer: ViewStyle = {
   flexDirection: "row",
+  gap: 12,
   marginTop: 12,
-  marginBottom: 8,
 }
 
 const $rangeInput: ViewStyle = {
   flex: 1,
-  marginRight: 8,
 }
 
 const $unitGrid: ViewStyle = {
   flexDirection: "row",
   flexWrap: "wrap",
+  gap: 8,
   marginTop: 12,
-  marginBottom: 8,
-}
-
-const $unitButton: ViewStyle = {
-  paddingVertical: 8,
-  paddingHorizontal: 12,
-  backgroundColor: colors.background,
-  borderRadius: 8,
-  borderWidth: 1,
-  borderColor: colors.border,
-  marginRight: 8,
-  marginBottom: 8,
-}
-
-const $unitButtonSelected: ViewStyle = {
-  backgroundColor: colors.tint,
-  borderColor: colors.tint,
-}
-
-const $unitText: TextStyle = {
-  textAlign: "center",
-}
-
-const $unitTextSelected: TextStyle = {
-  color: colors.palette.neutral100,
 }
 
 const $metricGrid: ViewStyle = {
   flexDirection: "row",
+  gap: 8,
   marginTop: 12,
-  marginBottom: 8,
-}
-
-const $metricButton: ViewStyle = {
-  flex: 1,
-  alignItems: "center",
-  justifyContent: "center",
-  paddingVertical: 12,
-  paddingHorizontal: 16,
-  backgroundColor: colors.background,
-  borderRadius: 12,
-  borderWidth: 1,
-  borderColor: colors.border,
-  marginRight: 8,
-}
-
-const $metricButtonSelected: ViewStyle = {
-  backgroundColor: colors.tint,
-  borderColor: colors.tint,
-}
-
-const $metricText: TextStyle = {
-  textAlign: "center",
-}
-
-const $metricTextSelected: TextStyle = {
-  color: colors.palette.neutral100,
 }
 
 const $removeSection: ViewStyle = {
   marginTop: 32,
-  marginBottom: 40,
-}
-
-const $removeButton: ViewStyle = {
-  backgroundColor: colors.error,
-  paddingVertical: 16,
-  paddingHorizontal: 24,
-  borderRadius: 12,
-  alignItems: "center",
-  justifyContent: "center",
-}
-
-const $removeButtonText: TextStyle = {
-  color: colors.palette.neutral100,
+  marginBottom: 16,
 }
