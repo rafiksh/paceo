@@ -90,17 +90,16 @@ export const GoalSelector: FC<GoalSelectorProps> = ({ goal, onGoalChange }) => {
       <Text style={$label}>Goal Type</Text>
       <View style={$goalTypeGrid}>
         {[
-          { key: "open", label: "Open", icon: "♾️" },
-          { key: "time", label: "Time", icon: "⏱️" },
-          { key: "distance", label: "Distance", icon: "📏" },
-          { key: "energy", label: "Energy", icon: "🔥" },
+          { key: "open", label: "Open" },
+          { key: "time", label: "Time" },
+          { key: "distance", label: "Distance" },
+          { key: "energy", label: "Energy" },
         ].map((type) => (
           <TouchableOpacity
             key={type.key}
             style={[$goalTypeButton, goalType === type.key && $goalTypeButtonSelected]}
             onPress={() => handleGoalTypeChange(type.key as any)}
           >
-            <Text style={$goalTypeIcon}>{type.icon}</Text>
             <Text style={[$goalTypeLabel, goalType === type.key && $goalTypeLabelSelected]}>
               {type.label}
             </Text>
@@ -110,14 +109,6 @@ export const GoalSelector: FC<GoalSelectorProps> = ({ goal, onGoalChange }) => {
 
       {goalType !== "open" && (
         <>
-          <Text style={$label}>Value</Text>
-          <TextField
-            placeholder="Enter value"
-            value={value}
-            onChangeText={handleValueChange}
-            keyboardType="numeric"
-          />
-
           <Text style={$label}>Unit</Text>
           <View style={$unitGrid}>
             {getUnitsForType(goalType).map((unitOption) => (
@@ -132,6 +123,14 @@ export const GoalSelector: FC<GoalSelectorProps> = ({ goal, onGoalChange }) => {
               </TouchableOpacity>
             ))}
           </View>
+
+          <Text style={$label}>Value</Text>
+          <TextField
+            placeholder="Enter value"
+            value={value}
+            onChangeText={handleValueChange}
+            keyboardType="numeric"
+          />
         </>
       )}
     </View>
@@ -152,48 +151,40 @@ const $label: TextStyle = {
   fontWeight: "600",
   color: colors.text,
   fontFamily: typography.primary.semiBold,
-  marginBottom: 8,
+  marginBottom: 12,
+  marginTop: 16,
 }
 
 const $goalTypeGrid: ViewStyle = {
-  flexDirection: "column",
-  gap: 12,
-  marginBottom: 20,
+  flexDirection: "row",
+  flexWrap: "wrap",
+  gap: 8,
+  marginBottom: 16,
 }
 
 const $goalTypeButton: ViewStyle = {
-  flexDirection: "row",
+  width: "48%",
   alignItems: "center",
-  padding: 16,
-  backgroundColor: colors.palette.neutral100,
-  borderRadius: 12,
-  borderWidth: 2,
+  justifyContent: "center",
+  paddingVertical: 12,
+  paddingHorizontal: 8,
+  backgroundColor: colors.background,
+  borderRadius: 8,
+  borderWidth: 1,
   borderColor: colors.border,
-  minHeight: 60,
 }
 
 const $goalTypeButtonSelected: ViewStyle = {
   backgroundColor: colors.tint,
   borderColor: colors.tint,
-  shadowColor: colors.tint,
-  shadowOffset: { width: 0, height: 2 },
-  shadowOpacity: 0.3,
-  shadowRadius: 4,
-  elevation: 4,
-}
-
-const $goalTypeIcon: TextStyle = {
-  fontSize: 24,
-  marginRight: 12,
 }
 
 const $goalTypeLabel: TextStyle = {
-  fontSize: 16,
-  fontWeight: "700",
+  fontSize: 14,
+  fontWeight: "600",
   color: colors.text,
-  fontFamily: typography.primary.bold,
-  textAlign: "left",
-  flex: 1,
+  fontFamily: typography.primary.semiBold,
+  textAlign: "center",
 }
 
 const $goalTypeLabelSelected: TextStyle = {
@@ -204,6 +195,7 @@ const $unitGrid: ViewStyle = {
   flexDirection: "row",
   flexWrap: "wrap",
   gap: 8,
+  marginBottom: 16,
 }
 
 const $unitButton: ViewStyle = {

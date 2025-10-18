@@ -24,7 +24,7 @@ import { radius } from "@/theme/spacing"
 const WORKOUT_TYPES = [
   {
     key: "goal",
-    label: "Goal",
+    label: "Simple",
   },
   {
     key: "pacer",
@@ -237,7 +237,7 @@ export const WorkoutConfigurationScreen: FC = function WorkoutConfigurationScree
         {selectedType === "goal" && (
           <View style={$section}>
             <Text preset="subheading" size="md">
-              Configure Goal
+              Configure Simple
             </Text>
             <GoalSelector
               goal={goalWorkout?.goal}
