@@ -9,13 +9,13 @@ import {
 } from "react-native"
 
 import { useAppTheme } from "@/theme/context"
-import { $styles } from "@/theme/styles"
 import { radius } from "@/theme/spacing"
+import { $styles } from "@/theme/styles"
 import type { ThemedStyle, ThemedStyleArray } from "@/theme/types"
 
 import { Text, TextProps } from "./Text"
 
-type Presets = "default" | "filled" | "reversed"
+type Presets = "default" | "filled" | "reversed" | "ghost" | "primary"
 
 export interface ButtonAccessoryProps {
   style: StyleProp<any>
@@ -228,22 +228,41 @@ const $viewPresets: Record<Presets, ThemedStyleArray<ViewStyle>> = {
     $baseViewStyle,
     ({ colors }) => ({ backgroundColor: colors.palette.neutral800 }),
   ],
+  ghost: [
+    $styles.row,
+    ({ colors }) => ({
+      backgroundColor: colors.transparent,
+    }),
+  ],
+  primary: [
+    $styles.row,
+    $baseViewStyle,
+    ({ colors }) => ({ backgroundColor: colors.palette.primary500 }),
+  ],
 }
 
 const $textPresets: Record<Presets, ThemedStyleArray<TextStyle>> = {
   default: [$baseTextStyle],
   filled: [$baseTextStyle],
   reversed: [$baseTextStyle, ({ colors }) => ({ color: colors.palette.neutral100 })],
+  ghost: [$baseTextStyle],
+  primary: [$baseTextStyle, ({ colors }) => ({ color: colors.palette.neutral100 })],
 }
 
 const $pressedViewPresets: Record<Presets, ThemedStyle<ViewStyle>> = {
   default: ({ colors }) => ({ backgroundColor: colors.palette.neutral200 }),
   filled: ({ colors }) => ({ backgroundColor: colors.palette.neutral400 }),
   reversed: ({ colors }) => ({ backgroundColor: colors.palette.neutral700 }),
+  ghost: ({ colors }) => ({
+    backgroundColor: colors.transparent,
+  }),
+  primary: ({ colors }) => ({ backgroundColor: colors.palette.primary600 }),
 }
 
 const $pressedTextPresets: Record<Presets, ThemedStyle<TextStyle>> = {
   default: () => ({ opacity: 0.9 }),
   filled: () => ({ opacity: 0.9 }),
   reversed: () => ({ opacity: 0.9 }),
+  ghost: () => ({ opacity: 0.9 }),
+  primary: () => ({ opacity: 0.9 }),
 }
