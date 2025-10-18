@@ -1,35 +1,43 @@
-import { FC, useState } from "react"
-import { View, ViewStyle, TouchableOpacity, ScrollView } from "react-native"
+import { FC } from "react"
+import { View, ViewStyle } from "react-native"
 import type { TextStyle } from "react-native"
 import type { IntervalBlock, IntervalStep } from "expo-workoutkit"
-import { TrashIcon } from "react-native-heroicons/solid"
+import { TrashIcon, PlusIcon } from "react-native-heroicons/solid"
 
 import { AlertDisplay } from "@/components/AlertDisplay"
+import { Button } from "@/components/Button"
 import { GoalSelector } from "@/components/GoalSelector"
 import { Text } from "@/components/Text"
-import { TextField } from "@/components/TextField"
 import { colors } from "@/theme/colors"
-import { typography } from "@/theme/typography"
 
 interface IntervalBlockBuilderProps {
   block: IntervalBlock
+  index: number
   onBlockChange: (block: IntervalBlock) => void
   onDelete: () => void
 }
 
 export const IntervalBlockBuilder: FC<IntervalBlockBuilderProps> = ({
   block,
+  index,
   onBlockChange,
   onDelete,
 }) => {
-  const [iterations, setIterations] = useState(block.iterations.toString())
-
-  const handleIterationsChange = (value: string) => {
-    setIterations(value)
+  const handleIterationsChange = (newIterations: number) => {
     onBlockChange({
       ...block,
-      iterations: parseInt(value) || 1,
+      iterations: newIterations,
     })
+  }
+
+  const incrementIterations = () => {
+    handleIterationsChange(block.iterations + 1)
+  }
+
+  const decrementIterations = () => {
+    if (block.iterations > 1) {
+      handleIterationsChange(block.iterations - 1)
+    }
   }
 
   const handleStepChange = (stepIndex: number, step: IntervalStep) => {
@@ -70,80 +78,99 @@ export const IntervalBlockBuilder: FC<IntervalBlockBuilderProps> = ({
 
   return (
     <View style={$container}>
-      <View style={$header}>
-        <Text style={$title}>Interval Block</Text>
-        <TouchableOpacity style={$deleteButton} onPress={onDelete}>
-          <TrashIcon size={18} color={colors.error} />
-        </TouchableOpacity>
+      <View style={$subHeader}>
+        <Text preset="subheading">Block {index + 1}</Text>
+        <Button onPress={onDelete} preset="ghost">
+          <TrashIcon size={16} color={colors.error} />
+        </Button>
+      </View>
+      <View style={$iterationsRow}>
+        <Text preset="formLabel">Repetitions</Text>
+        <View style={$iterationsStepper}>
+          <Button
+            style={[$stepperButton, block.iterations <= 1 && $stepperButtonDisabled]}
+            onPress={decrementIterations}
+            disabled={block.iterations <= 1}
+            preset="ghost"
+          >
+            <Text style={$stepperText}>−</Text>
+          </Button>
+          <Text preset="formLabel" style={$stepperValue}>
+            {block.iterations}
+          </Text>
+          <Button style={$stepperButton} onPress={incrementIterations} preset="ghost">
+            <Text style={$stepperText}>+</Text>
+          </Button>
+        </View>
       </View>
 
-      <Text style={$label}>Iterations</Text>
-      <TextField
-        placeholder="Number of iterations"
-        value={iterations}
-        onChangeText={handleIterationsChange}
-        keyboardType="numeric"
+      {block.steps.length === 0 && (
+        <View style={$emptyStepsContainer}>
+          <Text preset="formHelper" style={$emptyStepsText}>
+            No steps added yet. Tap &quot;Add Step&quot; to get started.
+          </Text>
+        </View>
+      )}
+
+      {block.steps.length > 0 && (
+        <View style={$stepsContainer}>
+          {block.steps.map((step, index) => (
+            <View key={index} style={$stepCard}>
+              <View style={$subHeader}>
+                <Text preset="subheading">Step {index + 1}</Text>
+                {block.steps.length > 1 && (
+                  <Button onPress={() => removeStep(index)} preset="ghost">
+                    <TrashIcon size={16} color={colors.error} />
+                  </Button>
+                )}
+              </View>
+
+              <Text preset="formLabel">Purpose</Text>
+              <View style={$purposeGrid}>
+                <Button
+                  text="Work"
+                  onPress={() => handleStepChange(index, { ...step, purpose: "work" })}
+                  preset={step.purpose === "work" ? "primary" : "default"}
+                />
+                <Button
+                  text="Recovery"
+                  onPress={() => handleStepChange(index, { ...step, purpose: "recovery" })}
+                  preset={step.purpose === "recovery" ? "primary" : "default"}
+                />
+              </View>
+
+              <GoalSelector
+                goal={step.step.goal}
+                type="embedded"
+                onGoalChange={(goal) =>
+                  handleStepChange(index, {
+                    ...step,
+                    step: { ...step.step, goal },
+                  })
+                }
+              />
+              <View style={$separator} />
+
+              <AlertDisplay
+                alert={step.step.alert}
+                onAlertChange={(alert) =>
+                  handleStepChange(index, {
+                    ...step,
+                    step: { ...step.step, alert },
+                  })
+                }
+              />
+            </View>
+          ))}
+        </View>
+      )}
+
+      <Button
+        text="Add Step"
+        LeftAccessory={() => <PlusIcon size={16} color={colors.background} />}
+        onPress={addStep}
+        preset="primary"
       />
-
-      <Text style={$label}>Steps</Text>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={$stepsContainer}>
-        {block.steps.map((step, index) => (
-          <View key={index} style={$stepCard}>
-            <View style={$stepHeader}>
-              <Text style={$stepTitle}>Step {index + 1}</Text>
-              {block.steps.length > 1 && (
-                <TouchableOpacity onPress={() => removeStep(index)}>
-                  <Text style={$removeStepText}>❌</Text>
-                </TouchableOpacity>
-              )}
-            </View>
-
-            <Text style={$label}>Purpose</Text>
-            <View style={$purposeGrid}>
-              <TouchableOpacity
-                style={[$purposeButton, step.purpose === "work" && $purposeButtonSelected]}
-                onPress={() => handleStepChange(index, { ...step, purpose: "work" })}
-              >
-                <Text style={[$purposeText, step.purpose === "work" && $purposeTextSelected]}>
-                  Work
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[$purposeButton, step.purpose === "recovery" && $purposeButtonSelected]}
-                onPress={() => handleStepChange(index, { ...step, purpose: "recovery" })}
-              >
-                <Text style={[$purposeText, step.purpose === "recovery" && $purposeTextSelected]}>
-                  Recovery
-                </Text>
-              </TouchableOpacity>
-            </View>
-
-            <GoalSelector
-              goal={step.step.goal}
-              onGoalChange={(goal) =>
-                handleStepChange(index, {
-                  ...step,
-                  step: { ...step.step, goal },
-                })
-              }
-            />
-
-            <AlertDisplay
-              alert={step.step.alert}
-              onAlertChange={(alert) =>
-                handleStepChange(index, {
-                  ...step,
-                  step: { ...step.step, alert },
-                })
-              }
-            />
-          </View>
-        ))}
-      </ScrollView>
-
-      <TouchableOpacity style={$addStepButton} onPress={addStep}>
-        <Text style={$addStepText}>+ Add Step</Text>
-      </TouchableOpacity>
     </View>
   )
 }
@@ -152,76 +179,98 @@ export const IntervalBlockBuilder: FC<IntervalBlockBuilderProps> = ({
 const $container: ViewStyle = {
   backgroundColor: colors.palette.neutral100,
   borderRadius: 16,
-  padding: 20,
+  paddingHorizontal: 20,
+  paddingVertical: 16,
   borderWidth: 1,
   borderColor: colors.border,
   marginBottom: 16,
 }
 
-const $header: ViewStyle = {
+const $iterationsRow: ViewStyle = {
   flexDirection: "row",
   justifyContent: "space-between",
   alignItems: "center",
   marginBottom: 16,
 }
 
-const $title: TextStyle = {
-  fontSize: 18,
-  fontWeight: "700",
-  color: colors.text,
-  fontFamily: typography.primary.bold,
-}
-
-const $deleteButton: ViewStyle = {
+const $iterationsStepper: ViewStyle = {
+  flexDirection: "row",
+  alignItems: "center",
   backgroundColor: colors.palette.neutral200,
-  borderRadius: 8,
-  padding: 12,
+  borderRadius: 6,
   borderWidth: 1,
   borderColor: colors.border,
-  alignItems: "center",
-  justifyContent: "center",
 }
 
-const $label: TextStyle = {
-  fontSize: 14,
+const $stepperButton: ViewStyle = {
+  width: 28,
+  height: 28,
+  alignItems: "center",
+  justifyContent: "center",
+  backgroundColor: colors.background,
+  borderWidth: 1,
+  borderColor: colors.border,
+}
+
+const $stepperButtonDisabled: ViewStyle = {
+  backgroundColor: colors.palette.neutral300,
+  borderColor: colors.palette.neutral400,
+}
+
+const $stepperText: TextStyle = {
+  fontSize: 16,
   fontWeight: "600",
   color: colors.text,
-  fontFamily: typography.primary.semiBold,
-  marginBottom: 8,
-  marginTop: 16,
+}
+
+const $stepperValue: TextStyle = {
+  paddingHorizontal: 12,
+  minWidth: 24,
+  textAlign: "center",
 }
 
 const $stepsContainer: ViewStyle = {
   marginBottom: 16,
 }
 
+const $emptyStepsContainer: ViewStyle = {
+  backgroundColor: colors.palette.neutral200,
+  borderRadius: 8,
+  padding: 16,
+  marginBottom: 16,
+  alignItems: "center",
+  borderWidth: 1,
+  borderColor: colors.border,
+  borderStyle: "dashed",
+}
+
+const $emptyStepsText: TextStyle = {
+  textAlign: "center",
+  color: colors.textDim,
+}
+
 const $stepCard: ViewStyle = {
-  width: 280,
   backgroundColor: colors.background,
   borderRadius: 12,
   padding: 16,
-  marginRight: 12,
+  marginBottom: 12,
   borderWidth: 1,
   borderColor: colors.border,
+  shadowColor: colors.palette.neutral900,
+  shadowOffset: {
+    width: 0,
+    height: 1,
+  },
+  shadowOpacity: 0.1,
+  shadowRadius: 2,
+  elevation: 2,
 }
 
-const $stepHeader: ViewStyle = {
+const $subHeader: ViewStyle = {
   flexDirection: "row",
   justifyContent: "space-between",
   alignItems: "center",
   marginBottom: 12,
-}
-
-const $stepTitle: TextStyle = {
-  fontSize: 16,
-  fontWeight: "600",
-  color: colors.text,
-  fontFamily: typography.primary.semiBold,
-}
-
-const $removeStepText: TextStyle = {
-  fontSize: 16,
-  color: colors.error,
 }
 
 const $purposeGrid: ViewStyle = {
@@ -230,44 +279,6 @@ const $purposeGrid: ViewStyle = {
   marginBottom: 12,
 }
 
-const $purposeButton: ViewStyle = {
-  flex: 1,
-  paddingVertical: 8,
-  paddingHorizontal: 12,
-  backgroundColor: colors.background,
-  borderRadius: 8,
-  borderWidth: 1,
-  borderColor: colors.border,
-  alignItems: "center",
-}
-
-const $purposeButtonSelected: ViewStyle = {
-  backgroundColor: colors.tint,
-  borderColor: colors.tint,
-}
-
-const $purposeText: TextStyle = {
-  fontSize: 12,
-  fontWeight: "600",
-  color: colors.text,
-  fontFamily: typography.primary.semiBold,
-}
-
-const $purposeTextSelected: TextStyle = {
-  color: colors.palette.neutral100,
-}
-
-const $addStepButton: ViewStyle = {
-  backgroundColor: colors.tint,
-  borderRadius: 12,
-  paddingVertical: 12,
-  paddingHorizontal: 16,
-  alignItems: "center",
-}
-
-const $addStepText: TextStyle = {
-  fontSize: 14,
-  fontWeight: "600",
-  color: colors.palette.neutral100,
-  fontFamily: typography.primary.semiBold,
+const $separator: ViewStyle = {
+  marginVertical: 12,
 }

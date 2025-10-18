@@ -58,9 +58,15 @@ interface GoalSelectorProps {
   goal: WorkoutGoal | null | undefined
   onGoalChange: (goal: WorkoutGoal) => void
   onRemove?: () => void
+  type?: "embedded" | "full"
 }
 
-export const GoalSelector: FC<GoalSelectorProps> = ({ goal, onGoalChange, onRemove }) => {
+export const GoalSelector: FC<GoalSelectorProps> = ({
+  goal,
+  onGoalChange,
+  onRemove,
+  type = "full",
+}) => {
   const [goalType, setGoalType] = useState<"time" | "distance" | "energy">(
     goal?.type === "time" || goal?.type === "distance" || goal?.type === "energy"
       ? goal.type
@@ -130,7 +136,7 @@ export const GoalSelector: FC<GoalSelectorProps> = ({ goal, onGoalChange, onRemo
   }
 
   return (
-    <View style={$container}>
+    <View style={type === "full" && $container}>
       <Text preset="formLabel" size="sm">
         Goal Type
       </Text>

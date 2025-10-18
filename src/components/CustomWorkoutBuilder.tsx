@@ -142,6 +142,7 @@ export const CustomWorkoutBuilder: FC<CustomWorkoutBuilderProps> = ({
       {(workout?.blocks || []).map((block, index) => (
         <IntervalBlockBuilder
           key={index}
+          index={index}
           block={block}
           onBlockChange={(updatedBlock) => handleBlockChange(index, updatedBlock)}
           onDelete={() => removeBlock(index)}
