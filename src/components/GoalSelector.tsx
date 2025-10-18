@@ -134,7 +134,7 @@ export const GoalSelector: FC<GoalSelectorProps> = ({ goal, onGoalChange, onRemo
       <Text preset="formLabel" size="sm">
         Goal Type
       </Text>
-      <View style={$goalTypeGrid}>
+      <View style={$grid}>
         {[
           { key: "time", label: "Time" },
           { key: "distance", label: "Distance" },
@@ -152,7 +152,7 @@ export const GoalSelector: FC<GoalSelectorProps> = ({ goal, onGoalChange, onRemo
       <Text preset="formLabel" size="sm">
         Unit
       </Text>
-      <View style={$unitGrid}>
+      <View style={$grid}>
         {getUnitsForType(goalType).map((unitOption) => (
           <Button
             key={unitOption}
@@ -190,14 +190,7 @@ const $container: ViewStyle = {
   borderColor: colors.border,
 }
 
-const $goalTypeGrid: ViewStyle = {
-  flexDirection: "row",
-  flexWrap: "wrap",
-  gap: 4,
-  marginBottom: 16,
-}
-
-const $unitGrid: ViewStyle = {
+const $grid: ViewStyle = {
   flexDirection: "row",
   flexWrap: "wrap",
   gap: 8,
