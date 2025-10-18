@@ -4,7 +4,6 @@ import type { TextStyle } from "react-native"
 
 import { Text } from "@/components/Text"
 import { colors } from "@/theme/colors"
-import { typography } from "@/theme/typography"
 
 export interface Activity {
   value: string
@@ -26,9 +25,13 @@ export const ActivityCard: FC<ActivityCardProps> = ({ activity, isSelected, onPr
       onPress={onPress}
     >
       <View style={[$activityIconContainer, { backgroundColor: activity.color }]}>
-        <Text style={$activityIcon}>{activity.icon}</Text>
+        <Text preset="default" size="lg">
+          {activity.icon}
+        </Text>
       </View>
-      <Text style={[$activityLabel, isSelected && $activityLabelSelected]}>{activity.label}</Text>
+      <Text preset="formLabel" size="xs" style={isSelected && $activityLabelSelected}>
+        {activity.label}
+      </Text>
     </TouchableOpacity>
   )
 }
@@ -56,18 +59,6 @@ const $activityIconContainer: ViewStyle = {
   alignItems: "center",
   justifyContent: "center",
   marginBottom: 8,
-}
-
-const $activityIcon: TextStyle = {
-  fontSize: 20,
-}
-
-const $activityLabel: TextStyle = {
-  fontSize: 12,
-  fontWeight: "600",
-  color: colors.text,
-  fontFamily: typography.primary.semiBold,
-  textAlign: "center",
 }
 
 const $activityLabelSelected: TextStyle = {
