@@ -1,14 +1,13 @@
 import { FC } from "react"
-import { View, ViewStyle, TouchableOpacity, ScrollView } from "react-native"
+import { View, ViewStyle, ScrollView } from "react-native"
 import type { TextStyle } from "react-native"
 import type { CustomWorkout, IntervalBlock, WorkoutStep } from "expo-workoutkit"
-import { TrashIcon } from "react-native-heroicons/solid"
 
 import { AlertDisplay } from "@/components/AlertDisplay"
+import { Button } from "@/components/Button"
 import { GoalSelector } from "@/components/GoalSelector"
 import { IntervalBlockBuilder } from "@/components/IntervalBlockBuilder"
 import { Text } from "@/components/Text"
-import { colors } from "@/theme/colors"
 
 interface CustomWorkoutBuilderProps {
   workout: CustomWorkout | null
@@ -94,62 +93,48 @@ export const CustomWorkoutBuilder: FC<CustomWorkoutBuilderProps> = ({
     })
   }
 
-  // Unified Remove Button Component
-  const RemoveButton: FC<{ onPress: () => void }> = ({ onPress }) => (
-    <TouchableOpacity style={$removeButton} onPress={onPress}>
-      <TrashIcon size={18} color={colors.error} />
-    </TouchableOpacity>
-  )
-
   return (
     <ScrollView showsVerticalScrollIndicator={false} style={$container}>
       <Text preset="formLabel" size="md" style={$label}>
         Warmup (Optional)
       </Text>
-      <View style={$section}>
-        {!workout?.warmup ? (
-          <TouchableOpacity
-            style={$addButton}
-            onPress={() =>
+      {!workout?.warmup ? (
+        <Button
+          text="+ Add Warmup"
+          onPress={() =>
+            handleWarmupChange({
+              goal: {
+                type: "time",
+                value: 5,
+                unit: "minutes",
+              },
+            })
+          }
+          preset="reversed"
+        />
+      ) : (
+        <View style={$section}>
+          <GoalSelector
+            goal={workout.warmup.goal}
+            onRemove={() => handleWarmupChange(undefined)}
+            onGoalChange={(goal) =>
               handleWarmupChange({
-                goal: {
-                  type: "time",
-                  value: 5,
-                  unit: "minutes",
-                },
+                ...workout.warmup!,
+                goal,
               })
             }
-          >
-            <Text preset="formLabel" size="sm" style={$addButtonText}>
-              + Add Warmup
-            </Text>
-          </TouchableOpacity>
-        ) : (
-          <>
-            <RemoveButton onPress={() => handleWarmupChange(undefined)} />
-            <View style={$goalContainer}>
-              <GoalSelector
-                goal={workout.warmup.goal}
-                onGoalChange={(goal) =>
-                  handleWarmupChange({
-                    ...workout.warmup!,
-                    goal,
-                  })
-                }
-              />
-              <AlertDisplay
-                alert={workout.warmup.alert}
-                onAlertChange={(alert) =>
-                  handleWarmupChange({
-                    ...workout.warmup!,
-                    alert,
-                  })
-                }
-              />
-            </View>
-          </>
-        )}
-      </View>
+          />
+          <AlertDisplay
+            alert={workout.warmup.alert}
+            onAlertChange={(alert) =>
+              handleWarmupChange({
+                ...workout.warmup!,
+                alert,
+              })
+            }
+          />
+        </View>
+      )}
 
       <Text preset="formLabel" size="md" style={$label}>
         Interval Blocks
@@ -163,59 +148,49 @@ export const CustomWorkoutBuilder: FC<CustomWorkoutBuilderProps> = ({
         />
       ))}
 
-      <TouchableOpacity style={$addBlockButton} onPress={addBlock}>
-        <Text preset="formLabel" size="md" style={$addBlockText}>
-          + Add Block
-        </Text>
-      </TouchableOpacity>
+      <Button text="+ Add Block" onPress={addBlock} preset="reversed" />
 
       <Text preset="formLabel" size="md" style={$label}>
         Cooldown (Optional)
       </Text>
-      <View style={$section}>
-        {!workout?.cooldown ? (
-          <TouchableOpacity
-            style={$addButton}
-            onPress={() =>
+
+      {!workout?.cooldown ? (
+        <Button
+          text="+ Add Cooldown"
+          onPress={() =>
+            handleCooldownChange({
+              goal: {
+                type: "time",
+                value: 5,
+                unit: "minutes",
+              },
+            })
+          }
+          preset="reversed"
+        />
+      ) : (
+        <View style={$section}>
+          <GoalSelector
+            goal={workout.cooldown.goal}
+            onRemove={() => handleCooldownChange(undefined)}
+            onGoalChange={(goal) =>
               handleCooldownChange({
-                goal: {
-                  type: "time",
-                  value: 5,
-                  unit: "minutes",
-                },
+                ...workout.cooldown!,
+                goal,
               })
             }
-          >
-            <Text preset="formLabel" size="sm" style={$addButtonText}>
-              + Add Cooldown
-            </Text>
-          </TouchableOpacity>
-        ) : (
-          <>
-            <RemoveButton onPress={() => handleCooldownChange(undefined)} />
-            <View style={$goalContainer}>
-              <GoalSelector
-                goal={workout.cooldown.goal}
-                onGoalChange={(goal) =>
-                  handleCooldownChange({
-                    ...workout.cooldown!,
-                    goal,
-                  })
-                }
-              />
-              <AlertDisplay
-                alert={workout.cooldown.alert}
-                onAlertChange={(alert) =>
-                  handleCooldownChange({
-                    ...workout.cooldown!,
-                    alert,
-                  })
-                }
-              />
-            </View>
-          </>
-        )}
-      </View>
+          />
+          <AlertDisplay
+            alert={workout.cooldown.alert}
+            onAlertChange={(alert) =>
+              handleCooldownChange({
+                ...workout.cooldown!,
+                alert,
+              })
+            }
+          />
+        </View>
+      )}
     </ScrollView>
   )
 }
@@ -226,58 +201,10 @@ const $container: ViewStyle = {
 }
 
 const $label: TextStyle = {
-  marginBottom: 12,
+  marginBottom: 8,
   marginTop: 20,
 }
 
 const $section: ViewStyle = {
-  backgroundColor: colors.palette.neutral100,
-  borderRadius: 16,
-  padding: 20,
-  borderWidth: 1,
-  borderColor: colors.border,
-  marginBottom: 16,
-}
-
-const $goalContainer: ViewStyle = {
-  marginTop: 16,
-}
-
-const $addBlockButton: ViewStyle = {
-  backgroundColor: colors.tint,
-  borderRadius: 16,
-  paddingVertical: 16,
-  paddingHorizontal: 20,
-  alignItems: "center",
-  marginBottom: 20,
-}
-
-const $addBlockText: TextStyle = {
-  color: colors.palette.neutral100,
-}
-
-const $addButton: ViewStyle = {
-  backgroundColor: colors.tint,
-  borderRadius: 12,
-  paddingVertical: 12,
-  paddingHorizontal: 16,
-  alignItems: "center",
-  borderWidth: 1,
-  borderColor: colors.tint,
-}
-
-const $addButtonText: TextStyle = {
-  color: colors.palette.neutral100,
-}
-
-const $removeButton: ViewStyle = {
-  backgroundColor: colors.palette.neutral200,
-  borderRadius: 8,
-  padding: 12,
-  borderWidth: 1,
-  borderColor: colors.border,
-  marginBottom: 16,
-  alignSelf: "flex-start",
-  alignItems: "center",
-  justifyContent: "center",
+  gap: 16,
 }

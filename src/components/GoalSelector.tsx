@@ -2,7 +2,9 @@ import { FC, useState } from "react"
 import { View, ViewStyle, TouchableOpacity } from "react-native"
 import type { TextStyle } from "react-native"
 import type { WorkoutGoal } from "expo-workoutkit"
+import { TrashIcon } from "react-native-heroicons/solid"
 
+import { Button } from "@/components/Button"
 import { Text } from "@/components/Text"
 import { TextField } from "@/components/TextField"
 import { colors } from "@/theme/colors"
@@ -56,9 +58,10 @@ const reverseUnitMapping: Record<UnitType, string> = {
 interface GoalSelectorProps {
   goal: WorkoutGoal | null | undefined
   onGoalChange: (goal: WorkoutGoal) => void
+  onRemove?: () => void
 }
 
-export const GoalSelector: FC<GoalSelectorProps> = ({ goal, onGoalChange }) => {
+export const GoalSelector: FC<GoalSelectorProps> = ({ goal, onGoalChange, onRemove }) => {
   const [goalType, setGoalType] = useState<"time" | "distance" | "energy">(
     goal?.type === "time" || goal?.type === "distance" || goal?.type === "energy"
       ? goal.type
@@ -180,6 +183,11 @@ export const GoalSelector: FC<GoalSelectorProps> = ({ goal, onGoalChange }) => {
         onChangeText={handleValueChange}
         keyboardType="numeric"
       />
+      {onRemove && (
+        <Button onPress={onRemove} preset="ghost" style={$removeButton}>
+          <TrashIcon size={18} color={colors.error} />
+        </Button>
+      )}
     </View>
   )
 }
@@ -245,4 +253,11 @@ const $unitButtonSelected: ViewStyle = {
 
 const $unitTextSelected: TextStyle = {
   color: colors.palette.neutral100,
+}
+
+const $removeButton: ViewStyle = {
+  position: "absolute",
+  right: 0,
+  top: 0,
+  padding: 8,
 }
