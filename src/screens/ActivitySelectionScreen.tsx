@@ -1,14 +1,11 @@
 import { FC } from "react"
 import { View, ViewStyle, ScrollView } from "react-native"
-import type { TextStyle } from "react-native"
 import { router } from "expo-router"
 import type { HKWorkoutActivityType } from "expo-workoutkit"
 
 import { ActivityCard } from "@/components/ActivityCard"
 import { Screen } from "@/components/Screen"
 import { Text } from "@/components/Text"
-import { colors } from "@/theme/colors"
-import { typography } from "@/theme/typography"
 
 // Activity categories
 const ACTIVITY_CATEGORIES = {
@@ -35,7 +32,6 @@ const ACTIVITY_CATEGORIES = {
 
 export const ActivitySelectionScreen: FC = function ActivitySelectionScreen() {
   const handleActivitySelect = (activity: HKWorkoutActivityType) => {
-    // Navigate to workout type selection with activity, staying within tabs
     router.push({
       pathname: "/(tabs)/builder/configure",
       params: {
@@ -45,99 +41,47 @@ export const ActivitySelectionScreen: FC = function ActivitySelectionScreen() {
   }
 
   return (
-    <Screen preset="scroll" contentContainerStyle={$container}>
+    <Screen preset="fixed" contentContainerStyle={$container} safeAreaEdges={["top"]}>
+      <View style={$header}>
+        <Text preset="heading">Choose Your Activity</Text>
+        <Text preset="subheading">Select the type of workout you want to create</Text>
+      </View>
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={$scrollContent}>
-        {/* Header */}
-        <View style={$header}>
-          <Text style={$title}>Choose Your Activity</Text>
-          <Text style={$subtitle}>Select the type of workout you want to create</Text>
-        </View>
-
-        {/* Activity Selection */}
-        <View style={$section}>
-          <Text style={$sectionTitle}>Activity Type</Text>
-          {Object.entries(ACTIVITY_CATEGORIES).map(([category, activities]) => (
-            <View key={category} style={$activityCategory}>
-              <Text style={$categoryTitle}>
-                {category.charAt(0).toUpperCase() + category.slice(1)}
-              </Text>
-              <View style={$activityGrid}>
-                {activities.map((activity) => (
-                  <ActivityCard
-                    key={activity.value}
-                    activity={activity}
-                    isSelected={false}
-                    onPress={() => handleActivitySelect(activity.value as HKWorkoutActivityType)}
-                  />
-                ))}
-              </View>
+        {Object.entries(ACTIVITY_CATEGORIES).map(([category, activities]) => (
+          <View key={category} style={$activityCategory}>
+            <Text preset="subheading">{category.charAt(0).toUpperCase() + category.slice(1)}</Text>
+            <View style={$activityGrid}>
+              {activities.map((activity) => (
+                <ActivityCard
+                  key={activity.value}
+                  activity={activity}
+                  isSelected={false}
+                  onPress={() => handleActivitySelect(activity.value as HKWorkoutActivityType)}
+                />
+              ))}
             </View>
-          ))}
-        </View>
+          </View>
+        ))}
       </ScrollView>
     </Screen>
   )
 }
 
-// Styles
 const $container: ViewStyle = {
   flex: 1,
-  backgroundColor: colors.background,
 }
 
 const $scrollContent: ViewStyle = {
-  paddingBottom: 40,
+  paddingVertical: 40,
+  paddingHorizontal: 24,
 }
 
 const $header: ViewStyle = {
   paddingHorizontal: 24,
-  paddingVertical: 40,
-  alignItems: "center",
 }
 
-const $title: TextStyle = {
-  fontSize: 32,
-  fontWeight: "800",
-  color: colors.text,
-  fontFamily: typography.primary.bold,
-  marginBottom: 8,
-  letterSpacing: -0.5,
-}
-
-const $subtitle: TextStyle = {
-  fontSize: 16,
-  fontWeight: "400",
-  color: colors.textDim,
-  fontFamily: typography.primary.normal,
-  textAlign: "center",
-}
-
-const $section: ViewStyle = {
-  paddingHorizontal: 24,
-  marginBottom: 32,
-}
-
-const $sectionTitle: TextStyle = {
-  fontSize: 20,
-  fontWeight: "700",
-  color: colors.text,
-  fontFamily: typography.primary.bold,
-  marginBottom: 20,
-  letterSpacing: -0.3,
-}
-
-// Activity Styles
 const $activityCategory: ViewStyle = {
   marginBottom: 24,
-}
-
-const $categoryTitle: TextStyle = {
-  fontSize: 16,
-  fontWeight: "600",
-  color: colors.text,
-  fontFamily: typography.primary.semiBold,
-  marginBottom: 12,
-  textTransform: "capitalize",
 }
 
 const $activityGrid: ViewStyle = {
