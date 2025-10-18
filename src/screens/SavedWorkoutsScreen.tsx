@@ -84,7 +84,7 @@ export const SavedWorkoutsScreen: FC = function SavedWorkoutsScreen() {
   }
 
   return (
-    <Screen preset="scroll" contentContainerStyle={$container} safeAreaEdges={["top"]}>
+    <Screen preset="fixed" contentContainerStyle={$container} safeAreaEdges={["top"]}>
       <View style={$header}>
         <Text preset="heading">My Workouts</Text>
       </View>
