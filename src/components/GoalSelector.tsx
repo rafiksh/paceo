@@ -1,5 +1,5 @@
 import { FC, useState } from "react"
-import { View, ViewStyle } from "react-native"
+import { TextStyle, View, ViewStyle } from "react-native"
 import type { WorkoutGoal } from "expo-workoutkit"
 import { TrashIcon } from "react-native-heroicons/solid"
 
@@ -170,13 +170,18 @@ export const GoalSelector: FC<GoalSelectorProps> = ({
       </View>
 
       <Text preset="formLabel" size="sm">
-        Value
+        Target
       </Text>
       <TextField
         placeholder="Enter value"
         value={value}
         onChangeText={handleValueChange}
         keyboardType="numeric"
+        RightAccessory={() => (
+          <Text preset="formLabel" size="sm" style={$unitTextStyle}>
+            {unit}
+          </Text>
+        )}
       />
       {onRemove && (
         <Button onPress={onRemove} preset="ghost" style={$removeButton}>
@@ -208,4 +213,10 @@ const $removeButton: ViewStyle = {
   right: 0,
   top: 0,
   padding: 8,
+}
+
+const $unitTextStyle: TextStyle = {
+  marginRight: 8,
+  textAlign: "right",
+  alignSelf: "center",
 }
