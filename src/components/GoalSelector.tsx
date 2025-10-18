@@ -1,6 +1,5 @@
 import { FC, useState } from "react"
-import { View, ViewStyle, TouchableOpacity } from "react-native"
-import type { TextStyle } from "react-native"
+import { View, ViewStyle } from "react-native"
 import type { WorkoutGoal } from "expo-workoutkit"
 import { TrashIcon } from "react-native-heroicons/solid"
 
@@ -141,19 +140,12 @@ export const GoalSelector: FC<GoalSelectorProps> = ({ goal, onGoalChange, onRemo
           { key: "distance", label: "Distance" },
           { key: "energy", label: "Energy" },
         ].map((type) => (
-          <TouchableOpacity
+          <Button
             key={type.key}
-            style={[$goalTypeButton, goalType === type.key && $goalTypeButtonSelected]}
+            text={type.label}
             onPress={() => handleGoalTypeChange(type.key as "time" | "distance" | "energy")}
-          >
-            <Text
-              preset="formLabel"
-              size="sm"
-              style={goalType === type.key && $goalTypeLabelSelected}
-            >
-              {type.label}
-            </Text>
-          </TouchableOpacity>
+            preset={goalType === type.key ? "primary" : "default"}
+          />
         ))}
       </View>
 
@@ -162,15 +154,12 @@ export const GoalSelector: FC<GoalSelectorProps> = ({ goal, onGoalChange, onRemo
       </Text>
       <View style={$unitGrid}>
         {getUnitsForType(goalType).map((unitOption) => (
-          <TouchableOpacity
+          <Button
             key={unitOption}
-            style={[$unitButton, unit === unitOption && $unitButtonSelected]}
+            text={unitOption}
             onPress={() => handleUnitChange(unitOption)}
-          >
-            <Text preset="formLabel" size="xs" style={unit === unitOption && $unitTextSelected}>
-              {unitOption}
-            </Text>
-          </TouchableOpacity>
+            preset={unit === unitOption ? "primary" : "default"}
+          />
         ))}
       </View>
 
@@ -196,7 +185,7 @@ export const GoalSelector: FC<GoalSelectorProps> = ({ goal, onGoalChange, onRemo
 const $container: ViewStyle = {
   backgroundColor: colors.palette.neutral100,
   borderRadius: 16,
-  padding: 20,
+  padding: 12,
   borderWidth: 1,
   borderColor: colors.border,
 }
@@ -204,29 +193,8 @@ const $container: ViewStyle = {
 const $goalTypeGrid: ViewStyle = {
   flexDirection: "row",
   flexWrap: "wrap",
-  gap: 8,
+  gap: 4,
   marginBottom: 16,
-}
-
-const $goalTypeButton: ViewStyle = {
-  flex: 1,
-  alignItems: "center",
-  justifyContent: "center",
-  paddingVertical: 12,
-  paddingHorizontal: 8,
-  backgroundColor: colors.background,
-  borderRadius: 8,
-  borderWidth: 1,
-  borderColor: colors.border,
-}
-
-const $goalTypeButtonSelected: ViewStyle = {
-  backgroundColor: colors.tint,
-  borderColor: colors.tint,
-}
-
-const $goalTypeLabelSelected: TextStyle = {
-  color: colors.palette.neutral100,
 }
 
 const $unitGrid: ViewStyle = {
@@ -234,25 +202,6 @@ const $unitGrid: ViewStyle = {
   flexWrap: "wrap",
   gap: 8,
   marginBottom: 16,
-}
-
-const $unitButton: ViewStyle = {
-  paddingVertical: 10,
-  paddingHorizontal: 14,
-  backgroundColor: colors.palette.neutral100,
-  borderRadius: 8,
-  borderWidth: 2,
-  borderColor: colors.border,
-  minHeight: 36,
-}
-
-const $unitButtonSelected: ViewStyle = {
-  backgroundColor: colors.tint,
-  borderColor: colors.tint,
-}
-
-const $unitTextSelected: TextStyle = {
-  color: colors.palette.neutral100,
 }
 
 const $removeButton: ViewStyle = {
