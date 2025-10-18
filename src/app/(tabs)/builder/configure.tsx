@@ -1,5 +1,5 @@
-import { WorkoutTypeSelectionScreen } from "@/screens/WorkoutTypeSelectionScreen"
+import { WorkoutConfigurationScreen } from "@/screens/WorkoutConfigurationScreen"
 
-export default function WorkoutTypeScreen() {
-  return <WorkoutTypeSelectionScreen />
+export default function WorkoutConfigureScreen() {
+  return <WorkoutConfigurationScreen />
 }

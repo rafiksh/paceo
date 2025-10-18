@@ -46,7 +46,7 @@ const LOCATIONS: Location[] = [
   { value: "unknown", label: "Unknown", icon: "❓", color: "#636E72" },
 ]
 
-export const WorkoutTypeSelectionScreen: FC = function WorkoutTypeSelectionScreen() {
+export const WorkoutConfigurationScreen: FC = function WorkoutConfigurationScreen() {
   const params = useLocalSearchParams()
   const activity = (params.activity as HKWorkoutActivityType) || "running"
 
