@@ -83,9 +83,6 @@ const $tabBarStyle: ThemedStyle<any> = ({ colors, spacing }) => ({
   backgroundColor: colors.background,
   borderTopColor: colors.border,
   borderTopWidth: 1,
-  height: 80,
-  paddingBottom: spacing.lg,
-  paddingTop: spacing.sm,
   paddingHorizontal: spacing.lg,
   // Ensure proper contrast in dark mode
   shadowColor: colors.palette.neutral900,
