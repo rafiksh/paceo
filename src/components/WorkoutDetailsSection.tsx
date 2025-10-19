@@ -181,11 +181,6 @@ export const WorkoutDetailsSection: FC<WorkoutDetailsSectionProps> = ({ workoutT
                 <Text preset="heading" size="md" style={themed($blockTitle)}>
                   Warmup
                 </Text>
-                <View style={themed($warmupBadge)}>
-                  <Text preset="formLabel" size="xs" style={themed($warmupBadgeText)}>
-                    PREP
-                  </Text>
-                </View>
               </View>
             </View>
             <View style={themed($stepCard)}>
@@ -247,11 +242,6 @@ export const WorkoutDetailsSection: FC<WorkoutDetailsSectionProps> = ({ workoutT
                 <Text preset="heading" size="md" style={themed($blockTitle)}>
                   Cooldown
                 </Text>
-                <View style={themed($cooldownBadge)}>
-                  <Text preset="formLabel" size="xs" style={themed($cooldownBadgeText)}>
-                    COOL
-                  </Text>
-                </View>
               </View>
             </View>
             <View style={themed($stepCard)}>
@@ -443,28 +433,4 @@ const $alertText: ThemedStyle<TextStyle> = ({ colors }) => ({
   color: colors.text,
   fontSize: 11,
   fontWeight: "500",
-})
-
-const $warmupBadge: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
-  backgroundColor: colors.palette.accent500,
-  paddingHorizontal: spacing.xs,
-  paddingVertical: 4,
-  borderRadius: 12,
-})
-
-const $warmupBadgeText: ThemedStyle<TextStyle> = ({ colors }) => ({
-  color: colors.palette.neutral100,
-  fontWeight: "600",
-})
-
-const $cooldownBadge: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
-  backgroundColor: colors.palette.secondary500,
-  paddingHorizontal: spacing.xs,
-  paddingVertical: 4,
-  borderRadius: 12,
-})
-
-const $cooldownBadgeText: ThemedStyle<TextStyle> = ({ colors }) => ({
-  color: colors.palette.neutral100,
-  fontWeight: "600",
 })

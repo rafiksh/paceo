@@ -196,9 +196,7 @@ export const SavedWorkoutsScreen: FC = function SavedWorkoutsScreen() {
     }
   }
 
-  const handleButtonPress = (message: string) => {
-    Alert.alert("Workout Button Pressed", message)
-  }
+  const handleButtonPress = () => {}
 
   const handlePreviewWorkout = (workout: SavedWorkout) => {
     // Navigate to workout preview screen as modal

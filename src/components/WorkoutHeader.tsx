@@ -61,7 +61,7 @@ export const WorkoutHeader: FC<WorkoutHeaderProps> = ({ title, workoutType, onCl
           {title}
         </Text>
         <TouchableOpacity style={themed($closeButton)} onPress={onClose}>
-          <XMarkIcon size={20} color={themed($iconColor)} />
+          <XMarkIcon size={20} color={theme.colors.text} />
         </TouchableOpacity>
       </View>
 
@@ -73,11 +73,7 @@ export const WorkoutHeader: FC<WorkoutHeaderProps> = ({ title, workoutType, onCl
               { backgroundColor: pillColors.bg, borderColor: pillColors.border },
             ]}
           >
-            <Text
-              preset="formLabel"
-              size="xs"
-              style={[themed($typePillText), { color: pillColors.text }]}
-            >
+            <Text preset="formLabel" size="xs">
               {typeLabel} workout
             </Text>
           </View>
@@ -121,15 +117,9 @@ const $closeButton: ThemedStyle<ViewStyle> = ({ colors }) => ({
   justifyContent: "center",
 })
 
-const $iconColor: ThemedStyle<string> = ({ colors }) => colors.text
-
 const $typePill: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   paddingHorizontal: spacing.xs,
   paddingVertical: 4,
   borderRadius: 999,
   borderWidth: 1,
-})
-
-const $typePillText: ThemedStyle<TextStyle> = () => ({
-  fontWeight: "600",
 })
