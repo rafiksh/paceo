@@ -25,6 +25,7 @@ export default function TabLayout() {
         tabBarActiveTintColor: theme.colors.tint,
         tabBarInactiveTintColor: theme.colors.textDim,
       }}
+      initialRouteName="builder"
     >
       <Tabs.Screen
         name="builder"
