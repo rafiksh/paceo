@@ -3,13 +3,16 @@ import { View, ViewStyle } from "react-native"
 import type { TextStyle } from "react-native"
 
 import { Text } from "@/components/Text"
-import { colors } from "@/theme/colors"
+import { useAppTheme } from "@/theme/context"
+import type { ThemedStyle } from "@/theme/types"
 
 interface WorkoutTypeSectionProps {
   workoutType: "goal" | "pacer" | "custom"
 }
 
 export const WorkoutTypeSection: FC<WorkoutTypeSectionProps> = ({ workoutType }) => {
+  const { themed } = useAppTheme()
+
   const getTypeInfo = () => {
     switch (workoutType) {
       case "goal":
@@ -38,15 +41,15 @@ export const WorkoutTypeSection: FC<WorkoutTypeSectionProps> = ({ workoutType })
   const typeInfo = getTypeInfo()
 
   return (
-    <View style={$detailSection}>
-      <Text preset="subheading" style={$sectionTitle}>
+    <View style={themed($detailSection)}>
+      <Text preset="subheading" style={themed($sectionTitle)}>
         Workout Type
       </Text>
-      <View style={$typeCard}>
-        <Text preset="heading" size="md" style={$typeText}>
+      <View style={themed($typeCard)}>
+        <Text preset="heading" size="md" style={themed($typeText)}>
           {typeInfo.title}
         </Text>
-        <Text preset="formHelper" style={$typeDescription}>
+        <Text preset="formHelper" style={themed($typeDescription)}>
           {typeInfo.description}
         </Text>
       </View>
@@ -55,30 +58,30 @@ export const WorkoutTypeSection: FC<WorkoutTypeSectionProps> = ({ workoutType })
 }
 
 // Styles
-const $detailSection: ViewStyle = {
-  marginBottom: 24,
-}
+const $detailSection: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  marginBottom: spacing.lg,
+})
 
-const $sectionTitle: TextStyle = {
-  marginBottom: 12,
+const $sectionTitle: ThemedStyle<TextStyle> = ({ colors, spacing }) => ({
+  marginBottom: spacing.sm,
   color: colors.text,
-}
+})
 
-const $typeCard: ViewStyle = {
+const $typeCard: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
   backgroundColor: colors.palette.primary100,
-  padding: 16,
+  padding: spacing.md,
   borderRadius: 12,
   borderWidth: 1,
   borderColor: colors.palette.primary200,
-}
+})
 
-const $typeText: TextStyle = {
+const $typeText: ThemedStyle<TextStyle> = ({ colors, spacing }) => ({
   fontSize: 18,
   fontWeight: "600",
   color: colors.text,
   marginBottom: 4,
-}
+})
 
-const $typeDescription: TextStyle = {
+const $typeDescription: ThemedStyle<TextStyle> = ({ colors }) => ({
   color: colors.textDim,
-}
+})

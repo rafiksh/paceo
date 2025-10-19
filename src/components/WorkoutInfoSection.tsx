@@ -4,7 +4,8 @@ import type { TextStyle } from "react-native"
 import { HomeIcon, SunIcon } from "react-native-heroicons/outline"
 
 import { Text } from "@/components/Text"
-import { colors } from "@/theme/colors"
+import { useAppTheme } from "@/theme/context"
+import type { ThemedStyle } from "@/theme/types"
 
 interface WorkoutInfoSectionProps {
   activity: string
@@ -17,32 +18,34 @@ export const WorkoutInfoSection: FC<WorkoutInfoSectionProps> = ({
   location,
   createdAt,
 }) => {
+  const { themed } = useAppTheme()
+
   return (
-    <View style={$detailSection}>
-      <Text preset="subheading" style={$sectionTitle}>
+    <View style={themed($detailSection)}>
+      <Text preset="subheading" style={themed($sectionTitle)}>
         Workout Information
       </Text>
-      <View style={$infoCard}>
-        <View style={$infoRow}>
+      <View style={themed($infoCard)}>
+        <View style={themed($infoRow)}>
           <Text preset="formLabel">Activity</Text>
           <Text preset="heading" size="sm">
             {activity.charAt(0).toUpperCase() + activity.slice(1)}
           </Text>
         </View>
-        <View style={$infoRow}>
+        <View style={themed($infoRow)}>
           <Text preset="formLabel">Location</Text>
-          <View style={$locationInfo}>
+          <View style={themed($locationInfo)}>
             {location === "indoor" ? (
-              <HomeIcon size={16} color={colors.palette.secondary500} />
+              <HomeIcon size={16} color={themed($indoorIconColor)} />
             ) : (
-              <SunIcon size={16} color={colors.palette.accent500} />
+              <SunIcon size={16} color={themed($outdoorIconColor)} />
             )}
-            <Text preset="heading" size="sm" style={$locationText}>
+            <Text preset="heading" size="sm" style={themed($locationText)}>
               {location === "indoor" ? "Indoor" : "Outdoor"}
             </Text>
           </View>
         </View>
-        <View style={$infoRow}>
+        <View style={themed($infoRow)}>
           <Text preset="formLabel">Created</Text>
           <Text preset="heading" size="sm">
             {createdAt.toLocaleDateString()}
@@ -54,36 +57,39 @@ export const WorkoutInfoSection: FC<WorkoutInfoSectionProps> = ({
 }
 
 // Styles
-const $detailSection: ViewStyle = {
-  marginBottom: 24,
-}
+const $detailSection: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  marginBottom: spacing.lg,
+})
 
-const $sectionTitle: TextStyle = {
-  marginBottom: 12,
+const $sectionTitle: ThemedStyle<TextStyle> = ({ colors, spacing }) => ({
+  marginBottom: spacing.sm,
   color: colors.text,
-}
+})
 
-const $infoCard: ViewStyle = {
+const $infoCard: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
   backgroundColor: colors.palette.neutral100,
-  padding: 16,
+  padding: spacing.md,
   borderRadius: 12,
   borderWidth: 1,
   borderColor: colors.border,
-}
+})
 
-const $infoRow: ViewStyle = {
+const $infoRow: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   flexDirection: "row",
   justifyContent: "space-between",
   alignItems: "center",
-  paddingVertical: 8,
-}
+  paddingVertical: spacing.xs,
+})
 
-const $locationInfo: ViewStyle = {
+const $locationInfo: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   flexDirection: "row",
   alignItems: "center",
   gap: 6,
-}
+})
 
-const $locationText: TextStyle = {
+const $locationText: ThemedStyle<TextStyle> = ({ colors }) => ({
   color: colors.textDim,
-}
+})
+
+const $indoorIconColor: ThemedStyle<string> = ({ colors }) => colors.palette.secondary500
+const $outdoorIconColor: ThemedStyle<string> = ({ colors }) => colors.palette.accent500

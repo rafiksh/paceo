@@ -2,12 +2,13 @@ import { FC } from "react"
 import { View, ViewStyle } from "react-native"
 
 import { Screen } from "@/components/Screen"
-import { WorkoutHeader } from "@/components/WorkoutHeader"
-import { WorkoutTypeSection } from "@/components/WorkoutTypeSection"
 import { WorkoutDetailsSection } from "@/components/WorkoutDetailsSection"
+import { WorkoutHeader } from "@/components/WorkoutHeader"
 import { WorkoutInfoSection } from "@/components/WorkoutInfoSection"
+import { WorkoutTypeSection } from "@/components/WorkoutTypeSection"
 import { type SavedWorkout } from "@/services/WorkoutStorage"
-import { colors } from "@/theme/colors"
+import { useAppTheme } from "@/theme/context"
+import type { ThemedStyle } from "@/theme/types"
 
 interface WorkoutPreviewScreenProps {
   workout: SavedWorkout
@@ -18,6 +19,7 @@ export const WorkoutPreviewScreen: FC<WorkoutPreviewScreenProps> = function Work
   workout,
   onClose,
 }) {
+  const { themed } = useAppTheme()
   const { workoutPlan } = workout
 
   // Debug logging
@@ -37,14 +39,14 @@ export const WorkoutPreviewScreen: FC<WorkoutPreviewScreenProps> = function Work
 
   return (
     <Screen
-      style={$container}
+      style={themed($container)}
       preset="scroll"
       safeAreaEdges={["top"]}
-      contentContainerStyle={$contentContainer}
+      contentContainerStyle={themed($contentContainer)}
     >
       <WorkoutHeader title={workout.name} onClose={onClose} />
 
-      <View style={$workoutDetails}>
+      <View style={themed($workoutDetails)}>
         <WorkoutTypeSection workoutType={workoutPlan.type} />
         <WorkoutDetailsSection workoutType={workoutPlan.type} workout={workoutPlan.workout} />
         <WorkoutInfoSection
@@ -58,16 +60,16 @@ export const WorkoutPreviewScreen: FC<WorkoutPreviewScreenProps> = function Work
 }
 
 // Styles
-const $container: ViewStyle = {
+const $container: ThemedStyle<ViewStyle> = ({ colors }) => ({
   flex: 1,
   backgroundColor: colors.background,
-}
+})
 
-const $contentContainer: ViewStyle = {
-  paddingBottom: 24,
-}
+const $contentContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  paddingBottom: spacing.lg,
+})
 
-const $workoutDetails: ViewStyle = {
-  paddingHorizontal: 24,
-  paddingVertical: 24,
-}
+const $workoutDetails: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  paddingHorizontal: spacing.lg,
+  paddingVertical: spacing.lg,
+})

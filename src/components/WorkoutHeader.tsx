@@ -4,7 +4,8 @@ import type { TextStyle } from "react-native"
 import { XMarkIcon } from "react-native-heroicons/outline"
 
 import { Text } from "@/components/Text"
-import { colors } from "@/theme/colors"
+import { useAppTheme } from "@/theme/context"
+import type { ThemedStyle } from "@/theme/types"
 
 interface WorkoutHeaderProps {
   title: string
@@ -12,39 +13,43 @@ interface WorkoutHeaderProps {
 }
 
 export const WorkoutHeader: FC<WorkoutHeaderProps> = ({ title, onClose }) => {
+  const { themed } = useAppTheme()
+
   return (
-    <View style={$header}>
-      <Text preset="heading" size="lg" style={$title}>
+    <View style={themed($header)}>
+      <Text preset="heading" size="lg" style={themed($title)}>
         {title}
       </Text>
-      <TouchableOpacity style={$closeButton} onPress={onClose}>
-        <XMarkIcon size={20} color={colors.text} />
+      <TouchableOpacity style={themed($closeButton)} onPress={onClose}>
+        <XMarkIcon size={20} color={themed($iconColor)} />
       </TouchableOpacity>
     </View>
   )
 }
 
 // Styles
-const $header: ViewStyle = {
+const $header: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
   flexDirection: "row",
   justifyContent: "space-between",
   alignItems: "center",
-  paddingHorizontal: 24,
-  paddingVertical: 20,
+  paddingHorizontal: spacing.lg,
+  paddingVertical: spacing.md,
   borderBottomWidth: 1,
   borderBottomColor: colors.border,
-}
+})
 
-const $title: TextStyle = {
+const $title: ThemedStyle<TextStyle> = ({ spacing }) => ({
   flex: 1,
-  marginRight: 16,
-}
+  marginRight: spacing.md,
+})
 
-const $closeButton: ViewStyle = {
+const $closeButton: ThemedStyle<ViewStyle> = ({ colors }) => ({
   width: 40,
   height: 40,
   borderRadius: 20,
   backgroundColor: colors.palette.neutral200,
   alignItems: "center",
   justifyContent: "center",
-}
+})
+
+const $iconColor: ThemedStyle<string> = ({ colors }) => colors.text

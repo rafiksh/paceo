@@ -3,7 +3,8 @@ import { View, ViewStyle } from "react-native"
 import type { TextStyle } from "react-native"
 
 import { Text } from "@/components/Text"
-import { colors } from "@/theme/colors"
+import { useAppTheme } from "@/theme/context"
+import type { ThemedStyle } from "@/theme/types"
 import {
   isCustomWorkout,
   isSingleGoalWorkout,
@@ -36,6 +37,7 @@ interface WorkoutDetailsSectionProps {
 }
 
 export const WorkoutDetailsSection: FC<WorkoutDetailsSectionProps> = ({ workoutType, workout }) => {
+  const { themed } = useAppTheme()
   // Helper function to render steps
   const renderSteps = (block: unknown) => {
     const blockObj = block as Record<string, unknown>
@@ -43,21 +45,21 @@ export const WorkoutDetailsSection: FC<WorkoutDetailsSectionProps> = ({ workoutT
     return steps?.map((step: unknown, stepIndex: number) => {
       const stepDisplay = getStepDisplay(step)
       return (
-        <View key={stepIndex} style={$stepCard}>
-          <View style={$stepContent}>
-            <Text preset="formLabel" size="sm" style={$stepDuration}>
+        <View key={stepIndex} style={themed($stepCard)}>
+          <View style={themed($stepContent)}>
+            <Text preset="formLabel" size="sm" style={themed($stepDuration)}>
               {stepDisplay.duration}
             </Text>
-            <Text preset="formHelper" size="xs" style={$stepPurpose}>
+            <Text preset="formHelper" size="xs" style={themed($stepPurpose)}>
               {stepDisplay.purpose}
             </Text>
           </View>
 
           {stepDisplay.alerts.length > 0 && (
-            <View style={$stepAlerts}>
+            <View style={themed($stepAlerts)}>
               {stepDisplay.alerts.map((alert, alertIndex) => (
-                <View key={alertIndex} style={$alertBadge}>
-                  <Text preset="formHelper" size="xs" style={$alertText}>
+                <View key={alertIndex} style={themed($alertBadge)}>
+                  <Text preset="formHelper" size="xs" style={themed($alertText)}>
                     {alert}
                   </Text>
                 </View>
@@ -70,12 +72,12 @@ export const WorkoutDetailsSection: FC<WorkoutDetailsSectionProps> = ({ workoutT
   }
 
   const renderGoalWorkout = () => (
-    <View style={$detailSection}>
-      <Text preset="subheading" style={$sectionTitle}>
+    <View style={themed($detailSection)}>
+      <Text preset="subheading" style={themed($sectionTitle)}>
         Goal Details
       </Text>
-      <View style={$goalCard}>
-        <Text preset="heading" size="xl" style={$goalValue}>
+      <View style={themed($goalCard)}>
+        <Text preset="heading" size="xl" style={themed($goalValue)}>
           {workout && typeof workout === "object" && "goal" in workout
             ? (() => {
                 const goalObj = (workout as Record<string, unknown>).goal as WorkoutGoal
@@ -90,7 +92,7 @@ export const WorkoutDetailsSection: FC<WorkoutDetailsSectionProps> = ({ workoutT
               })()
             : "No goal set"}
         </Text>
-        <Text preset="formHelper" style={$goalType}>
+        <Text preset="formHelper" style={themed($goalType)}>
           {workout && typeof workout === "object" && "goal" in workout
             ? (() => {
                 const goal = (workout as Record<string, unknown>).goal as WorkoutGoal
@@ -114,12 +116,12 @@ export const WorkoutDetailsSection: FC<WorkoutDetailsSectionProps> = ({ workoutT
   )
 
   const renderPacerWorkout = () => (
-    <View style={$detailSection}>
-      <Text preset="subheading" style={$sectionTitle}>
+    <View style={themed($detailSection)}>
+      <Text preset="subheading" style={themed($sectionTitle)}>
         Pace Details
       </Text>
-      <View style={$pacerCard}>
-        <View style={$pacerRow}>
+      <View style={themed($pacerCard)}>
+        <View style={themed($pacerRow)}>
           <Text preset="formLabel">Distance</Text>
           <Text preset="heading" size="md">
             {workout && typeof workout === "object" && "distance" in workout
@@ -130,7 +132,7 @@ export const WorkoutDetailsSection: FC<WorkoutDetailsSectionProps> = ({ workoutT
               : "No distance set"}
           </Text>
         </View>
-        <View style={$pacerRow}>
+        <View style={themed($pacerRow)}>
           <Text preset="formLabel">Time Target</Text>
           <Text preset="heading" size="md">
             {workout && typeof workout === "object" && "time" in workout
@@ -141,7 +143,7 @@ export const WorkoutDetailsSection: FC<WorkoutDetailsSectionProps> = ({ workoutT
               : "No time set"}
           </Text>
         </View>
-        <View style={$pacerRow}>
+        <View style={themed($pacerRow)}>
           <Text preset="formLabel">Required Pace</Text>
           <Text preset="heading" size="md">
             {workout && typeof workout === "object" && "distance" in workout && "time" in workout
@@ -167,33 +169,33 @@ export const WorkoutDetailsSection: FC<WorkoutDetailsSectionProps> = ({ workoutT
     const warmupGoal = customWorkout ? getGoalDisplay(customWorkout.warmup?.goal) : "No warmup"
 
     return (
-      <View style={$detailSection}>
-        <Text preset="subheading" style={$sectionTitle}>
+      <View style={themed($detailSection)}>
+        <Text preset="subheading" style={themed($sectionTitle)}>
           Workout Segments
         </Text>
 
         {/* Debug Info */}
-        <View style={$blockCard}>
-          <Text preset="heading" size="sm" style={$blockTitle}>
+        <View style={themed($blockCard)}>
+          <Text preset="heading" size="sm" style={themed($blockTitle)}>
             Debug Info
           </Text>
-          <Text preset="formHelper" style={$blockDescription}>
+          <Text preset="formHelper" style={themed($blockDescription)}>
             Blocks: {customWorkout?.blocks?.length || 0}
           </Text>
-          <Text preset="formHelper" style={$blockDescription}>
+          <Text preset="formHelper" style={themed($blockDescription)}>
             Has Warmup: {customWorkout?.warmup ? "Yes" : "No"}
           </Text>
-          <Text preset="formHelper" style={$blockDescription}>
+          <Text preset="formHelper" style={themed($blockDescription)}>
             Has Cooldown: {customWorkout?.cooldown ? "Yes" : "No"}
           </Text>
-          <Text preset="formHelper" style={$blockDescription}>
+          <Text preset="formHelper" style={themed($blockDescription)}>
             Warmup Goal: {warmupGoal}
           </Text>
-          <Text preset="formHelper" style={$blockDescription}>
+          <Text preset="formHelper" style={themed($blockDescription)}>
             First Block Steps: {customWorkout?.blocks?.[0]?.steps?.length || 0}
           </Text>
           {customWorkout?.blocks?.[0] && (
-            <Text preset="formHelper" style={$blockDescription}>
+            <Text preset="formHelper" style={themed($blockDescription)}>
               First Block Summary: {JSON.stringify(getBlockSummary(customWorkout.blocks[0]))}
             </Text>
           )}
@@ -201,32 +203,32 @@ export const WorkoutDetailsSection: FC<WorkoutDetailsSectionProps> = ({ workoutT
 
         {/* Warmup */}
         {customWorkout?.warmup && (
-          <View style={$blockCard}>
-            <View style={$blockHeader}>
-              <View style={$blockTitleContainer}>
-                <Text preset="heading" size="md" style={$blockTitle}>
+          <View style={themed($blockCard)}>
+            <View style={themed($blockHeader)}>
+              <View style={themed($blockTitleContainer)}>
+                <Text preset="heading" size="md" style={themed($blockTitle)}>
                   Warmup
                 </Text>
-                <View style={$warmupBadge}>
-                  <Text preset="formLabel" size="xs" style={$warmupBadgeText}>
+                <View style={themed($warmupBadge)}>
+                  <Text preset="formLabel" size="xs" style={themed($warmupBadgeText)}>
                     PREP
                   </Text>
                 </View>
               </View>
             </View>
-            <View style={$stepCard}>
-              <View style={$stepContent}>
-                <Text preset="formLabel" size="sm" style={$stepDuration}>
+            <View style={themed($stepCard)}>
+              <View style={themed($stepContent)}>
+                <Text preset="formLabel" size="sm" style={themed($stepDuration)}>
                   {getGoalDisplay(customWorkout.warmup?.goal)}
                 </Text>
-                <Text preset="formHelper" size="xs" style={$stepPurpose}>
+                <Text preset="formHelper" size="xs" style={themed($stepPurpose)}>
                   Preparation phase
                 </Text>
               </View>
               {customWorkout.warmup?.alert && (
-                <View style={$stepAlerts}>
-                  <View style={$alertBadge}>
-                    <Text preset="formHelper" size="xs" style={$alertText}>
+                <View style={themed($stepAlerts)}>
+                  <View style={themed($alertBadge)}>
+                    <Text preset="formHelper" size="xs" style={themed($alertText)}>
                       {getAlertDisplay(customWorkout.warmup.alert)}
                     </Text>
                   </View>
@@ -240,59 +242,59 @@ export const WorkoutDetailsSection: FC<WorkoutDetailsSectionProps> = ({ workoutT
         {customWorkout?.blocks?.map((block: unknown, blockIndex: number) => {
           const blockSummary = getBlockSummary(block)
           return (
-            <View key={blockIndex} style={$blockCard}>
+            <View key={blockIndex} style={themed($blockCard)}>
               {/* Block Header */}
-              <View style={$blockHeader}>
-                <View style={$blockTitleContainer}>
-                  <Text preset="heading" size="md" style={$blockTitle}>
+              <View style={themed($blockHeader)}>
+                <View style={themed($blockTitleContainer)}>
+                  <Text preset="heading" size="md" style={themed($blockTitle)}>
                     Block {blockIndex + 1}
                   </Text>
-                  <View style={$blockBadge}>
-                    <Text preset="formLabel" size="xs" style={$blockBadgeText}>
+                  <View style={themed($blockBadge)}>
+                    <Text preset="formLabel" size="xs" style={themed($blockBadgeText)}>
                       {blockSummary.iterations}x
                     </Text>
                   </View>
                 </View>
-                <Text preset="formHelper" style={$blockDescription}>
+                <Text preset="formHelper" style={themed($blockDescription)}>
                   {blockSummary.totalSteps} step{blockSummary.totalSteps !== 1 ? "s" : ""} •{" "}
                   {blockSummary.stepTypes.join(", ")}
                 </Text>
               </View>
 
               {/* Steps */}
-              <View style={$stepsContainer}>{renderSteps(block)}</View>
+              <View style={themed($stepsContainer)}>{renderSteps(block)}</View>
             </View>
           )
         })}
 
         {/* Cooldown */}
         {customWorkout?.cooldown && (
-          <View style={$blockCard}>
-            <View style={$blockHeader}>
-              <View style={$blockTitleContainer}>
-                <Text preset="heading" size="md" style={$blockTitle}>
+          <View style={themed($blockCard)}>
+            <View style={themed($blockHeader)}>
+              <View style={themed($blockTitleContainer)}>
+                <Text preset="heading" size="md" style={themed($blockTitle)}>
                   Cooldown
                 </Text>
-                <View style={$cooldownBadge}>
-                  <Text preset="formLabel" size="xs" style={$cooldownBadgeText}>
+                <View style={themed($cooldownBadge)}>
+                  <Text preset="formLabel" size="xs" style={themed($cooldownBadgeText)}>
                     COOL
                   </Text>
                 </View>
               </View>
             </View>
-            <View style={$stepCard}>
-              <View style={$stepContent}>
-                <Text preset="formLabel" size="sm" style={$stepDuration}>
+            <View style={themed($stepCard)}>
+              <View style={themed($stepContent)}>
+                <Text preset="formLabel" size="sm" style={themed($stepDuration)}>
                   {getGoalDisplay(customWorkout.cooldown?.goal)}
                 </Text>
-                <Text preset="formHelper" size="xs" style={$stepPurpose}>
+                <Text preset="formHelper" size="xs" style={themed($stepPurpose)}>
                   Recovery phase
                 </Text>
               </View>
               {customWorkout.cooldown?.alert && (
-                <View style={$stepAlerts}>
-                  <View style={$alertBadge}>
-                    <Text preset="formHelper" size="xs" style={$alertText}>
+                <View style={themed($stepAlerts)}>
+                  <View style={themed($alertBadge)}>
+                    <Text preset="formHelper" size="xs" style={themed($alertText)}>
                       {getAlertDisplay(customWorkout.cooldown.alert)}
                     </Text>
                   </View>
@@ -304,11 +306,11 @@ export const WorkoutDetailsSection: FC<WorkoutDetailsSectionProps> = ({ workoutT
 
         {/* Fallback when no data */}
         {!customWorkout?.blocks?.length && !customWorkout?.warmup && !customWorkout?.cooldown && (
-          <View style={$blockCard}>
-            <Text preset="heading" size="md" style={$blockTitle}>
+          <View style={themed($blockCard)}>
+            <Text preset="heading" size="md" style={themed($blockTitle)}>
               No Workout Data
             </Text>
-            <Text preset="formHelper" style={$blockDescription}>
+            <Text preset="formHelper" style={themed($blockDescription)}>
               This custom workout doesn&apos;t have detailed segments configured.
             </Text>
           </View>
@@ -330,53 +332,53 @@ export const WorkoutDetailsSection: FC<WorkoutDetailsSectionProps> = ({ workoutT
 }
 
 // Styles
-const $detailSection: ViewStyle = {
-  marginBottom: 24,
-}
+const $detailSection: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  marginBottom: spacing.lg,
+})
 
-const $sectionTitle: TextStyle = {
-  marginBottom: 12,
+const $sectionTitle: ThemedStyle<TextStyle> = ({ colors, spacing }) => ({
+  marginBottom: spacing.sm,
   color: colors.text,
-}
+})
 
-const $goalCard: ViewStyle = {
+const $goalCard: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
   backgroundColor: colors.palette.accent100,
-  padding: 20,
+  padding: spacing.lg,
   borderRadius: 12,
   alignItems: "center",
   borderWidth: 1,
   borderColor: colors.palette.accent200,
-}
+})
 
-const $goalValue: TextStyle = {
+const $goalValue: ThemedStyle<TextStyle> = ({ colors, spacing }) => ({
   color: colors.text,
-  marginBottom: 8,
-}
+  marginBottom: spacing.xs,
+})
 
-const $goalType: TextStyle = {
+const $goalType: ThemedStyle<TextStyle> = ({ colors }) => ({
   color: colors.textDim,
-}
+})
 
-const $pacerCard: ViewStyle = {
+const $pacerCard: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
   backgroundColor: colors.palette.secondary100,
-  padding: 16,
+  padding: spacing.md,
   borderRadius: 12,
   borderWidth: 1,
   borderColor: colors.palette.secondary200,
-}
+})
 
-const $pacerRow: ViewStyle = {
+const $pacerRow: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   flexDirection: "row",
   justifyContent: "space-between",
   alignItems: "center",
-  paddingVertical: 8,
-}
+  paddingVertical: spacing.xs,
+})
 
-const $blockCard: ViewStyle = {
+const $blockCard: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
   backgroundColor: colors.palette.neutral100,
-  padding: 20,
+  padding: spacing.lg,
   borderRadius: 16,
-  marginBottom: 16,
+  marginBottom: spacing.md,
   borderWidth: 1,
   borderColor: colors.border,
   shadowColor: colors.palette.neutral900,
@@ -384,113 +386,113 @@ const $blockCard: ViewStyle = {
   shadowOpacity: 0.05,
   shadowRadius: 8,
   elevation: 2,
-}
+})
 
-const $blockHeader: ViewStyle = {
-  marginBottom: 16,
-}
+const $blockHeader: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  marginBottom: spacing.md,
+})
 
-const $blockTitleContainer: ViewStyle = {
+const $blockTitleContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   flexDirection: "row",
   alignItems: "center",
   justifyContent: "space-between",
-  marginBottom: 8,
-}
+  marginBottom: spacing.xs,
+})
 
-const $blockTitle: TextStyle = {
+const $blockTitle: ThemedStyle<TextStyle> = ({ colors }) => ({
   fontSize: 18,
   fontWeight: "700",
   color: colors.text,
-}
+})
 
-const $blockBadge: ViewStyle = {
+const $blockBadge: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
   backgroundColor: colors.tint,
-  paddingHorizontal: 8,
+  paddingHorizontal: spacing.xs,
   paddingVertical: 4,
   borderRadius: 12,
-}
+})
 
-const $blockBadgeText: TextStyle = {
+const $blockBadgeText: ThemedStyle<TextStyle> = ({ colors }) => ({
   color: colors.palette.neutral100,
   fontWeight: "600",
-}
+})
 
-const $blockDescription: TextStyle = {
+const $blockDescription: ThemedStyle<TextStyle> = ({ colors }) => ({
   color: colors.textDim,
   fontSize: 14,
-}
+})
 
-const $stepsContainer: ViewStyle = {
-  gap: 16,
-}
+const $stepsContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  gap: spacing.md,
+})
 
-const $stepCard: ViewStyle = {
+const $stepCard: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
   backgroundColor: colors.palette.neutral200,
   borderRadius: 12,
-  padding: 16,
+  padding: spacing.md,
   borderWidth: 1,
   borderColor: colors.border,
   flex: 1,
-}
+})
 
-const $stepContent: ViewStyle = {
-  marginBottom: 8,
-}
+const $stepContent: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  marginBottom: spacing.xs,
+})
 
-const $stepDuration: TextStyle = {
+const $stepDuration: ThemedStyle<TextStyle> = ({ colors }) => ({
   color: colors.text,
   fontWeight: "600",
   fontSize: 16,
   marginBottom: 4,
-}
+})
 
-const $stepPurpose: TextStyle = {
+const $stepPurpose: ThemedStyle<TextStyle> = ({ colors }) => ({
   color: colors.textDim,
   fontSize: 12,
   textTransform: "capitalize",
-}
+})
 
-const $stepAlerts: ViewStyle = {
+const $stepAlerts: ThemedStyle<ViewStyle> = () => ({
   flexDirection: "row",
   flexWrap: "wrap",
   gap: 6,
-}
+})
 
-const $alertBadge: ViewStyle = {
+const $alertBadge: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
   backgroundColor: colors.palette.neutral300,
-  paddingHorizontal: 8,
+  paddingHorizontal: spacing.xs,
   paddingVertical: 4,
   borderRadius: 6,
   borderWidth: 1,
   borderColor: colors.palette.neutral400,
-}
+})
 
-const $alertText: TextStyle = {
+const $alertText: ThemedStyle<TextStyle> = ({ colors }) => ({
   color: colors.text,
   fontSize: 11,
   fontWeight: "500",
-}
+})
 
-const $warmupBadge: ViewStyle = {
+const $warmupBadge: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
   backgroundColor: colors.palette.accent500,
-  paddingHorizontal: 8,
+  paddingHorizontal: spacing.xs,
   paddingVertical: 4,
   borderRadius: 12,
-}
+})
 
-const $warmupBadgeText: TextStyle = {
+const $warmupBadgeText: ThemedStyle<TextStyle> = ({ colors }) => ({
   color: colors.palette.neutral100,
   fontWeight: "600",
-}
+})
 
-const $cooldownBadge: ViewStyle = {
+const $cooldownBadge: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
   backgroundColor: colors.palette.secondary500,
-  paddingHorizontal: 8,
+  paddingHorizontal: spacing.xs,
   paddingVertical: 4,
   borderRadius: 12,
-}
+})
 
-const $cooldownBadgeText: TextStyle = {
+const $cooldownBadgeText: ThemedStyle<TextStyle> = ({ colors }) => ({
   color: colors.palette.neutral100,
   fontWeight: "600",
-}
+})
