@@ -9,33 +9,102 @@ import type { ThemedStyle } from "@/theme/types"
 
 interface WorkoutHeaderProps {
   title: string
+  workoutType?: "goal" | "pacer" | "custom"
   onClose: () => void
 }
 
-export const WorkoutHeader: FC<WorkoutHeaderProps> = ({ title, onClose }) => {
-  const { themed } = useAppTheme()
+export const WorkoutHeader: FC<WorkoutHeaderProps> = ({ title, workoutType, onClose }) => {
+  const { themed, theme } = useAppTheme()
+
+  const typeLabel = (() => {
+    switch (workoutType) {
+      case "goal":
+        return "Goal"
+      case "pacer":
+        return "Pacer"
+      case "custom":
+        return "Custom"
+      default:
+        return undefined
+    }
+  })()
+
+  const pillColors = (() => {
+    switch (workoutType) {
+      case "goal":
+        return {
+          bg: theme.colors.palette.accent100,
+          border: theme.colors.palette.accent200,
+          text: theme.colors.text,
+        }
+      case "pacer":
+        return {
+          bg: theme.colors.palette.secondary100,
+          border: theme.colors.palette.secondary200,
+          text: theme.colors.text,
+        }
+      case "custom":
+        return {
+          bg: theme.colors.palette.primary100,
+          border: theme.colors.palette.primary200,
+          text: theme.colors.text,
+        }
+      default:
+        return undefined
+    }
+  })()
 
   return (
     <View style={themed($header)}>
-      <Text preset="heading" size="lg" style={themed($title)}>
-        {title}
-      </Text>
-      <TouchableOpacity style={themed($closeButton)} onPress={onClose}>
-        <XMarkIcon size={20} color={themed($iconColor)} />
-      </TouchableOpacity>
+      <View style={themed($titleRow)}>
+        <Text preset="heading" size="lg" style={themed($title)}>
+          {title}
+        </Text>
+        <TouchableOpacity style={themed($closeButton)} onPress={onClose}>
+          <XMarkIcon size={20} color={themed($iconColor)} />
+        </TouchableOpacity>
+      </View>
+
+      {typeLabel && pillColors && (
+        <View style={themed($metaRow)}>
+          <View
+            style={[
+              themed($typePill),
+              { backgroundColor: pillColors.bg, borderColor: pillColors.border },
+            ]}
+          >
+            <Text
+              preset="formLabel"
+              size="xs"
+              style={[themed($typePillText), { color: pillColors.text }]}
+            >
+              {typeLabel} workout
+            </Text>
+          </View>
+        </View>
+      )}
     </View>
   )
 }
 
 // Styles
 const $header: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
-  flexDirection: "row",
-  justifyContent: "space-between",
-  alignItems: "center",
   paddingHorizontal: spacing.lg,
   paddingVertical: spacing.md,
   borderBottomWidth: 1,
   borderBottomColor: colors.border,
+})
+
+const $titleRow: ThemedStyle<ViewStyle> = () => ({
+  flexDirection: "row",
+  justifyContent: "space-between",
+  alignItems: "center",
+})
+
+const $metaRow: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  marginTop: spacing.xs,
+  flexDirection: "row",
+  alignItems: "center",
 })
 
 const $title: ThemedStyle<TextStyle> = ({ spacing }) => ({
@@ -53,3 +122,14 @@ const $closeButton: ThemedStyle<ViewStyle> = ({ colors }) => ({
 })
 
 const $iconColor: ThemedStyle<string> = ({ colors }) => colors.text
+
+const $typePill: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  paddingHorizontal: spacing.xs,
+  paddingVertical: 4,
+  borderRadius: 999,
+  borderWidth: 1,
+})
+
+const $typePillText: ThemedStyle<TextStyle> = () => ({
+  fontWeight: "600",
+})

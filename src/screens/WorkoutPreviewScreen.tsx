@@ -1,11 +1,10 @@
 import { FC } from "react"
-import { View, ViewStyle } from "react-native"
+import { ScrollView, ViewStyle } from "react-native"
 
 import { Screen } from "@/components/Screen"
 import { WorkoutDetailsSection } from "@/components/WorkoutDetailsSection"
 import { WorkoutHeader } from "@/components/WorkoutHeader"
 import { WorkoutInfoSection } from "@/components/WorkoutInfoSection"
-import { WorkoutTypeSection } from "@/components/WorkoutTypeSection"
 import { type SavedWorkout } from "@/services/WorkoutStorage"
 import { useAppTheme } from "@/theme/context"
 import type { ThemedStyle } from "@/theme/types"
@@ -40,21 +39,19 @@ export const WorkoutPreviewScreen: FC<WorkoutPreviewScreenProps> = function Work
   return (
     <Screen
       style={themed($container)}
-      preset="scroll"
-      safeAreaEdges={["top"]}
+      preset="fixed"
       contentContainerStyle={themed($contentContainer)}
     >
-      <WorkoutHeader title={workout.name} onClose={onClose} />
+      <WorkoutHeader title={workout.name} workoutType={workoutPlan.type} onClose={onClose} />
 
-      <View style={themed($workoutDetails)}>
-        <WorkoutTypeSection workoutType={workoutPlan.type} />
+      <ScrollView contentContainerStyle={themed($workoutDetails)}>
         <WorkoutDetailsSection workoutType={workoutPlan.type} workout={workoutPlan.workout} />
         <WorkoutInfoSection
           activity={workout.activity}
           location={workout.location as "indoor" | "outdoor"}
           createdAt={workout.createdAt}
         />
-      </View>
+      </ScrollView>
     </Screen>
   )
 }

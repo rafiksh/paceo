@@ -143,7 +143,7 @@ const WorkoutCard: FC<WorkoutCardProps> = ({ workout, onPreview, onDelete, onBut
             style={themed($iconButton)}
             textStyle={themed($iconButtonText)}
           >
-            <EyeIcon size={18} color={themed($eyeIconColor)} />
+            <EyeIcon size={18} color={theme.colors.tint} />
           </Button>
           <Button
             preset="default"
@@ -473,5 +473,4 @@ const $emptyDescription: ThemedStyle<TextStyle> = ({ colors }) => ({
 const $emptyIconColor: ThemedStyle<string> = ({ colors }) => colors.palette.neutral400
 const $indoorIconColor: ThemedStyle<string> = ({ colors }) => colors.palette.secondary500
 const $outdoorIconColor: ThemedStyle<string> = ({ colors }) => colors.palette.accent500
-const $eyeIconColor: ThemedStyle<string> = ({ colors }) => colors.tint
 const $trashIconColor: ThemedStyle<string> = ({ colors }) => colors.palette.angry500
