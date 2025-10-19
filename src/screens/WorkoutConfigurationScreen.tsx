@@ -157,10 +157,14 @@ export const WorkoutConfigurationScreen: FC = function WorkoutConfigurationScree
     const savedWorkout = {
       id: WorkoutStorage.generateId(),
       name: name.trim(),
-      workoutPlan: workout,
+      workoutPlan:
+        workout.type === "custom"
+          ? { ...workout, workout: { ...workout.workout, displayName: name.trim() } }
+          : workout,
       createdAt: new Date(),
       activity: activity,
       location: location,
+      origin: "manual" as const,
     }
 
     await WorkoutStorage.saveWorkout(savedWorkout)
