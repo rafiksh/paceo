@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { Alert, View, ViewStyle, TextStyle } from "react-native"
+import { Alert, View, ViewStyle, TextStyle, ScrollView } from "react-native"
 import { useRouter } from "expo-router"
 import * as SecureStore from "expo-secure-store"
 
@@ -16,6 +16,7 @@ export default function AISetup() {
   const { themed } = useAppTheme()
   const [apiKey, setApiKey] = useState("")
   const [hasApiKey, setHasApiKey] = useState(false)
+  const [model, setModel] = useState<string>("gpt-5-nano")
 
   useEffect(() => {
     ;(async () => {
@@ -25,6 +26,8 @@ export default function AISetup() {
           setApiKey(savedKey)
           setHasApiKey(true)
         }
+        const savedModel = await SecureStore.getItemAsync("paceo_openai_model")
+        if (savedModel) setModel(savedModel)
       } catch {}
     })()
   }, [])
@@ -42,6 +45,7 @@ export default function AISetup() {
     }
     try {
       await SecureStore.setItemAsync("paceo_openai_key", apiKey.trim())
+      await SecureStore.setItemAsync("paceo_openai_model", model)
       setHasApiKey(true)
     } catch {
       Alert.alert("Error", "Failed to save API key")
@@ -57,7 +61,7 @@ export default function AISetup() {
         </Text>
       </View>
 
-      <View style={$apiKeySection}>
+      <ScrollView contentContainerStyle={themed($apiKeySection)}>
         <Text preset="subheading">OpenAI API Key</Text>
         <Text preset="formHelper">
           Enter your OpenAI API key to start chatting with our AI assistant. Your key is stored
@@ -67,6 +71,43 @@ export default function AISetup() {
         <TextField placeholder="sk-..." value={apiKey} onChangeText={setApiKey} secureTextEntry />
 
         <Button text="Save API Key" onPress={saveApiKey} />
+
+        <View style={$modelSection}>
+          <Text preset="subheading">Model</Text>
+          <Text preset="formHelper" size="sm" style={$modelHint}>
+            Choose the model used for responses
+          </Text>
+          <View style={$modelRow}>
+            {(
+              [
+                "gpt-5",
+                "gpt-5-mini",
+                "gpt-5-nano",
+                "gpt-4.1",
+                "gpt-4.1-mini",
+                "gpt-4o",
+                "gpt-4o-mini",
+                "gpt-3.5-turbo",
+              ] as const
+            ).map((m) => (
+              <Button
+                key={m}
+                preset={model === m ? "filled" : "default"}
+                onPress={async () => {
+                  setModel(m)
+                  try {
+                    await SecureStore.setItemAsync("paceo_openai_model", m)
+                  } catch {}
+                }}
+                style={$modelChip}
+              >
+                <Text preset="default" size="xs">
+                  {m}
+                </Text>
+              </Button>
+            ))}
+          </View>
+        </View>
 
         <View style={$infoSection}>
           <Text preset="subheading">How to get your API key:</Text>
@@ -86,7 +127,7 @@ export default function AISetup() {
             5. Copy and paste it here
           </Text>
         </View>
-      </View>
+      </ScrollView>
     </Screen>
   )
 }
@@ -107,4 +148,25 @@ const $apiKeySection: ViewStyle = {
 
 const $infoSection: ViewStyle = {
   gap: spacing.xs,
+}
+
+const $modelSection: ViewStyle = {
+  marginTop: spacing.md,
+  gap: spacing.xs,
+}
+
+const $modelHint: TextStyle = {
+  opacity: 0.8,
+}
+
+const $modelRow: ViewStyle = {
+  flexDirection: "row",
+  flexWrap: "wrap",
+  gap: 8,
+}
+
+const $modelChip: ViewStyle = {
+  borderRadius: 16,
+  paddingVertical: 6,
+  paddingHorizontal: 12,
 }

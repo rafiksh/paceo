@@ -84,6 +84,7 @@ const AIConversation: FC = () => {
     setIsLoading(true)
 
     try {
+      const model = (await SecureStore.getItemAsync("paceo_openai_model")) || "gpt-5-nano"
       const openai = new OpenAI({ apiKey, dangerouslyAllowBrowser: true })
 
       const isWorkoutRequest =
@@ -107,7 +108,7 @@ const AIConversation: FC = () => {
         : inputText.trim()
 
       const response = await openai.chat.completions.create({
-        model: "gpt-3.5-turbo",
+        model,
         messages: [
           { role: "system", content: systemPrompt },
           ...messages.map((m) => ({ role: m.role, content: m.content })),
