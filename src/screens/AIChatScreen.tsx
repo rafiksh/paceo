@@ -1,13 +1,5 @@
 import { FC, useState, useRef, useEffect } from "react"
-import {
-  View,
-  ViewStyle,
-  ScrollView,
-  Alert,
-  KeyboardAvoidingView,
-  Platform,
-  TextStyle,
-} from "react-native"
+import { View, ViewStyle, ScrollView, Alert, TextStyle } from "react-native"
 import * as SecureStore from "expo-secure-store"
 import OpenAI from "openai"
 import { ChatBubbleLeftRightIcon } from "react-native-heroicons/outline"
@@ -219,8 +211,8 @@ export const AIChatScreen: FC = () => {
 
   if (!hasApiKey) {
     return (
-      <Screen style={$root} preset="scroll" safeAreaEdges={["top"]}>
-        <View style={$container}>
+      <Screen preset="fixed" safeAreaEdges={["top"]}>
+        <View style={$headerContainer}>
           <View style={$header}>
             <ChatBubbleLeftRightIcon size={32} color={colors.tint} />
             <View style={$titleContainer}>
@@ -278,124 +270,119 @@ export const AIChatScreen: FC = () => {
   }
 
   return (
-    <Screen style={$root} preset="scroll">
+    <Screen preset="fixed" contentContainerStyle={$container} safeAreaEdges={["top"]}>
       <View style={$header}>
-        <ChatBubbleLeftRightIcon size={24} color={colors.tint} />
         <Text preset="subheading" size="lg">
           AI Assistant
         </Text>
-        <Button text="Clear" onPress={clearChat} style={$clearButton} />
+        <View style={$headerActions}>
+          <Button text="Clear" onPress={clearChat} preset="filled" />
+          <Button text="Reset API Key" onPress={resetApiKey} preset="reversed" />
+        </View>
       </View>
 
-      <KeyboardAvoidingView
-        style={$keyboardAvoidingView}
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
+      <ScrollView
+        ref={scrollViewRef}
+        style={$messagesContainer}
+        contentContainerStyle={$messagesContent}
+        onContentSizeChange={() => scrollViewRef.current?.scrollToEnd({ animated: true })}
       >
-        <ScrollView
-          ref={scrollViewRef}
-          style={$messagesContainer}
-          contentContainerStyle={$messagesContent}
-          onContentSizeChange={() => scrollViewRef.current?.scrollToEnd({ animated: true })}
-        >
-          {messages.length === 0 ? (
-            <View style={$emptyState}>
-              <ChatBubbleLeftRightIcon size={48} color={colors.textDim} />
-              <Text preset="subheading" size="lg">
-                Start a conversation
-              </Text>
-              <Text preset="formHelper" size="sm" style={$emptySubtitle}>
-                Ask me anything about fitness, workouts, or health!
-              </Text>
-            </View>
-          ) : (
-            messages.map((message) => (
-              <View
-                key={message.id}
-                style={[
-                  $messageContainer,
-                  message.role === "user" ? $userMessage : $assistantMessage,
-                ]}
-              >
-                <Text preset="default" size="sm">
-                  {message.content}
-                </Text>
-                <Text preset="formHelper" size="xxs" style={$messageTime}>
-                  {message.timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                </Text>
-              </View>
-            ))
-          )}
-
-          {isLoading && (
-            <View style={[$messageContainer, $assistantMessage]}>
+        {messages.length === 0 ? (
+          <View style={$emptyState}>
+            <ChatBubbleLeftRightIcon size={48} color={colors.textDim} />
+            <Text preset="subheading" size="lg">
+              Start a conversation
+            </Text>
+            <Text preset="formHelper" size="sm" style={$emptySubtitle}>
+              Ask me anything about fitness, workouts, or health!
+            </Text>
+          </View>
+        ) : (
+          messages.map((message) => (
+            <View
+              key={message.id}
+              style={[
+                $messageContainer,
+                message.role === "user" ? $userMessage : $assistantMessage,
+              ]}
+            >
               <Text preset="default" size="sm">
-                Thinking...
+                {message.content}
+              </Text>
+              <Text preset="formHelper" size="xxs" style={$messageTime}>
+                {message.timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
               </Text>
             </View>
-          )}
+          ))
+        )}
 
-          {/* Workout Confirmation */}
-          {pendingWorkout && (
-            <View style={$workoutConfirmation}>
-              <Text preset="bold" size="lg" style={$workoutTitle}>
-                🎯 Workout Created!
-              </Text>
-              <Text preset="subheading" size="md" style={$workoutName}>
-                {pendingWorkout.name}
-              </Text>
-              <Text preset="formHelper" size="sm" style={$workoutDetails}>
-                {pendingWorkout.activity} • {pendingWorkout.location}
-              </Text>
-              <View style={$workoutActions}>
-                <Button text="Save Workout" onPress={saveWorkout} style={$saveWorkoutButton} />
-                <Button text="Dismiss" onPress={dismissWorkout} style={$dismissButton} />
-              </View>
-            </View>
-          )}
-        </ScrollView>
+        {isLoading && (
+          <View style={[$messageContainer, $assistantMessage]}>
+            <Text preset="default" size="sm">
+              Thinking...
+            </Text>
+          </View>
+        )}
 
-        <View style={$inputContainer}>
-          <View style={$inputRow}>
-            <View style={$messageInput}>
-              <TextField
-                placeholder="Ask me anything about fitness..."
-                value={inputText}
-                onChangeText={setInputText}
-                multiline
-                maxLength={500}
-              />
+        {/* Workout Confirmation */}
+        {pendingWorkout && (
+          <View style={$workoutConfirmation}>
+            <Text preset="bold" size="lg" style={$workoutTitle}>
+              🎯 Workout Created!
+            </Text>
+            <Text preset="subheading" size="md" style={$workoutName}>
+              {pendingWorkout.name}
+            </Text>
+            <Text preset="formHelper" size="sm" style={$workoutDetails}>
+              {pendingWorkout.activity} • {pendingWorkout.location}
+            </Text>
+            <View style={$workoutActions}>
+              <Button text="Save Workout" onPress={saveWorkout} style={$saveWorkoutButton} />
+              <Button text="Dismiss" onPress={dismissWorkout} style={$dismissButton} />
             </View>
-            <Button
-              text="Send"
-              onPress={sendMessage}
-              disabled={!inputText.trim() || isLoading}
-              style={$sendButton}
+          </View>
+        )}
+      </ScrollView>
+
+      <View style={$inputContainer}>
+        <View style={$inputRow}>
+          <View style={$messageInput}>
+            <TextField
+              placeholder="Ask me anything about fitness..."
+              value={inputText}
+              onChangeText={setInputText}
+              maxLength={500}
+              RightAccessory={() => (
+                <Button
+                  text="Send"
+                  onPress={sendMessage}
+                  disabled={!inputText.trim() || isLoading}
+                  preset="ghost"
+                  style={$sendButton}
+                />
+              )}
             />
           </View>
         </View>
-      </KeyboardAvoidingView>
-
-      <View style={$footer}>
-        <Button text="Reset API Key" onPress={resetApiKey} style={$resetButton} />
       </View>
     </Screen>
   )
 }
 
-// Styles
-const $root: ViewStyle = {
-  flex: 1,
-  backgroundColor: colors.background,
-}
-
-const $keyboardAvoidingView: ViewStyle = {
-  flex: 1,
-  flexDirection: "column",
-}
-
 const $container: ViewStyle = {
   flex: 1,
+}
+
+const $headerContainer: ViewStyle = {
+  flex: 1,
   padding: 20,
+}
+
+const $headerActions: ViewStyle = {
+  flexDirection: "row",
+  alignItems: "center",
+  justifyContent: "space-between",
+  gap: 12,
 }
 
 const $header: ViewStyle = {
@@ -442,21 +429,16 @@ const $infoText: TextStyle = {
   marginBottom: 4,
 }
 
-const $clearButton: ViewStyle = {
-  backgroundColor: colors.background,
-  borderWidth: 1,
-  borderColor: colors.border,
-}
-
 const $messagesContainer: ViewStyle = {
   flex: 1,
   paddingHorizontal: 20,
-  flexGrow: 1,
 }
 
 const $messagesContent: ViewStyle = {
   paddingVertical: 16,
   paddingBottom: 20,
+  flexGrow: 1,
+  flex: 1,
 }
 
 const $emptyState: ViewStyle = {
@@ -513,23 +495,6 @@ const $messageInput: ViewStyle = {
   maxHeight: 120,
 }
 
-const $sendButton: ViewStyle = {
-  minWidth: 80,
-}
-
-const $footer: ViewStyle = {
-  padding: 20,
-  borderTopWidth: 1,
-  borderTopColor: colors.border,
-  backgroundColor: colors.background,
-}
-
-const $resetButton: ViewStyle = {
-  backgroundColor: colors.background,
-  borderWidth: 1,
-  borderColor: colors.border,
-}
-
 // Workout Confirmation Styles
 const $workoutConfirmation: ViewStyle = {
   marginHorizontal: 20,
@@ -578,4 +543,11 @@ const $dismissButton: ViewStyle = {
   backgroundColor: "transparent",
   borderWidth: 1,
   borderColor: colors.palette.neutral100,
+}
+
+const $sendButton: ViewStyle = {
+  minWidth: 80,
+  height: "100%",
+  alignItems: "center",
+  justifyContent: "center",
 }
