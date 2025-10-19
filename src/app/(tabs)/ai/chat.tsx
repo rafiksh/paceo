@@ -161,6 +161,7 @@ const AIConversation: FC = () => {
         createdAt: new Date(),
         activity: pendingWorkout.activity,
         location: pendingWorkout.location,
+        origin: "ai" as const,
       }
       await WorkoutStorage.saveWorkout(savedWorkout)
       setPendingWorkout(null)

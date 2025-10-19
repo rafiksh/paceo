@@ -10,6 +10,7 @@ export interface SavedWorkout {
   createdAt: Date
   activity: string
   location: string
+  origin: "ai" | "manual"
 }
 
 export class WorkoutStorage {
@@ -33,7 +34,8 @@ export class WorkoutStorage {
       // Convert createdAt strings back to Date objects
       return workouts.map((workout: Record<string, unknown>) => ({
         ...workout,
-        createdAt: new Date(workout.createdAt),
+        createdAt: new Date(workout.createdAt as string),
+        origin: (workout.origin as "ai" | "manual" | undefined) ?? "manual",
       }))
     } catch (error) {
       console.error("Error loading workouts:", error)

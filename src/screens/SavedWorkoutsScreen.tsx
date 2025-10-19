@@ -3,7 +3,14 @@ import { View, ViewStyle, ScrollView, Alert } from "react-native"
 import type { TextStyle } from "react-native"
 import { router, useFocusEffect } from "expo-router"
 import { PreviewWorkoutButton } from "expo-workoutkit"
-import { TrashIcon, HeartIcon, EyeIcon, SunIcon, HomeIcon } from "react-native-heroicons/outline"
+import {
+  TrashIcon,
+  HeartIcon,
+  EyeIcon,
+  SunIcon,
+  HomeIcon,
+  SparklesIcon,
+} from "react-native-heroicons/outline"
 
 import { Badge } from "@/components/Badge"
 import { Button } from "@/components/Button"
@@ -137,9 +144,14 @@ const WorkoutCard: FC<WorkoutCardProps> = ({ workout, onPreview, onDelete, onBut
       <View style={themed($cardTopRow)}>
         {/* Workout Info */}
         <View style={themed($workoutInfo)}>
-          <Text preset="heading" size="sm" style={themed($workoutName)}>
-            {workout.name}
-          </Text>
+          <View style={themed($titleRow)}>
+            <Text preset="heading" size="sm" style={themed($workoutName)}>
+              {workout.name}
+            </Text>
+            {workout.origin === "ai" ? (
+              <SparklesIcon size={14} color={theme.colors.palette.accent500} />
+            ) : null}
+          </View>
           <Text preset="formHelper" size="xs" style={themed($workoutDescription)}>
             {getWorkoutSummary(workout.workoutPlan)}
           </Text>
@@ -344,6 +356,12 @@ const $workoutInfo: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   flex: 1,
   marginRight: spacing.md,
   paddingTop: 2,
+})
+
+const $titleRow: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  flexDirection: "row",
+  alignItems: "center",
+  gap: spacing.xs,
 })
 
 const $workoutName: ThemedStyle<TextStyle> = ({ colors }) => ({
