@@ -166,40 +166,12 @@ export const WorkoutDetailsSection: FC<WorkoutDetailsSectionProps> = ({ workoutT
 
   const renderCustomWorkout = () => {
     const customWorkout = isCustomWorkout(workout) ? workout : null
-    const warmupGoal = customWorkout ? getGoalDisplay(customWorkout.warmup?.goal) : "No warmup"
 
     return (
       <View style={themed($detailSection)}>
         <Text preset="subheading" style={themed($sectionTitle)}>
           Workout Segments
         </Text>
-
-        {/* Debug Info */}
-        <View style={themed($blockCard)}>
-          <Text preset="heading" size="sm" style={themed($blockTitle)}>
-            Debug Info
-          </Text>
-          <Text preset="formHelper" style={themed($blockDescription)}>
-            Blocks: {customWorkout?.blocks?.length || 0}
-          </Text>
-          <Text preset="formHelper" style={themed($blockDescription)}>
-            Has Warmup: {customWorkout?.warmup ? "Yes" : "No"}
-          </Text>
-          <Text preset="formHelper" style={themed($blockDescription)}>
-            Has Cooldown: {customWorkout?.cooldown ? "Yes" : "No"}
-          </Text>
-          <Text preset="formHelper" style={themed($blockDescription)}>
-            Warmup Goal: {warmupGoal}
-          </Text>
-          <Text preset="formHelper" style={themed($blockDescription)}>
-            First Block Steps: {customWorkout?.blocks?.[0]?.steps?.length || 0}
-          </Text>
-          {customWorkout?.blocks?.[0] && (
-            <Text preset="formHelper" style={themed($blockDescription)}>
-              First Block Summary: {JSON.stringify(getBlockSummary(customWorkout.blocks[0]))}
-            </Text>
-          )}
-        </View>
 
         {/* Warmup */}
         {customWorkout?.warmup && (
