@@ -42,11 +42,11 @@ const LoadingState: FC = () => {
 
 // EmptyState Component
 const EmptyState: FC = () => {
-  const { themed } = useAppTheme()
+  const { themed, theme } = useAppTheme()
   return (
     <View style={themed($emptyState)}>
       <View style={themed($emptyIconContainer)}>
-        <HeartIcon size={40} color={themed($emptyIconColor)} />
+        <HeartIcon size={40} color={theme.colors.palette.neutral400} />
       </View>
       <Text preset="heading" size="md" style={themed($emptyTitle)}>
         No Saved Workouts
@@ -68,6 +68,35 @@ interface WorkoutCardProps {
 
 const WorkoutCard: FC<WorkoutCardProps> = ({ workout, onPreview, onDelete, onButtonPress }) => {
   const { themed, theme } = useAppTheme()
+  const getTypeBadge = (
+    workoutPlan: unknown,
+  ): { label: string; bg: string; border: string } | null => {
+    if (!workoutPlan || typeof workoutPlan !== "object") return null
+    const plan = workoutPlan as Record<string, unknown>
+    const t = plan.type as string | undefined
+    switch (t) {
+      case "goal":
+        return {
+          label: "Simple",
+          bg: theme.colors.palette.accent100,
+          border: theme.colors.palette.accent200,
+        }
+      case "pacer":
+        return {
+          label: "Pacer",
+          bg: theme.colors.palette.secondary100,
+          border: theme.colors.palette.secondary200,
+        }
+      case "custom":
+        return {
+          label: "Custom",
+          bg: theme.colors.palette.primary100,
+          border: theme.colors.palette.primary200,
+        }
+      default:
+        return null
+    }
+  }
   const getWorkoutSummary = (workoutPlan: unknown): string => {
     if (!workoutPlan || typeof workoutPlan !== "object") {
       return "Workout Plan"
@@ -111,8 +140,8 @@ const WorkoutCard: FC<WorkoutCardProps> = ({ workout, onPreview, onDelete, onBut
   }
 
   return (
-    <View>
-      <View style={themed($workoutCard)}>
+    <View style={themed($workoutCard)}>
+      <View style={themed($cardTopRow)}>
         {/* Workout Info */}
         <View style={themed($workoutInfo)}>
           <Text preset="heading" size="sm" style={themed($workoutName)}>
@@ -124,14 +153,27 @@ const WorkoutCard: FC<WorkoutCardProps> = ({ workout, onPreview, onDelete, onBut
           <View style={themed($workoutMeta)}>
             <View style={themed($metaItem)}>
               {workout.location === "indoor" ? (
-                <HomeIcon size={12} color={themed($indoorIconColor)} />
+                <HomeIcon size={12} color={theme.colors.palette.secondary500} />
               ) : (
-                <SunIcon size={12} color={themed($outdoorIconColor)} />
+                <SunIcon size={12} color={theme.colors.palette.accent500} />
               )}
               <Text preset="formHelper" size="xxs" style={themed($metaText)}>
                 {workout.location === "indoor" ? "Indoor" : "Outdoor"}
               </Text>
             </View>
+            {(() => {
+              const tb = getTypeBadge(workout.workoutPlan)
+              if (!tb) return null
+              return (
+                <View
+                  style={[themed($typeBadge), { backgroundColor: tb.bg, borderColor: tb.border }]}
+                >
+                  <Text preset="formLabel" size="xxs" style={themed($typeBadgeText)}>
+                    {tb.label}
+                  </Text>
+                </View>
+              )
+            })()}
           </View>
         </View>
 
@@ -151,17 +193,17 @@ const WorkoutCard: FC<WorkoutCardProps> = ({ workout, onPreview, onDelete, onBut
             style={themed($deleteIconButton)}
             textStyle={themed($iconButtonText)}
           >
-            <TrashIcon size={18} color={themed($trashIconColor)} />
+            <TrashIcon size={18} color={theme.colors.error} />
           </Button>
         </View>
       </View>
 
-      {/* Workout Preview */}
-      <View style={themed($workoutPreview)}>
+      {/* Footer Button inside card */}
+      <View style={themed($cardFooter)}>
         <PreviewWorkoutButton
           workoutPlan={workout.workoutPlan}
           onButtonPress={({ nativeEvent }) => onButtonPress(nativeEvent.message)}
-          label="Start Workout"
+          label="Send workout to ⌚"
           buttonColor={theme.colors.tint}
           textColor={theme.colors.palette.neutral100}
           cornerRadius={12}
@@ -288,9 +330,9 @@ const $workoutsList: ThemedStyle<ViewStyle> = ({ spacing }) => ({
 })
 
 const $workoutCard: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
-  flexDirection: "row",
-  alignItems: "flex-start",
-  justifyContent: "space-between",
+  flexDirection: "column",
+  alignItems: "stretch",
+  justifyContent: "flex-start",
   backgroundColor: colors.palette.neutral100,
   padding: spacing.lg,
   borderRadius: 16,
@@ -301,6 +343,13 @@ const $workoutCard: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
   shadowOpacity: 0.08,
   shadowRadius: 8,
   elevation: 3,
+})
+
+const $cardTopRow: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  flexDirection: "row",
+  alignItems: "flex-start",
+  justifyContent: "space-between",
+  gap: spacing.md,
 })
 
 const $workoutInfo: ThemedStyle<ViewStyle> = ({ spacing }) => ({
@@ -323,14 +372,27 @@ const $workoutDescription: ThemedStyle<TextStyle> = ({ colors, spacing }) => ({
 
 const $workoutMeta: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   flexDirection: "row",
-  gap: spacing.md,
+  gap: spacing.sm,
   alignItems: "center",
+  flexWrap: "wrap",
 })
 
 const $metaItem: ThemedStyle<ViewStyle> = () => ({
   flexDirection: "row",
   alignItems: "center",
   gap: 4,
+})
+
+const $typeBadge: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  paddingHorizontal: spacing.xs,
+  paddingVertical: 2,
+  borderRadius: 10,
+  borderWidth: 1,
+})
+
+const $typeBadgeText: ThemedStyle<TextStyle> = ({ colors }) => ({
+  color: colors.text,
+  fontWeight: "600",
 })
 
 const $metaText: ThemedStyle<TextStyle> = ({ colors }) => ({
@@ -383,11 +445,15 @@ const $iconButtonText: TextStyle = {
 const $startWorkoutButton: ThemedStyle<ViewStyle> = () => ({
   height: 56,
   borderRadius: 12,
+  width: "100%",
+  marginHorizontal: 0,
 })
 
-const $workoutPreview: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+const $cardFooter: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
   marginTop: spacing.md,
-  paddingHorizontal: 4,
+  paddingTop: spacing.sm,
+  borderTopWidth: 1,
+  borderTopColor: colors.border,
 })
 
 // Loading States
@@ -466,9 +532,3 @@ const $emptyDescription: ThemedStyle<TextStyle> = ({ colors }) => ({
   textAlign: "center",
   lineHeight: 20,
 })
-
-// Color helpers
-const $emptyIconColor: ThemedStyle<string> = ({ colors }) => colors.palette.neutral400
-const $indoorIconColor: ThemedStyle<string> = ({ colors }) => colors.palette.secondary500
-const $outdoorIconColor: ThemedStyle<string> = ({ colors }) => colors.palette.accent500
-const $trashIconColor: ThemedStyle<string> = ({ colors }) => colors.palette.angry500
