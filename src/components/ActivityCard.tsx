@@ -3,7 +3,8 @@ import { View, ViewStyle, TouchableOpacity } from "react-native"
 import type { TextStyle } from "react-native"
 
 import { Text } from "@/components/Text"
-import { colors } from "@/theme/colors"
+import { useAppTheme } from "@/theme/context"
+import type { ThemedStyle } from "@/theme/types"
 
 export interface Activity {
   value: string
@@ -19,17 +20,19 @@ interface ActivityCardProps {
 }
 
 export const ActivityCard: FC<ActivityCardProps> = ({ activity, isSelected, onPress }) => {
+  const { themed } = useAppTheme()
+
   return (
     <TouchableOpacity
-      style={[$activityCard, isSelected && $activityCardSelected]}
+      style={[themed($activityCard), isSelected && themed($activityCardSelected)]}
       onPress={onPress}
     >
-      <View style={[$activityIconContainer, { backgroundColor: activity.color }]}>
+      <View style={[themed($activityIconContainer), { backgroundColor: activity.color }]}>
         <Text preset="default" size="lg">
           {activity.icon}
         </Text>
       </View>
-      <Text preset="formLabel" size="xs" style={isSelected && $activityLabelSelected}>
+      <Text preset="formLabel" size="xs" style={isSelected && themed($activityLabelSelected)}>
         {activity.label}
       </Text>
     </TouchableOpacity>
@@ -37,30 +40,30 @@ export const ActivityCard: FC<ActivityCardProps> = ({ activity, isSelected, onPr
 }
 
 // Styles
-const $activityCard: ViewStyle = {
+const $activityCard: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
   alignItems: "center",
-  padding: 16,
+  padding: spacing.md,
   backgroundColor: colors.palette.neutral100,
   borderRadius: 12,
   borderWidth: 2,
   borderColor: colors.border,
   minWidth: 100,
-}
+})
 
-const $activityCardSelected: ViewStyle = {
+const $activityCardSelected: ThemedStyle<ViewStyle> = ({ colors }) => ({
   backgroundColor: colors.palette.neutral900,
   borderColor: colors.palette.neutral900,
-}
+})
 
-const $activityIconContainer: ViewStyle = {
+const $activityIconContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   width: 40,
   height: 40,
   borderRadius: 20,
   alignItems: "center",
   justifyContent: "center",
-  marginBottom: 8,
-}
+  marginBottom: spacing.xs,
+})
 
-const $activityLabelSelected: TextStyle = {
+const $activityLabelSelected: ThemedStyle<TextStyle> = ({ colors }) => ({
   color: colors.palette.neutral100,
-}
+})
