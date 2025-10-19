@@ -10,8 +10,7 @@ import { Screen } from "@/components/Screen"
 import { Text } from "@/components/Text"
 import { useAppTheme } from "@/theme/context"
 
-// Activity categories
-const ACTIVITY_CATEGORIES = {
+export const ACTIVITY_CATEGORIES = {
   cardio: [
     { value: "running", label: "Running", icon: "🏃‍♂️", color: "#FF6B6B" },
     { value: "cycling", label: "Cycling", icon: "🚴‍♂️", color: "#4ECDC4" },
@@ -31,6 +30,16 @@ const ACTIVITY_CATEGORIES = {
     { value: "soccer", label: "Soccer", icon: "⚽", color: "#00B894" },
     { value: "boxing", label: "Boxing", icon: "🥊", color: "#E17055" },
   ],
+}
+
+export const getActivityEmoji = (activity: string) => {
+  const activityCategory = Object.values(ACTIVITY_CATEGORIES).find((category) =>
+    category.some((a) => a.value === activity),
+  )
+  const activityIcon = activityCategory?.find((a) => a.value === activity)?.icon
+  if (!activityIcon) return "🏃‍♂️‍➡️"
+
+  return activityIcon
 }
 
 export const ActivitySelectionScreen: FC = function ActivitySelectionScreen() {

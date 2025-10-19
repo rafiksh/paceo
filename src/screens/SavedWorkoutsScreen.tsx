@@ -3,14 +3,17 @@ import { View, ViewStyle, ScrollView, Alert } from "react-native"
 import type { TextStyle } from "react-native"
 import { router, useFocusEffect } from "expo-router"
 import { PreviewWorkoutButton } from "expo-workoutkit"
-import { TrashIcon, HeartIcon, HomeIcon, SunIcon, EyeIcon } from "react-native-heroicons/outline"
+import { TrashIcon, HeartIcon, EyeIcon, SunIcon, HomeIcon } from "react-native-heroicons/outline"
 
+import { Badge } from "@/components/Badge"
 import { Button } from "@/components/Button"
 import { Screen } from "@/components/Screen"
 import { Text } from "@/components/Text"
 import { WorkoutStorage, type SavedWorkout } from "@/services/WorkoutStorage"
 import { useAppTheme } from "@/theme/context"
 import type { ThemedStyle } from "@/theme/types"
+
+import { getActivityEmoji } from "./ActivitySelectionScreen"
 
 // LoadingState Component
 const LoadingState: FC = () => {
@@ -68,35 +71,25 @@ interface WorkoutCardProps {
 
 const WorkoutCard: FC<WorkoutCardProps> = ({ workout, onPreview, onDelete, onButtonPress }) => {
   const { themed, theme } = useAppTheme()
-  const getTypeBadge = (
+  const activityEmoji = getActivityEmoji(workout.activity)
+  const getPlanBadge = (
     workoutPlan: unknown,
-  ): { label: string; bg: string; border: string } | null => {
+  ): { label: string; variant: "primary" | "secondary" | "accent" | "neutral" } | null => {
     if (!workoutPlan || typeof workoutPlan !== "object") return null
     const plan = workoutPlan as Record<string, unknown>
     const t = plan.type as string | undefined
     switch (t) {
       case "goal":
-        return {
-          label: "Simple",
-          bg: theme.colors.palette.accent100,
-          border: theme.colors.palette.accent200,
-        }
+        return { label: "Simple", variant: "accent" }
       case "pacer":
-        return {
-          label: "Pacer",
-          bg: theme.colors.palette.secondary100,
-          border: theme.colors.palette.secondary200,
-        }
+        return { label: "Pacer", variant: "secondary" }
       case "custom":
-        return {
-          label: "Custom",
-          bg: theme.colors.palette.primary100,
-          border: theme.colors.palette.primary200,
-        }
+        return { label: "Custom", variant: "primary" }
       default:
         return null
     }
   }
+
   const getWorkoutSummary = (workoutPlan: unknown): string => {
     if (!workoutPlan || typeof workoutPlan !== "object") {
       return "Workout Plan"
@@ -150,31 +143,6 @@ const WorkoutCard: FC<WorkoutCardProps> = ({ workout, onPreview, onDelete, onBut
           <Text preset="formHelper" size="xs" style={themed($workoutDescription)}>
             {getWorkoutSummary(workout.workoutPlan)}
           </Text>
-          <View style={themed($workoutMeta)}>
-            <View style={themed($metaItem)}>
-              {workout.location === "indoor" ? (
-                <HomeIcon size={12} color={theme.colors.palette.secondary500} />
-              ) : (
-                <SunIcon size={12} color={theme.colors.palette.accent500} />
-              )}
-              <Text preset="formHelper" size="xxs" style={themed($metaText)}>
-                {workout.location === "indoor" ? "Indoor" : "Outdoor"}
-              </Text>
-            </View>
-            {(() => {
-              const tb = getTypeBadge(workout.workoutPlan)
-              if (!tb) return null
-              return (
-                <View
-                  style={[themed($typeBadge), { backgroundColor: tb.bg, borderColor: tb.border }]}
-                >
-                  <Text preset="formLabel" size="xxs" style={themed($typeBadgeText)}>
-                    {tb.label}
-                  </Text>
-                </View>
-              )
-            })()}
-          </View>
         </View>
 
         {/* Action Buttons */}
@@ -195,6 +163,26 @@ const WorkoutCard: FC<WorkoutCardProps> = ({ workout, onPreview, onDelete, onBut
           >
             <TrashIcon size={18} color={theme.colors.error} />
           </Button>
+        </View>
+      </View>
+
+      <View style={themed($workoutMeta)}>
+        <Badge label={activityEmoji} size="sm" variant="neutral" />
+        {(() => {
+          const plan = getPlanBadge(workout.workoutPlan)
+          if (!plan) return null
+          return <Badge label={plan.label} size="sm" variant={plan.variant} />
+        })()}
+
+        <View style={themed($metaItem)}>
+          {workout.location === "indoor" ? (
+            <HomeIcon size={12} color={theme.colors.palette.secondary500} />
+          ) : (
+            <SunIcon size={12} color={theme.colors.palette.accent500} />
+          )}
+          <Text preset="formHelper" size="xxs">
+            {workout.location === "indoor" ? "Indoor" : "Outdoor"}
+          </Text>
         </View>
       </View>
 
@@ -375,28 +363,7 @@ const $workoutMeta: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   gap: spacing.sm,
   alignItems: "center",
   flexWrap: "wrap",
-})
-
-const $metaItem: ThemedStyle<ViewStyle> = () => ({
-  flexDirection: "row",
-  alignItems: "center",
-  gap: 4,
-})
-
-const $typeBadge: ThemedStyle<ViewStyle> = ({ spacing }) => ({
-  paddingHorizontal: spacing.xs,
-  paddingVertical: 2,
-  borderRadius: 10,
-  borderWidth: 1,
-})
-
-const $typeBadgeText: ThemedStyle<TextStyle> = ({ colors }) => ({
-  color: colors.text,
-  fontWeight: "600",
-})
-
-const $metaText: ThemedStyle<TextStyle> = ({ colors }) => ({
-  color: colors.textDim,
+  flex: 1,
 })
 
 const $actionButtons: ThemedStyle<ViewStyle> = ({ spacing }) => ({
@@ -531,4 +498,10 @@ const $emptyDescription: ThemedStyle<TextStyle> = ({ colors }) => ({
   color: colors.textDim,
   textAlign: "center",
   lineHeight: 20,
+})
+
+const $metaItem: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  flexDirection: "row",
+  alignItems: "center",
+  gap: spacing.xxxs,
 })
