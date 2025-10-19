@@ -5,8 +5,8 @@ import { PreviewWorkoutButton } from "expo-workoutkit"
 import type { WorkoutPlan } from "expo-workoutkit"
 
 import { Text } from "@/components/Text"
-import { colors } from "@/theme/colors"
-import { typography } from "@/theme/typography"
+import { useAppTheme } from "@/theme/context"
+import type { ThemedStyle } from "@/theme/types"
 
 const WORKOUT_TYPE_CONFIG = {
   goal: { icon: "🎯", color: "#FF6B6B", label: "Goal" },
@@ -35,6 +35,7 @@ interface WorkoutCardProps {
 }
 
 export const WorkoutCard: FC<WorkoutCardProps> = ({ workout, index, onDelete, onButtonPress }) => {
+  const { themed } = useAppTheme()
   const typeConfig = WORKOUT_TYPE_CONFIG[workout.type]
   const activityIcon =
     ACTIVITY_ICONS[workout.workout.activity as keyof typeof ACTIVITY_ICONS] || "🏃‍♂️"
@@ -93,52 +94,55 @@ export const WorkoutCard: FC<WorkoutCardProps> = ({ workout, index, onDelete, on
   }
 
   return (
-    <View style={$workoutCard}>
+    <View style={themed($workoutCard)}>
       {/* Workout Header */}
-      <View style={$workoutHeader}>
-        <View style={$workoutTypeContainer}>
-          <View style={[$workoutTypeIcon, { backgroundColor: typeConfig.color }]}>
-            <Text style={$workoutTypeIconText}>{typeConfig.icon}</Text>
+      <View style={themed($workoutHeader)}>
+        <View style={themed($workoutTypeContainer)}>
+          <View style={[themed($workoutTypeIcon), { backgroundColor: typeConfig.color }]}>
+            <Text style={themed($workoutTypeIconText)}>{typeConfig.icon}</Text>
           </View>
-          <View style={$workoutTypeInfo}>
-            <Text style={$workoutTypeLabel}>{typeConfig.label}</Text>
-            <Text style={$workoutActivityLabel}>
+          <View style={themed($workoutTypeInfo)}>
+            <Text style={themed($workoutTypeLabel)}>{typeConfig.label}</Text>
+            <Text style={themed($workoutActivityLabel)}>
               {activityIcon} {workout.workout.activity}
             </Text>
           </View>
         </View>
-        <View style={$workoutLocation}>
-          <Text style={$workoutLocationText}>
+        <View style={themed($workoutLocation)}>
+          <Text style={themed($workoutLocationText)}>
             {workout.workout.location === "indoor" ? "🏠" : "🌳"} {workout.workout.location}
           </Text>
         </View>
       </View>
 
       {/* Workout Details */}
-      <View style={$workoutDetails}>
-        <Text style={$workoutTitle}>{title}</Text>
-        <Text style={$workoutSubtitle}>{subtitle}</Text>
+      <View style={themed($workoutDetails)}>
+        <Text style={themed($workoutTitle)}>{title}</Text>
+        <Text style={themed($workoutSubtitle)}>{subtitle}</Text>
       </View>
 
       {/* Workout Preview */}
-      <View style={$workoutPreview}>
+      <View style={themed($workoutPreview)}>
         <PreviewWorkoutButton
           workoutPlan={workout}
           onButtonPress={({ nativeEvent: { message } }) => onButtonPress(message)}
-          style={$previewButton}
+          style={themed($previewButton)}
         />
       </View>
 
       {/* Action Buttons */}
-      <View style={$workoutActions}>
-        <TouchableOpacity style={$actionButton} onPress={shareWorkout}>
-          <Text style={$actionButtonIcon}>📤</Text>
-          <Text style={$actionButtonText}>Share</Text>
+      <View style={themed($workoutActions)}>
+        <TouchableOpacity style={themed($actionButton)} onPress={shareWorkout}>
+          <Text style={themed($actionButtonIcon)}>📤</Text>
+          <Text style={themed($actionButtonText)}>Share</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={[$actionButton, $deleteButton]} onPress={deleteWorkout}>
-          <Text style={$actionButtonIcon}>🗑️</Text>
-          <Text style={[$actionButtonText, $deleteButtonText]}>Delete</Text>
+        <TouchableOpacity
+          style={[themed($actionButton), themed($deleteButton)]}
+          onPress={deleteWorkout}
+        >
+          <Text style={themed($actionButtonIcon)}>🗑️</Text>
+          <Text style={[themed($actionButtonText), themed($deleteButtonText)]}>Delete</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -146,10 +150,10 @@ export const WorkoutCard: FC<WorkoutCardProps> = ({ workout, index, onDelete, on
 }
 
 // Styles
-const $workoutCard: ViewStyle = {
+const $workoutCard: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
   backgroundColor: colors.palette.neutral100,
   borderRadius: 20,
-  padding: 20,
+  padding: spacing.lg,
   borderWidth: 1,
   borderColor: colors.border,
   shadowColor: colors.palette.neutral900,
@@ -157,137 +161,137 @@ const $workoutCard: ViewStyle = {
   shadowOpacity: 0.1,
   shadowRadius: 8,
   elevation: 4,
-}
+})
 
 // Workout Header
-const $workoutHeader: ViewStyle = {
+const $workoutHeader: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   flexDirection: "row",
   justifyContent: "space-between",
   alignItems: "flex-start",
-  marginBottom: 16,
-}
+  marginBottom: spacing.md,
+})
 
-const $workoutTypeContainer: ViewStyle = {
+const $workoutTypeContainer: ThemedStyle<ViewStyle> = () => ({
   flexDirection: "row",
   alignItems: "center",
   flex: 1,
-}
+})
 
-const $workoutTypeIcon: ViewStyle = {
+const $workoutTypeIcon: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   width: 40,
   height: 40,
   borderRadius: 20,
   alignItems: "center",
   justifyContent: "center",
-  marginRight: 12,
-}
+  marginRight: spacing.sm,
+})
 
-const $workoutTypeIconText: TextStyle = {
+const $workoutTypeIconText: ThemedStyle<TextStyle> = () => ({
   fontSize: 18,
-}
+})
 
-const $workoutTypeInfo: ViewStyle = {
+const $workoutTypeInfo: ThemedStyle<ViewStyle> = () => ({
   flex: 1,
-}
+})
 
-const $workoutTypeLabel: TextStyle = {
+const $workoutTypeLabel: ThemedStyle<TextStyle> = ({ colors, typography }) => ({
   fontSize: 14,
   fontWeight: "600",
   color: colors.text,
   fontFamily: typography.primary.semiBold,
   marginBottom: 2,
-}
+})
 
-const $workoutActivityLabel: TextStyle = {
+const $workoutActivityLabel: ThemedStyle<TextStyle> = ({ colors, typography }) => ({
   fontSize: 12,
   fontWeight: "500",
   color: colors.textDim,
   fontFamily: typography.primary.medium,
-}
+})
 
-const $workoutLocation: ViewStyle = {
+const $workoutLocation: ThemedStyle<ViewStyle> = () => ({
   alignItems: "flex-end",
-}
+})
 
-const $workoutLocationText: TextStyle = {
+const $workoutLocationText: ThemedStyle<TextStyle> = ({ colors, typography }) => ({
   fontSize: 12,
   fontWeight: "500",
   color: colors.textDim,
   fontFamily: typography.primary.medium,
-}
+})
 
 // Workout Details
-const $workoutDetails: ViewStyle = {
-  marginBottom: 16,
-}
+const $workoutDetails: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  marginBottom: spacing.md,
+})
 
-const $workoutTitle: TextStyle = {
+const $workoutTitle: ThemedStyle<TextStyle> = ({ colors, typography }) => ({
   fontSize: 18,
   fontWeight: "700",
   color: colors.text,
   fontFamily: typography.primary.bold,
   marginBottom: 4,
   lineHeight: 24,
-}
+})
 
-const $workoutSubtitle: TextStyle = {
+const $workoutSubtitle: ThemedStyle<TextStyle> = ({ colors, typography }) => ({
   fontSize: 14,
   fontWeight: "500",
   color: colors.textDim,
   fontFamily: typography.primary.medium,
   lineHeight: 20,
-}
+})
 
 // Workout Preview
-const $workoutPreview: ViewStyle = {
-  marginBottom: 20,
-}
+const $workoutPreview: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  marginBottom: spacing.lg,
+})
 
-const $previewButton: ViewStyle = {
+const $previewButton: ThemedStyle<ViewStyle> = ({ colors }) => ({
   height: 100,
   width: "100%",
   borderRadius: 12,
   backgroundColor: colors.background,
   borderWidth: 1,
   borderColor: colors.border,
-}
+})
 
 // Action Buttons
-const $workoutActions: ViewStyle = {
+const $workoutActions: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   flexDirection: "row",
-  gap: 12,
-}
+  gap: spacing.sm,
+})
 
-const $actionButton: ViewStyle = {
+const $actionButton: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
   flex: 1,
   flexDirection: "row",
   alignItems: "center",
   justifyContent: "center",
-  paddingVertical: 12,
-  paddingHorizontal: 16,
+  paddingVertical: spacing.sm,
+  paddingHorizontal: spacing.md,
   backgroundColor: colors.background,
   borderRadius: 12,
   borderWidth: 1,
   borderColor: colors.border,
-}
+})
 
-const $deleteButton: ViewStyle = {
+const $deleteButton: ThemedStyle<ViewStyle> = () => ({
   backgroundColor: "#FF6B6B",
   borderColor: "#FF6B6B",
-}
+})
 
-const $actionButtonIcon: TextStyle = {
+const $actionButtonIcon: ThemedStyle<TextStyle> = () => ({
   fontSize: 16,
   marginRight: 6,
-}
+})
 
-const $actionButtonText: TextStyle = {
+const $actionButtonText: ThemedStyle<TextStyle> = ({ colors, typography }) => ({
   fontSize: 14,
   fontWeight: "600",
   color: colors.text,
   fontFamily: typography.primary.semiBold,
-}
+})
 
-const $deleteButtonText: TextStyle = {
+const $deleteButtonText: ThemedStyle<TextStyle> = ({ colors }) => ({
   color: colors.palette.neutral100,
-}
+})

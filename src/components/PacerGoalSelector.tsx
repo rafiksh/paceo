@@ -4,7 +4,8 @@ import type { TextStyle } from "react-native"
 
 import { Text } from "@/components/Text"
 import { TextField } from "@/components/TextField"
-import { colors } from "@/theme/colors"
+import { useAppTheme } from "@/theme/context"
+import type { ThemedStyle } from "@/theme/types"
 
 type UnitType =
   | "seconds"
@@ -53,6 +54,7 @@ export const PacerGoalSelector: FC<PacerGoalSelectorProps> = ({
   onDistanceChange,
   onTimeChange,
 }) => {
+  const { themed } = useAppTheme()
   const [distanceValue, setDistanceValue] = useState(distance.value?.toString() || "")
   const [distanceUnit, setDistanceUnit] = useState(
     distance.unit ? reverseUnitMapping[distance.unit as UnitType] || "km" : "km",
@@ -194,14 +196,14 @@ export const PacerGoalSelector: FC<PacerGoalSelectorProps> = ({
   }
 
   return (
-    <View style={$container}>
+    <View style={themed($container)}>
       {/* Distance Goal */}
-      <View style={$goalSection}>
+      <View style={themed($goalSection)}>
         <Text preset="formLabel" size="sm">
           Distance Goal
         </Text>
-        <View style={$goalRow}>
-          <View style={$valueInput}>
+        <View style={themed($goalRow)}>
+          <View style={themed($valueInput)}>
             <TextField
               placeholder="Enter distance"
               value={distanceValue}
@@ -209,26 +211,26 @@ export const PacerGoalSelector: FC<PacerGoalSelectorProps> = ({
               keyboardType="numeric"
             />
           </View>
-          <View style={$dropdownContainer}>
+          <View style={themed($dropdownContainer)}>
             <TouchableOpacity
-              style={$dropdownButton}
+              style={themed($dropdownButton)}
               onPress={() => setShowDistanceDropdown(!showDistanceDropdown)}
             >
-              <Text preset="formLabel" size="sm" style={$dropdownText}>
+              <Text preset="formLabel" size="sm" style={themed($dropdownText)}>
                 {distanceUnit}
               </Text>
-              <Text style={$dropdownArrow}>▼</Text>
+              <Text style={themed($dropdownArrow)}>▼</Text>
             </TouchableOpacity>
 
             {showDistanceDropdown && (
-              <View style={$dropdownList}>
+              <View style={themed($dropdownList)}>
                 {getDistanceUnits().map((unit) => (
                   <TouchableOpacity
                     key={unit}
-                    style={$dropdownItem}
+                    style={themed($dropdownItem)}
                     onPress={() => handleDistanceUnitChange(unit)}
                   >
-                    <Text preset="formLabel" size="sm" style={$dropdownItemText}>
+                    <Text preset="formLabel" size="sm" style={themed($dropdownItemText)}>
                       {unit}
                     </Text>
                   </TouchableOpacity>
@@ -240,21 +242,29 @@ export const PacerGoalSelector: FC<PacerGoalSelectorProps> = ({
       </View>
 
       {/* Time/Pace Goal Toggle */}
-      <View style={$toggleSection}>
-        <View style={$toggleContainer}>
+      <View style={themed($toggleSection)}>
+        <View style={themed($toggleContainer)}>
           <TouchableOpacity
-            style={[$toggleButton, !isPaceMode && $toggleButtonActive]}
+            style={[themed($toggleButton), !isPaceMode && themed($toggleButtonActive)]}
             onPress={() => handleToggleMode(false)}
           >
-            <Text preset="formLabel" size="sm" style={!isPaceMode && $toggleButtonTextActive}>
+            <Text
+              preset="formLabel"
+              size="sm"
+              style={!isPaceMode && themed($toggleButtonTextActive)}
+            >
               Time Goal
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
-            style={[$toggleButton, isPaceMode && $toggleButtonActive]}
+            style={[themed($toggleButton), isPaceMode && themed($toggleButtonActive)]}
             onPress={() => handleToggleMode(true)}
           >
-            <Text preset="formLabel" size="sm" style={isPaceMode && $toggleButtonTextActive}>
+            <Text
+              preset="formLabel"
+              size="sm"
+              style={isPaceMode && themed($toggleButtonTextActive)}
+            >
               Pace Goal
             </Text>
           </TouchableOpacity>
@@ -262,12 +272,12 @@ export const PacerGoalSelector: FC<PacerGoalSelectorProps> = ({
       </View>
 
       {/* Time/Pace Goal */}
-      <View style={$goalSection}>
+      <View style={themed($goalSection)}>
         <Text preset="formLabel" size="sm">
           {isPaceMode ? "Pace Goal" : "Time Goal"}
         </Text>
-        <View style={$goalRow}>
-          <View style={$valueInput}>
+        <View style={themed($goalRow)}>
+          <View style={themed($valueInput)}>
             <TextField
               placeholder={isPaceMode ? "Enter pace" : "Enter time"}
               value={timeValue}
@@ -275,26 +285,26 @@ export const PacerGoalSelector: FC<PacerGoalSelectorProps> = ({
               keyboardType="numeric"
             />
           </View>
-          <View style={$dropdownContainer}>
+          <View style={themed($dropdownContainer)}>
             <TouchableOpacity
-              style={$dropdownButton}
+              style={themed($dropdownButton)}
               onPress={() => setShowTimeDropdown(!showTimeDropdown)}
             >
-              <Text preset="formLabel" size="sm" style={$dropdownText}>
+              <Text preset="formLabel" size="sm" style={themed($dropdownText)}>
                 {timeUnit}
               </Text>
-              <Text style={$dropdownArrow}>▼</Text>
+              <Text style={themed($dropdownArrow)}>▼</Text>
             </TouchableOpacity>
 
             {showTimeDropdown && (
-              <View style={$dropdownList}>
+              <View style={themed($dropdownList)}>
                 {getTimeUnits().map((unit) => (
                   <TouchableOpacity
                     key={unit}
-                    style={$dropdownItem}
+                    style={themed($dropdownItem)}
                     onPress={() => handleTimeUnitChange(unit)}
                   >
-                    <Text preset="formLabel" size="sm" style={$dropdownItemText}>
+                    <Text preset="formLabel" size="sm" style={themed($dropdownItemText)}>
                       {unit}
                     </Text>
                   </TouchableOpacity>
@@ -308,23 +318,23 @@ export const PacerGoalSelector: FC<PacerGoalSelectorProps> = ({
   )
 }
 
-const $container: ViewStyle = {
+const $container: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
   backgroundColor: colors.palette.neutral100,
   borderRadius: 16,
-  padding: 20,
+  padding: spacing.lg,
   borderWidth: 1,
   borderColor: colors.border,
-}
+})
 
-const $goalSection: ViewStyle = {
-  marginBottom: 20,
-}
+const $goalSection: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  marginBottom: spacing.lg,
+})
 
-const $goalRow: ViewStyle = {
+const $goalRow: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   flexDirection: "row",
-  gap: 12,
-  marginTop: 8,
-}
+  gap: spacing.sm,
+  marginTop: spacing.xs,
+})
 
 const $valueInput: ViewStyle = {
   flex: 1,
@@ -336,7 +346,7 @@ const $dropdownContainer: ViewStyle = {
   maxWidth: 120,
 }
 
-const $dropdownButton: ViewStyle = {
+const $dropdownButton: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
   flexDirection: "row",
   alignItems: "center",
   justifyContent: "space-between",
@@ -344,22 +354,22 @@ const $dropdownButton: ViewStyle = {
   borderRadius: 12,
   borderWidth: 1,
   borderColor: colors.border,
-  paddingHorizontal: 12,
-  paddingVertical: 8,
+  paddingHorizontal: spacing.sm,
+  paddingVertical: spacing.xs,
   height: 40,
-}
+})
 
-const $dropdownText: TextStyle = {
+const $dropdownText: ThemedStyle<TextStyle> = ({ colors }) => ({
   color: colors.text,
-}
+})
 
-const $dropdownArrow: TextStyle = {
+const $dropdownArrow: ThemedStyle<TextStyle> = ({ colors, spacing }) => ({
   fontSize: 12,
   color: colors.textDim,
-  marginLeft: 8,
-}
+  marginLeft: spacing.xs,
+})
 
-const $dropdownList: ViewStyle = {
+const $dropdownList: ThemedStyle<ViewStyle> = ({ colors }) => ({
   position: "absolute",
   top: 40,
   left: 0,
@@ -374,44 +384,44 @@ const $dropdownList: ViewStyle = {
   shadowOpacity: 0.1,
   shadowRadius: 8,
   elevation: 5,
-}
+})
 
-const $dropdownItem: ViewStyle = {
-  paddingHorizontal: 12,
-  paddingVertical: 8,
+const $dropdownItem: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
+  paddingHorizontal: spacing.sm,
+  paddingVertical: spacing.xs,
   borderBottomWidth: 1,
   borderBottomColor: colors.separator,
-}
+})
 
-const $dropdownItemText: TextStyle = {
+const $dropdownItemText: ThemedStyle<TextStyle> = ({ colors }) => ({
   color: colors.text,
   textAlign: "center",
-}
+})
 
-const $toggleSection: ViewStyle = {
-  marginBottom: 20,
-}
+const $toggleSection: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  marginBottom: spacing.lg,
+})
 
-const $toggleContainer: ViewStyle = {
+const $toggleContainer: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
   flexDirection: "row",
   backgroundColor: colors.palette.neutral200,
   borderRadius: 12,
   padding: 4,
-}
+})
 
-const $toggleButton: ViewStyle = {
+const $toggleButton: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   flex: 1,
   alignItems: "center",
   justifyContent: "center",
-  paddingVertical: 12,
-  paddingHorizontal: 16,
+  paddingVertical: spacing.sm,
+  paddingHorizontal: spacing.md,
   borderRadius: 8,
-}
+})
 
-const $toggleButtonActive: ViewStyle = {
+const $toggleButtonActive: ThemedStyle<ViewStyle> = ({ colors }) => ({
   backgroundColor: colors.tint,
-}
+})
 
-const $toggleButtonTextActive: TextStyle = {
+const $toggleButtonTextActive: ThemedStyle<TextStyle> = ({ colors }) => ({
   color: colors.palette.neutral100,
-}
+})

@@ -5,7 +5,8 @@ import type { WorkoutAlert } from "expo-workoutkit"
 import { Button } from "@/components/Button"
 import { Text } from "@/components/Text"
 import { TextField } from "@/components/TextField"
-import { colors } from "@/theme/colors"
+import { useAppTheme } from "@/theme/context"
+import type { ThemedStyle } from "@/theme/types"
 
 interface AlertSelectorModalProps {
   visible: boolean
@@ -20,6 +21,7 @@ export const AlertSelectorModal: FC<AlertSelectorModalProps> = ({
   onAlertChange,
   onClose,
 }) => {
+  const { themed } = useAppTheme()
   const [alertType, setAlertType] = useState<"speed" | "heartRate" | "power" | "cadence" | "pace">(
     alert?.type || "heartRate",
   )
@@ -148,8 +150,8 @@ export const AlertSelectorModal: FC<AlertSelectorModalProps> = ({
 
   return (
     <Modal visible={visible} animationType="slide" presentationStyle="pageSheet">
-      <View style={$modalContainer}>
-        <View style={$header}>
+      <View style={themed($modalContainer)}>
+        <View style={themed($header)}>
           <Button text="Cancel" onPress={onClose} preset="ghost" />
           <Text preset="heading" size="md">
             Configure Alert
@@ -157,12 +159,12 @@ export const AlertSelectorModal: FC<AlertSelectorModalProps> = ({
           <Button text="Save" onPress={handleSave} preset="primary" />
         </View>
 
-        <ScrollView style={$content} showsVerticalScrollIndicator={false}>
-          <View style={$firstSection}>
+        <ScrollView style={themed($content)} showsVerticalScrollIndicator={false}>
+          <View style={themed($firstSection)}>
             <Text preset="formLabel" size="sm">
               Alert Type
             </Text>
-            <View style={$alertTypeGrid}>
+            <View style={themed($alertTypeGrid)}>
               {[
                 { key: "heartRate", label: "Heart Rate" },
                 { key: "speed", label: "Speed" },
@@ -180,12 +182,12 @@ export const AlertSelectorModal: FC<AlertSelectorModalProps> = ({
             </View>
           </View>
 
-          <View style={$section}>
+          <View style={themed($section)}>
             <Text preset="formLabel" size="sm">
               Target Range
             </Text>
-            <View style={$rangeContainer}>
-              <View style={$rangeInput}>
+            <View style={themed($rangeContainer)}>
+              <View style={themed($rangeInput)}>
                 <Text preset="formLabel" size="xs">
                   Min
                 </Text>
@@ -196,7 +198,7 @@ export const AlertSelectorModal: FC<AlertSelectorModalProps> = ({
                   placeholder="60"
                 />
               </View>
-              <View style={$rangeInput}>
+              <View style={themed($rangeInput)}>
                 <Text preset="formLabel" size="xs">
                   Max
                 </Text>
@@ -210,11 +212,11 @@ export const AlertSelectorModal: FC<AlertSelectorModalProps> = ({
             </View>
           </View>
 
-          <View style={$section}>
+          <View style={themed($section)}>
             <Text preset="formLabel" size="sm">
               Unit
             </Text>
-            <View style={$unitGrid}>
+            <View style={themed($unitGrid)}>
               {getUnitsForType(alertType).map((unitOption) => (
                 <Button
                   key={unitOption}
@@ -226,11 +228,11 @@ export const AlertSelectorModal: FC<AlertSelectorModalProps> = ({
             </View>
           </View>
 
-          <View style={$section}>
+          <View style={themed($section)}>
             <Text preset="formLabel" size="sm">
               Metric
             </Text>
-            <View style={$metricGrid}>
+            <View style={themed($metricGrid)}>
               {[
                 { key: "current", label: "Current" },
                 { key: "average", label: "Average" },
@@ -247,7 +249,7 @@ export const AlertSelectorModal: FC<AlertSelectorModalProps> = ({
           </View>
 
           {alert && (
-            <View style={$removeSection}>
+            <View style={themed($removeSection)}>
               <Button text="Remove Alert" onPress={handleRemove} preset="destructive" />
             </View>
           )}
@@ -257,67 +259,67 @@ export const AlertSelectorModal: FC<AlertSelectorModalProps> = ({
   )
 }
 
-const $modalContainer: ViewStyle = {
+const $modalContainer: ThemedStyle<ViewStyle> = ({ colors }) => ({
   flex: 1,
   backgroundColor: colors.background,
-}
+})
 
-const $header: ViewStyle = {
+const $header: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
   flexDirection: "row",
   alignItems: "center",
   justifyContent: "space-between",
-  paddingHorizontal: 20,
-  paddingVertical: 16,
+  paddingHorizontal: spacing.lg,
+  paddingVertical: spacing.md,
   borderBottomWidth: 1,
   borderBottomColor: colors.border,
-}
+})
 
-const $content: ViewStyle = {
+const $content: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   flex: 1,
-  paddingHorizontal: 20,
-  paddingTop: 16,
-  paddingBottom: 24,
-}
+  paddingHorizontal: spacing.lg,
+  paddingTop: spacing.md,
+  paddingBottom: spacing.lg,
+})
 
-const $firstSection: ViewStyle = {
-  marginBottom: 24,
-}
+const $firstSection: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  marginBottom: spacing.lg,
+})
 
-const $section: ViewStyle = {
-  marginBottom: 24,
-}
+const $section: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  marginBottom: spacing.lg,
+})
 
-const $alertTypeGrid: ViewStyle = {
+const $alertTypeGrid: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   flexDirection: "row",
   flexWrap: "wrap",
-  gap: 8,
-  marginTop: 12,
-}
+  gap: spacing.xs,
+  marginTop: spacing.sm,
+})
 
-const $rangeContainer: ViewStyle = {
+const $rangeContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   flexDirection: "row",
-  gap: 12,
-  marginTop: 12,
-}
+  gap: spacing.sm,
+  marginTop: spacing.sm,
+})
 
 const $rangeInput: ViewStyle = {
   flex: 1,
 }
 
-const $unitGrid: ViewStyle = {
+const $unitGrid: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   flexDirection: "row",
   flexWrap: "wrap",
-  gap: 8,
-  marginTop: 12,
-}
+  gap: spacing.xs,
+  marginTop: spacing.sm,
+})
 
-const $metricGrid: ViewStyle = {
+const $metricGrid: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   flexDirection: "row",
-  gap: 8,
-  marginTop: 12,
-}
+  gap: spacing.xs,
+  marginTop: spacing.sm,
+})
 
-const $removeSection: ViewStyle = {
-  marginTop: 32,
-  marginBottom: 16,
-}
+const $removeSection: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  marginTop: spacing.xl,
+  marginBottom: spacing.md,
+})

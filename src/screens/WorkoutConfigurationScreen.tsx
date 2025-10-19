@@ -1,6 +1,5 @@
 import { FC, useState } from "react"
 import { View, ViewStyle, ScrollView, TouchableOpacity, Alert } from "react-native"
-import type { TextStyle } from "react-native"
 import { router, useLocalSearchParams } from "expo-router"
 import type {
   WorkoutPlan,
@@ -13,8 +12,10 @@ import { ArrowLeftIcon } from "react-native-heroicons/outline"
 import { Screen } from "@/components/Screen"
 import { Text } from "@/components/Text"
 import { SimpleWorkoutForm, PacerWorkoutForm, CustomWorkoutForm } from "@/components/WorkoutForm"
+import { ButtonSelector } from "@/components/WorkoutForm/ButtonSelector"
 import { WorkoutStorage } from "@/services/WorkoutStorage"
-import { colors } from "@/theme/colors"
+import { useAppTheme } from "@/theme/context"
+import type { ThemedStyle } from "@/theme/types"
 import type {
   SimpleWorkoutFormData,
   PacerWorkoutFormData,
@@ -40,6 +41,7 @@ const WORKOUT_TYPES = [
 ]
 
 export const WorkoutConfigurationScreen: FC = function WorkoutConfigurationScreen() {
+  const { themed } = useAppTheme()
   const params = useLocalSearchParams()
   const activity = (params.activity as HKWorkoutActivityType) || "running"
 
@@ -171,12 +173,12 @@ export const WorkoutConfigurationScreen: FC = function WorkoutConfigurationScree
   }
 
   return (
-    <Screen preset="fixed" contentContainerStyle={$container} safeAreaEdges={["top"]}>
-      <View style={$header}>
-        <TouchableOpacity style={$backButton} onPress={handleBack}>
-          <ArrowLeftIcon size={20} color={colors.text} />
+    <Screen preset="fixed" contentContainerStyle={themed($container)} safeAreaEdges={["top"]}>
+      <View style={themed($header)}>
+        <TouchableOpacity style={themed($backButton)} onPress={handleBack}>
+          <ArrowLeftIcon size={20} color={themed($backIconColor)} />
         </TouchableOpacity>
-        <View style={$headerContent}>
+        <View style={themed($headerContent)}>
           <Text preset="heading" size="lg">
             Configure Workout
           </Text>
@@ -185,35 +187,20 @@ export const WorkoutConfigurationScreen: FC = function WorkoutConfigurationScree
           </Text>
         </View>
       </View>
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={$scrollContent}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={themed($scrollContent)}
+      >
         {/* Workout Type Selection */}
-        <View style={$section}>
+        <View style={themed($section)}>
           <Text preset="subheading" size="md">
             Workout Type
           </Text>
-          <View style={$workoutTypeContainer}>
-            {WORKOUT_TYPES.map((type) => (
-              <TouchableOpacity
-                key={type.key}
-                style={[
-                  $workoutTypeOption,
-                  selectedType === type.key && $workoutTypeOptionSelected,
-                ]}
-                onPress={() => setSelectedType(type.key as "goal" | "pacer" | "custom")}
-              >
-                <Text
-                  preset="formLabel"
-                  size="sm"
-                  style={[
-                    $workoutTypeLabel,
-                    selectedType === type.key && $workoutTypeLabelSelected,
-                  ]}
-                >
-                  {type.label}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </View>
+          <ButtonSelector
+            options={WORKOUT_TYPES}
+            selectedValue={selectedType}
+            onValueChange={(value) => setSelectedType(value as "goal" | "pacer" | "custom")}
+          />
         </View>
 
         {/* Render appropriate form based on selected type */}
@@ -232,20 +219,20 @@ const $container: ViewStyle = {
   flex: 1,
 }
 
-const $scrollContent: ViewStyle = {
-  paddingVertical: 40,
-  paddingHorizontal: 24,
-}
+const $scrollContent: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  paddingVertical: spacing.xl,
+  paddingHorizontal: spacing.lg,
+})
 
-const $header: ViewStyle = {
+const $header: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   flexDirection: "row",
   alignItems: "center",
-  paddingHorizontal: 24,
-  paddingVertical: 16,
-  gap: 16,
-}
+  paddingHorizontal: spacing.lg,
+  paddingVertical: spacing.md,
+  gap: spacing.md,
+})
 
-const $backButton: ViewStyle = {
+const $backButton: ThemedStyle<ViewStyle> = ({ colors }) => ({
   width: 40,
   height: 40,
   borderRadius: 20,
@@ -254,46 +241,17 @@ const $backButton: ViewStyle = {
   justifyContent: "center",
   borderWidth: 1,
   borderColor: colors.border,
-}
+})
 
 const $headerContent: ViewStyle = {
   flex: 1,
 }
 
-const $section: ViewStyle = {
-  marginBottom: 32,
-}
+const $section: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  marginBottom: spacing.xl,
+})
 
-// Workout Type Styles
-const $workoutTypeContainer: ViewStyle = {
-  flexDirection: "row",
-  gap: 12,
-}
-
-const $workoutTypeOption: ViewStyle = {
-  flex: 1,
-  alignItems: "center",
-  justifyContent: "center",
-  paddingVertical: 16,
-  paddingHorizontal: 12,
-  backgroundColor: colors.background,
-  borderRadius: 12,
-  borderWidth: 1,
-  borderColor: colors.border,
-  gap: 4,
-}
-
-const $workoutTypeOptionSelected: ViewStyle = {
-  backgroundColor: colors.tint,
-  borderColor: colors.tint,
-}
-
-const $workoutTypeLabel: TextStyle = {
-  textAlign: "center",
-}
-
-const $workoutTypeLabelSelected: TextStyle = {
-  color: colors.palette.neutral100,
-}
+// Color helpers
+const $backIconColor: ThemedStyle<string> = ({ colors }) => colors.text
 
 // Location Styles

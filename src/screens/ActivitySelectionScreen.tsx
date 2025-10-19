@@ -2,10 +2,13 @@ import { FC } from "react"
 import { View, ViewStyle, ScrollView } from "react-native"
 import { router } from "expo-router"
 import type { HKWorkoutActivityType } from "expo-workoutkit"
+import { SunIcon, MoonIcon } from "react-native-heroicons/outline"
 
 import { ActivityCard } from "@/components/ActivityCard"
+import { Button } from "@/components/Button"
 import { Screen } from "@/components/Screen"
 import { Text } from "@/components/Text"
+import { useAppTheme } from "@/theme/context"
 
 // Activity categories
 const ACTIVITY_CATEGORIES = {
@@ -31,6 +34,8 @@ const ACTIVITY_CATEGORIES = {
 }
 
 export const ActivitySelectionScreen: FC = function ActivitySelectionScreen() {
+  const { themeContext, setThemeContextOverride, theme } = useAppTheme()
+
   const handleActivitySelect = (activity: HKWorkoutActivityType) => {
     router.push({
       pathname: "/(tabs)/builder/configure",
@@ -40,11 +45,26 @@ export const ActivitySelectionScreen: FC = function ActivitySelectionScreen() {
     })
   }
 
+  const toggleTheme = () => {
+    setThemeContextOverride(themeContext === "dark" ? "light" : "dark")
+  }
+
   return (
     <Screen preset="fixed" contentContainerStyle={$container} safeAreaEdges={["top"]}>
       <View style={$header}>
-        <Text preset="heading">Choose Your Activity</Text>
-        <Text preset="subheading">Select the type of workout you want to create</Text>
+        <View style={$headerTop}>
+          <View style={$headerText}>
+            <Text preset="heading">Choose Your Activity</Text>
+            <Text preset="subheading">Select the type of workout you want to create</Text>
+          </View>
+          <Button preset="ghost" style={$themeToggleButton} onPress={toggleTheme}>
+            {themeContext === "dark" ? (
+              <SunIcon size={20} color={theme.colors.text} />
+            ) : (
+              <MoonIcon size={20} color={theme.colors.text} />
+            )}
+          </Button>
+        </View>
       </View>
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={$scrollContent}>
         {Object.entries(ACTIVITY_CATEGORIES).map(([category, activities]) => (
@@ -78,6 +98,22 @@ const $scrollContent: ViewStyle = {
 
 const $header: ViewStyle = {
   paddingHorizontal: 24,
+}
+
+const $headerTop: ViewStyle = {
+  flexDirection: "row",
+  justifyContent: "space-between",
+  alignItems: "flex-start",
+}
+
+const $headerText: ViewStyle = {
+  flex: 1,
+}
+
+const $themeToggleButton: ViewStyle = {
+  paddingHorizontal: 12,
+  paddingVertical: 8,
+  borderRadius: 20,
 }
 
 const $activityCategory: ViewStyle = {

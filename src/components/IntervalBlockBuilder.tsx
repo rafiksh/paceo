@@ -8,7 +8,8 @@ import { AlertDisplay } from "@/components/AlertDisplay"
 import { Button } from "@/components/Button"
 import { GoalSelector } from "@/components/GoalSelector"
 import { Text } from "@/components/Text"
-import { colors } from "@/theme/colors"
+import { useAppTheme } from "@/theme/context"
+import type { ThemedStyle } from "@/theme/types"
 
 interface IntervalBlockBuilderProps {
   block: IntervalBlock
@@ -23,6 +24,7 @@ export const IntervalBlockBuilder: FC<IntervalBlockBuilderProps> = ({
   onBlockChange,
   onDelete,
 }) => {
+  const { themed } = useAppTheme()
   const handleIterationsChange = (newIterations: number) => {
     onBlockChange({
       ...block,
@@ -77,56 +79,59 @@ export const IntervalBlockBuilder: FC<IntervalBlockBuilderProps> = ({
   }
 
   return (
-    <View style={$container}>
-      <View style={$subHeader}>
+    <View style={themed($container)}>
+      <View style={themed($subHeader)}>
         <Text preset="subheading">Block {index + 1}</Text>
         <Button onPress={onDelete} preset="ghost">
-          <TrashIcon size={16} color={colors.error} />
+          <TrashIcon size={16} color={themed($trashIconColor)} />
         </Button>
       </View>
-      <View style={$iterationsRow}>
+      <View style={themed($iterationsRow)}>
         <Text preset="formLabel">Repetitions</Text>
-        <View style={$iterationsStepper}>
+        <View style={themed($iterationsStepper)}>
           <Button
-            style={[$stepperButton, block.iterations <= 1 && $stepperButtonDisabled]}
+            style={[
+              themed($stepperButton),
+              block.iterations <= 1 && themed($stepperButtonDisabled),
+            ]}
             onPress={decrementIterations}
             disabled={block.iterations <= 1}
             preset="ghost"
           >
-            <Text style={$stepperText}>−</Text>
+            <Text style={themed($stepperText)}>−</Text>
           </Button>
-          <Text preset="formLabel" style={$stepperValue}>
+          <Text preset="formLabel" style={themed($stepperValue)}>
             {block.iterations}
           </Text>
-          <Button style={$stepperButton} onPress={incrementIterations} preset="ghost">
-            <Text style={$stepperText}>+</Text>
+          <Button style={themed($stepperButton)} onPress={incrementIterations} preset="ghost">
+            <Text style={themed($stepperText)}>+</Text>
           </Button>
         </View>
       </View>
 
       {block.steps.length === 0 && (
-        <View style={$emptyStepsContainer}>
-          <Text preset="formHelper" style={$emptyStepsText}>
+        <View style={themed($emptyStepsContainer)}>
+          <Text preset="formHelper" style={themed($emptyStepsText)}>
             No steps added yet. Tap &quot;Add Step&quot; to get started.
           </Text>
         </View>
       )}
 
       {block.steps.length > 0 && (
-        <View style={$stepsContainer}>
+        <View style={themed($stepsContainer)}>
           {block.steps.map((step, index) => (
-            <View key={index} style={$stepCard}>
-              <View style={$subHeader}>
+            <View key={index} style={themed($stepCard)}>
+              <View style={themed($subHeader)}>
                 <Text preset="subheading">Step {index + 1}</Text>
                 {block.steps.length > 1 && (
                   <Button onPress={() => removeStep(index)} preset="ghost">
-                    <TrashIcon size={16} color={colors.error} />
+                    <TrashIcon size={16} color={themed($trashIconColor)} />
                   </Button>
                 )}
               </View>
 
               <Text preset="formLabel">Purpose</Text>
-              <View style={$purposeGrid}>
+              <View style={themed($purposeGrid)}>
                 <Button
                   text="Work"
                   onPress={() => handleStepChange(index, { ...step, purpose: "work" })}
@@ -149,7 +154,7 @@ export const IntervalBlockBuilder: FC<IntervalBlockBuilderProps> = ({
                   })
                 }
               />
-              <View style={$separator} />
+              <View style={themed($separator)} />
 
               <AlertDisplay
                 alert={step.step.alert}
@@ -167,7 +172,7 @@ export const IntervalBlockBuilder: FC<IntervalBlockBuilderProps> = ({
 
       <Button
         text="Add Step"
-        LeftAccessory={() => <PlusIcon size={16} color={colors.background} />}
+        LeftAccessory={() => <PlusIcon size={16} color={themed($plusIconColor)} />}
         onPress={addStep}
         preset="primary"
       />
@@ -176,33 +181,33 @@ export const IntervalBlockBuilder: FC<IntervalBlockBuilderProps> = ({
 }
 
 // Styles
-const $container: ViewStyle = {
+const $container: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
   backgroundColor: colors.palette.neutral100,
   borderRadius: 16,
-  paddingHorizontal: 20,
-  paddingVertical: 16,
+  paddingHorizontal: spacing.lg,
+  paddingVertical: spacing.md,
   borderWidth: 1,
   borderColor: colors.border,
-  marginBottom: 16,
-}
+  marginBottom: spacing.md,
+})
 
-const $iterationsRow: ViewStyle = {
+const $iterationsRow: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   flexDirection: "row",
   justifyContent: "space-between",
   alignItems: "center",
-  marginBottom: 16,
-}
+  marginBottom: spacing.md,
+})
 
-const $iterationsStepper: ViewStyle = {
+const $iterationsStepper: ThemedStyle<ViewStyle> = ({ colors }) => ({
   flexDirection: "row",
   alignItems: "center",
   backgroundColor: colors.palette.neutral200,
   borderRadius: 6,
   borderWidth: 1,
   borderColor: colors.border,
-}
+})
 
-const $stepperButton: ViewStyle = {
+const $stepperButton: ThemedStyle<ViewStyle> = ({ colors }) => ({
   width: 28,
   height: 28,
   alignItems: "center",
@@ -210,50 +215,50 @@ const $stepperButton: ViewStyle = {
   backgroundColor: colors.background,
   borderWidth: 1,
   borderColor: colors.border,
-}
+})
 
-const $stepperButtonDisabled: ViewStyle = {
+const $stepperButtonDisabled: ThemedStyle<ViewStyle> = ({ colors }) => ({
   backgroundColor: colors.palette.neutral300,
   borderColor: colors.palette.neutral400,
-}
+})
 
-const $stepperText: TextStyle = {
+const $stepperText: ThemedStyle<TextStyle> = ({ colors }) => ({
   fontSize: 16,
   fontWeight: "600",
   color: colors.text,
-}
+})
 
-const $stepperValue: TextStyle = {
-  paddingHorizontal: 12,
+const $stepperValue: ThemedStyle<TextStyle> = ({ spacing }) => ({
+  paddingHorizontal: spacing.sm,
   minWidth: 24,
   textAlign: "center",
-}
+})
 
-const $stepsContainer: ViewStyle = {
-  marginBottom: 16,
-}
+const $stepsContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  marginBottom: spacing.md,
+})
 
-const $emptyStepsContainer: ViewStyle = {
+const $emptyStepsContainer: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
   backgroundColor: colors.palette.neutral200,
   borderRadius: 8,
-  padding: 16,
-  marginBottom: 16,
+  padding: spacing.md,
+  marginBottom: spacing.md,
   alignItems: "center",
   borderWidth: 1,
   borderColor: colors.border,
   borderStyle: "dashed",
-}
+})
 
-const $emptyStepsText: TextStyle = {
+const $emptyStepsText: ThemedStyle<TextStyle> = ({ colors }) => ({
   textAlign: "center",
   color: colors.textDim,
-}
+})
 
-const $stepCard: ViewStyle = {
+const $stepCard: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
   backgroundColor: colors.background,
   borderRadius: 12,
-  padding: 16,
-  marginBottom: 12,
+  padding: spacing.md,
+  marginBottom: spacing.sm,
   borderWidth: 1,
   borderColor: colors.border,
   shadowColor: colors.palette.neutral900,
@@ -264,21 +269,25 @@ const $stepCard: ViewStyle = {
   shadowOpacity: 0.1,
   shadowRadius: 2,
   elevation: 2,
-}
+})
 
-const $subHeader: ViewStyle = {
+const $subHeader: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   flexDirection: "row",
   justifyContent: "space-between",
   alignItems: "center",
-  marginBottom: 12,
-}
+  marginBottom: spacing.sm,
+})
 
-const $purposeGrid: ViewStyle = {
+const $purposeGrid: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   flexDirection: "row",
-  gap: 8,
-  marginBottom: 12,
-}
+  gap: spacing.xs,
+  marginBottom: spacing.sm,
+})
 
-const $separator: ViewStyle = {
-  marginVertical: 12,
-}
+const $separator: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  marginVertical: spacing.sm,
+})
+
+const $trashIconColor: ThemedStyle<string> = ({ colors }) => colors.error
+
+const $plusIconColor: ThemedStyle<string> = ({ colors }) => colors.background

@@ -6,7 +6,8 @@ import { TrashIcon } from "react-native-heroicons/solid"
 import { Button } from "@/components/Button"
 import { Text } from "@/components/Text"
 import { TextField } from "@/components/TextField"
-import { colors } from "@/theme/colors"
+import { useAppTheme } from "@/theme/context"
+import type { ThemedStyle } from "@/theme/types"
 
 type UnitType =
   | "seconds"
@@ -67,6 +68,7 @@ export const GoalSelector: FC<GoalSelectorProps> = ({
   onRemove,
   type = "full",
 }) => {
+  const { themed } = useAppTheme()
   const [goalType, setGoalType] = useState<"time" | "distance" | "energy">(
     goal?.type === "time" || goal?.type === "distance" || goal?.type === "energy"
       ? goal.type
@@ -136,11 +138,11 @@ export const GoalSelector: FC<GoalSelectorProps> = ({
   }
 
   return (
-    <View style={type === "full" && $container}>
+    <View style={type === "full" && themed($container)}>
       <Text preset="formLabel" size="sm">
         Goal Type
       </Text>
-      <View style={$grid}>
+      <View style={themed($grid)}>
         {[
           { key: "time", label: "Time" },
           { key: "distance", label: "Distance" },
@@ -158,7 +160,7 @@ export const GoalSelector: FC<GoalSelectorProps> = ({
       <Text preset="formLabel" size="sm">
         Unit
       </Text>
-      <View style={$grid}>
+      <View style={themed($grid)}>
         {getUnitsForType(goalType).map((unitOption) => (
           <Button
             key={unitOption}
@@ -178,14 +180,14 @@ export const GoalSelector: FC<GoalSelectorProps> = ({
         onChangeText={handleValueChange}
         keyboardType="numeric"
         RightAccessory={() => (
-          <Text preset="formLabel" size="sm" style={$unitTextStyle}>
+          <Text preset="formLabel" size="sm" style={themed($unitTextStyle)}>
             {unit}
           </Text>
         )}
       />
       {onRemove && (
-        <Button onPress={onRemove} preset="ghost" style={$removeButton}>
-          <TrashIcon size={18} color={colors.error} />
+        <Button onPress={onRemove} preset="ghost" style={themed($removeButton)}>
+          <TrashIcon size={18} color={themed($trashIconColor)} />
         </Button>
       )}
     </View>
@@ -193,30 +195,32 @@ export const GoalSelector: FC<GoalSelectorProps> = ({
 }
 
 // Styles
-const $container: ViewStyle = {
+const $container: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
   backgroundColor: colors.palette.neutral100,
   borderRadius: 16,
-  padding: 12,
+  padding: spacing.sm,
   borderWidth: 1,
   borderColor: colors.border,
-}
+})
 
-const $grid: ViewStyle = {
+const $grid: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   flexDirection: "row",
   flexWrap: "wrap",
-  gap: 8,
-  marginBottom: 16,
-}
+  gap: spacing.xs,
+  marginBottom: spacing.md,
+})
 
-const $removeButton: ViewStyle = {
+const $removeButton: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   position: "absolute",
   right: 0,
   top: 0,
-  padding: 8,
-}
+  padding: spacing.xs,
+})
 
-const $unitTextStyle: TextStyle = {
-  marginRight: 8,
+const $unitTextStyle: ThemedStyle<TextStyle> = ({ spacing }) => ({
+  marginRight: spacing.xs,
   textAlign: "right",
   alignSelf: "center",
-}
+})
+
+const $trashIconColor: ThemedStyle<string> = ({ colors }) => colors.error

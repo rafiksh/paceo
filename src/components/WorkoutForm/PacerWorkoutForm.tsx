@@ -7,7 +7,8 @@ import { Button } from "@/components/Button"
 import { PacerGoalSelector } from "@/components/PacerGoalSelector"
 import { Text } from "@/components/Text"
 import { TextField } from "@/components/TextField"
-import { colors } from "@/theme/colors"
+import { useAppTheme } from "@/theme/context"
+import type { ThemedStyle } from "@/theme/types"
 import { pacerWorkoutSchema, type PacerWorkoutFormData } from "@/types/WorkoutFormData"
 
 import { ButtonSelector } from "./ButtonSelector"
@@ -25,6 +26,7 @@ const LOCATIONS = [
 ]
 
 export const PacerWorkoutForm: FC<PacerWorkoutFormProps> = ({ onSubmit, initialData }) => {
+  const { themed } = useAppTheme()
   const {
     control,
     handleSubmit,
@@ -48,7 +50,7 @@ export const PacerWorkoutForm: FC<PacerWorkoutFormProps> = ({ onSubmit, initialD
   })
 
   return (
-    <View style={$container}>
+    <View style={themed($container)}>
       {/* Workout Name */}
       <FormSection title="Workout Name" error={errors.workoutName?.message}>
         <Controller
@@ -61,7 +63,7 @@ export const PacerWorkoutForm: FC<PacerWorkoutFormProps> = ({ onSubmit, initialD
               placeholder="Enter a name for your workout..."
               autoCapitalize="words"
               returnKeyType="done"
-              containerStyle={$nameInputContainer}
+              containerStyle={themed($nameInputContainer)}
             />
           )}
         />
@@ -98,7 +100,7 @@ export const PacerWorkoutForm: FC<PacerWorkoutFormProps> = ({ onSubmit, initialD
         )}
       />
       {(errors.distance || errors.time) && (
-        <Text preset="formHelper" size="xs" style={$errorText}>
+        <Text preset="formHelper" size="xs" style={themed($errorText)}>
           {errors.distance?.message || errors.time?.message}
         </Text>
       )}
@@ -108,7 +110,7 @@ export const PacerWorkoutForm: FC<PacerWorkoutFormProps> = ({ onSubmit, initialD
         text={!isValid ? "Complete Configuration" : "Save Pacer Workout"}
         preset={!isValid ? "primary" : "default"}
         onPress={handleSubmit(onSubmit)}
-        style={$submitButton}
+        style={themed($submitButton)}
         disabled={!isValid}
       />
     </View>
@@ -123,11 +125,11 @@ const $nameInputContainer: ViewStyle = {
   marginBottom: 0,
 }
 
-const $submitButton: ViewStyle = {
-  marginTop: 24,
-}
+const $submitButton: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  marginTop: spacing.lg,
+})
 
-const $errorText = {
+const $errorText: ThemedStyle<any> = ({ colors }) => ({
   color: colors.error,
   marginTop: 4,
-}
+})

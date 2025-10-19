@@ -10,31 +10,20 @@ import {
   ChatBubbleLeftRightIcon as ChatBubbleLeftRightIconSolid,
 } from "react-native-heroicons/solid"
 
-import { colors } from "@/theme/colors"
-import { typography } from "@/theme/typography"
+import { useAppTheme } from "@/theme/context"
+import type { ThemedStyle } from "@/theme/types"
 
 export default function TabLayout() {
+  const { themed, theme } = useAppTheme()
+
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarStyle: {
-          backgroundColor: colors.background,
-          borderTopColor: colors.border,
-          borderTopWidth: 1,
-          height: 80,
-          paddingBottom: 20,
-          paddingTop: 12,
-          paddingHorizontal: 20,
-        },
-        tabBarLabelStyle: {
-          fontSize: 12,
-          fontWeight: "600",
-          fontFamily: typography.primary.semiBold,
-          marginTop: 4,
-        },
-        tabBarActiveTintColor: colors.text,
-        tabBarInactiveTintColor: colors.textDim,
+        tabBarStyle: themed($tabBarStyle),
+        tabBarLabelStyle: themed($tabBarLabelStyle),
+        tabBarActiveTintColor: theme.colors.tint,
+        tabBarInactiveTintColor: theme.colors.textDim,
       }}
     >
       <Tabs.Screen
@@ -88,3 +77,27 @@ function TabIcon({
 }) {
   return <Icon size={size} color={color} />
 }
+
+// Styles
+const $tabBarStyle: ThemedStyle<any> = ({ colors, spacing }) => ({
+  backgroundColor: colors.background,
+  borderTopColor: colors.border,
+  borderTopWidth: 1,
+  height: 80,
+  paddingBottom: spacing.lg,
+  paddingTop: spacing.sm,
+  paddingHorizontal: spacing.lg,
+  // Ensure proper contrast in dark mode
+  shadowColor: colors.palette.neutral900,
+  shadowOffset: { width: 0, height: -1 },
+  shadowOpacity: 0.1,
+  shadowRadius: 4,
+  elevation: 8,
+})
+
+const $tabBarLabelStyle: ThemedStyle<any> = ({ typography }) => ({
+  fontSize: 12,
+  fontWeight: "600",
+  fontFamily: typography.primary.semiBold,
+  marginTop: 4,
+})

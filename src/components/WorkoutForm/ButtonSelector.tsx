@@ -1,8 +1,8 @@
 import { FC } from "react"
 import { View, ViewStyle, TouchableOpacity, TextStyle } from "react-native"
 import { Text } from "@/components/Text"
-import { colors } from "@/theme/colors"
-import { radius } from "@/theme/spacing"
+import { useAppTheme } from "@/theme/context"
+import type { ThemedStyle } from "@/theme/types"
 
 interface ButtonOption {
   key: string
@@ -22,19 +22,24 @@ export const ButtonSelector: FC<ButtonSelectorProps> = ({
   onValueChange,
   error,
 }) => {
+  const { themed } = useAppTheme()
+
   return (
-    <View style={$container}>
-      <View style={$buttonContainer}>
+    <View style={themed($container)}>
+      <View style={themed($buttonContainer)}>
         {options.map((option) => (
           <TouchableOpacity
             key={option.key}
-            style={[$button, selectedValue === option.key && $buttonSelected]}
+            style={[themed($button), selectedValue === option.key && themed($buttonSelected)]}
             onPress={() => onValueChange(option.key)}
           >
             <Text
               preset="formLabel"
               size="sm"
-              style={[$buttonText, selectedValue === option.key && $buttonTextSelected]}
+              style={[
+                themed($buttonText),
+                selectedValue === option.key && themed($buttonTextSelected),
+              ]}
             >
               {option.label}
             </Text>
@@ -42,7 +47,7 @@ export const ButtonSelector: FC<ButtonSelectorProps> = ({
         ))}
       </View>
       {error && (
-        <Text preset="formHelper" size="xs" style={$errorText}>
+        <Text preset="formHelper" size="xs" style={themed($errorText)}>
           {error}
         </Text>
       )}
@@ -50,41 +55,41 @@ export const ButtonSelector: FC<ButtonSelectorProps> = ({
   )
 }
 
-const $container: ViewStyle = {
-  marginBottom: 16,
-}
+const $container: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  marginBottom: spacing.md,
+})
 
-const $buttonContainer: ViewStyle = {
+const $buttonContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   flexDirection: "row",
-  gap: 12,
-}
+  gap: spacing.sm,
+})
 
-const $button: ViewStyle = {
+const $button: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
   flex: 1,
-  paddingVertical: 12,
-  paddingHorizontal: 16,
-  borderRadius: radius.sm,
+  paddingVertical: spacing.sm,
+  paddingHorizontal: spacing.md,
+  borderRadius: 8,
   borderWidth: 1,
   borderColor: colors.border,
   backgroundColor: colors.background,
   alignItems: "center",
   justifyContent: "center",
-}
+})
 
-const $buttonSelected: ViewStyle = {
+const $buttonSelected: ThemedStyle<ViewStyle> = ({ colors }) => ({
   backgroundColor: colors.tint,
   borderColor: colors.tint,
-}
+})
 
-const $buttonText: TextStyle = {
+const $buttonText: ThemedStyle<TextStyle> = ({ colors }) => ({
   color: colors.text,
-}
+})
 
-const $buttonTextSelected: TextStyle = {
+const $buttonTextSelected: ThemedStyle<TextStyle> = ({ colors }) => ({
   color: colors.palette.neutral100,
-}
+})
 
-const $errorText = {
+const $errorText: ThemedStyle<TextStyle> = ({ colors, spacing }) => ({
   color: colors.error,
   marginTop: 4,
-}
+})

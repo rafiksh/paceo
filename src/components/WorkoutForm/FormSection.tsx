@@ -1,8 +1,9 @@
 import { FC, ReactNode } from "react"
-import { View, ViewStyle } from "react-native"
+import { View, ViewStyle, TextStyle } from "react-native"
 
 import { Text } from "@/components/Text"
-import { colors } from "@/theme/colors"
+import { useAppTheme } from "@/theme/context"
+import type { ThemedStyle } from "@/theme/types"
 
 interface FormSectionProps {
   title: string
@@ -11,14 +12,16 @@ interface FormSectionProps {
 }
 
 export const FormSection: FC<FormSectionProps> = ({ title, children, error }) => {
+  const { themed } = useAppTheme()
+
   return (
-    <View style={$section}>
+    <View style={themed($section)}>
       <Text preset="subheading" size="md">
         {title}
       </Text>
       {children}
       {error && (
-        <Text preset="formHelper" size="xs" style={$errorText}>
+        <Text preset="formHelper" size="xs" style={themed($errorText)}>
           {error}
         </Text>
       )}
@@ -26,11 +29,11 @@ export const FormSection: FC<FormSectionProps> = ({ title, children, error }) =>
   )
 }
 
-const $section: ViewStyle = {
-  marginBottom: 24,
-}
+const $section: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  marginBottom: spacing.lg,
+})
 
-const $errorText = {
+const $errorText: ThemedStyle<TextStyle> = ({ colors }) => ({
   color: colors.error,
   marginTop: 4,
-}
+})

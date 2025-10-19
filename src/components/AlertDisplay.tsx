@@ -4,7 +4,8 @@ import type { TextStyle } from "react-native"
 import type { WorkoutAlert } from "expo-workoutkit"
 
 import { Text } from "@/components/Text"
-import { colors } from "@/theme/colors"
+import { useAppTheme } from "@/theme/context"
+import type { ThemedStyle } from "@/theme/types"
 
 import { AlertSelectorModal } from "./AlertSelectorModal"
 
@@ -14,6 +15,7 @@ interface AlertDisplayProps {
 }
 
 export const AlertDisplay: FC<AlertDisplayProps> = ({ alert, onAlertChange }) => {
+  const { themed } = useAppTheme()
   const [modalVisible, setModalVisible] = useState(false)
 
   const getAlertDisplayText = (alert: WorkoutAlert) => {
@@ -44,13 +46,13 @@ export const AlertDisplay: FC<AlertDisplayProps> = ({ alert, onAlertChange }) =>
   }
 
   return (
-    <View style={$container}>
+    <View style={themed($container)}>
       <TouchableOpacity
-        style={[$alertButton, alert && $alertButtonActive]}
+        style={[themed($alertButton), alert && themed($alertButtonActive)]}
         onPress={() => setModalVisible(true)}
       >
-        <View style={$alertContent}>
-          <Text preset="formLabel" size="sm" style={$alertLabel}>
+        <View style={themed($alertContent)}>
+          <Text preset="formLabel" size="sm" style={themed($alertLabel)}>
             Alert
           </Text>
           {alert ? (
@@ -58,12 +60,12 @@ export const AlertDisplay: FC<AlertDisplayProps> = ({ alert, onAlertChange }) =>
               {getAlertDisplayText(alert)}
             </Text>
           ) : (
-            <Text preset="formHelper" size="xs" style={$alertPlaceholder}>
+            <Text preset="formHelper" size="xs" style={themed($alertPlaceholder)}>
               Tap to configure alert
             </Text>
           )}
         </View>
-        <View style={$alertIcon}>
+        <View style={themed($alertIcon)}>
           <Text preset="formLabel" size="sm">
             {alert ? "✏️" : "➕"}
           </Text>
@@ -80,39 +82,39 @@ export const AlertDisplay: FC<AlertDisplayProps> = ({ alert, onAlertChange }) =>
   )
 }
 
-const $container: ViewStyle = {
-  marginBottom: 16,
-}
+const $container: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  marginBottom: spacing.md,
+})
 
-const $alertButton: ViewStyle = {
+const $alertButton: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
   flexDirection: "row",
   alignItems: "center",
   justifyContent: "space-between",
-  paddingVertical: 12,
-  paddingHorizontal: 16,
+  paddingVertical: spacing.sm,
+  paddingHorizontal: spacing.md,
   backgroundColor: colors.background,
   borderRadius: 12,
   borderWidth: 1,
   borderColor: colors.border,
-}
+})
 
-const $alertButtonActive: ViewStyle = {
+const $alertButtonActive: ThemedStyle<ViewStyle> = ({ colors }) => ({
   backgroundColor: colors.palette.accent100,
   borderColor: colors.tint,
-}
+})
 
 const $alertContent: ViewStyle = {
   flex: 1,
 }
 
-const $alertLabel: TextStyle = {
+const $alertLabel: ThemedStyle<TextStyle> = ({ spacing }) => ({
   marginBottom: 2,
-}
+})
 
-const $alertPlaceholder: TextStyle = {
+const $alertPlaceholder: ThemedStyle<TextStyle> = ({ colors }) => ({
   color: colors.textDim,
-}
+})
 
-const $alertIcon: ViewStyle = {
-  marginLeft: 12,
-}
+const $alertIcon: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  marginLeft: spacing.sm,
+})

@@ -9,44 +9,54 @@ import { Button } from "@/components/Button"
 import { Screen } from "@/components/Screen"
 import { Text } from "@/components/Text"
 import { WorkoutStorage, type SavedWorkout } from "@/services/WorkoutStorage"
-import { colors } from "@/theme/colors"
+import { useAppTheme } from "@/theme/context"
+import type { ThemedStyle } from "@/theme/types"
 
 // LoadingState Component
-const LoadingState: FC = () => (
-  <View style={$loadingContainer}>
-    <View style={$header}>
-      <Text preset="heading">Saved Workouts</Text>
-      <Text preset="subheading">Your saved workout plans</Text>
-    </View>
-    <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={$scrollContent}>
-      {[1, 2, 3].map((i) => (
-        <View key={i} style={$skeletonCard}>
-          <View style={$skeletonContent}>
-            <View style={$skeletonTitle} />
-            <View style={$skeletonDescription} />
-            <View style={$skeletonMeta} />
+const LoadingState: FC = () => {
+  const { themed } = useAppTheme()
+  return (
+    <View style={themed($loadingContainer)}>
+      <View style={themed($header)}>
+        <Text preset="heading">Saved Workouts</Text>
+        <Text preset="subheading">Your saved workout plans</Text>
+      </View>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={themed($scrollContent)}
+      >
+        {[1, 2, 3].map((i) => (
+          <View key={i} style={themed($skeletonCard)}>
+            <View style={themed($skeletonContent)}>
+              <View style={themed($skeletonTitle)} />
+              <View style={themed($skeletonDescription)} />
+              <View style={themed($skeletonMeta)} />
+            </View>
+            <View style={themed($skeletonButton)} />
           </View>
-          <View style={$skeletonButton} />
-        </View>
-      ))}
-    </ScrollView>
-  </View>
-)
+        ))}
+      </ScrollView>
+    </View>
+  )
+}
 
 // EmptyState Component
-const EmptyState: FC = () => (
-  <View style={$emptyState}>
-    <View style={$emptyIconContainer}>
-      <HeartIcon size={40} color={colors.palette.neutral400} />
+const EmptyState: FC = () => {
+  const { themed } = useAppTheme()
+  return (
+    <View style={themed($emptyState)}>
+      <View style={themed($emptyIconContainer)}>
+        <HeartIcon size={40} color={themed($emptyIconColor)} />
+      </View>
+      <Text preset="heading" size="md" style={themed($emptyTitle)}>
+        No Saved Workouts
+      </Text>
+      <Text preset="formHelper" style={themed($emptyDescription)}>
+        Create your first workout to see it here
+      </Text>
     </View>
-    <Text preset="heading" size="md" style={$emptyTitle}>
-      No Saved Workouts
-    </Text>
-    <Text preset="formHelper" style={$emptyDescription}>
-      Create your first workout to see it here
-    </Text>
-  </View>
-)
+  )
+}
 
 // WorkoutCard Component
 interface WorkoutCardProps {
@@ -57,6 +67,7 @@ interface WorkoutCardProps {
 }
 
 const WorkoutCard: FC<WorkoutCardProps> = ({ workout, onPreview, onDelete, onButtonPress }) => {
+  const { themed, theme } = useAppTheme()
   const getWorkoutSummary = (workoutPlan: unknown): string => {
     if (!workoutPlan || typeof workoutPlan !== "object") {
       return "Workout Plan"
@@ -101,23 +112,23 @@ const WorkoutCard: FC<WorkoutCardProps> = ({ workout, onPreview, onDelete, onBut
 
   return (
     <View>
-      <View style={$workoutCard}>
+      <View style={themed($workoutCard)}>
         {/* Workout Info */}
-        <View style={$workoutInfo}>
-          <Text preset="heading" size="sm" style={$workoutName}>
+        <View style={themed($workoutInfo)}>
+          <Text preset="heading" size="sm" style={themed($workoutName)}>
             {workout.name}
           </Text>
-          <Text preset="formHelper" size="xs" style={$workoutDescription}>
+          <Text preset="formHelper" size="xs" style={themed($workoutDescription)}>
             {getWorkoutSummary(workout.workoutPlan)}
           </Text>
-          <View style={$workoutMeta}>
-            <View style={$metaItem}>
+          <View style={themed($workoutMeta)}>
+            <View style={themed($metaItem)}>
               {workout.location === "indoor" ? (
-                <HomeIcon size={12} color={colors.palette.secondary500} />
+                <HomeIcon size={12} color={themed($indoorIconColor)} />
               ) : (
-                <SunIcon size={12} color={colors.palette.accent500} />
+                <SunIcon size={12} color={themed($outdoorIconColor)} />
               )}
-              <Text preset="formHelper" size="xxs" style={$metaText}>
+              <Text preset="formHelper" size="xxs" style={themed($metaText)}>
                 {workout.location === "indoor" ? "Indoor" : "Outdoor"}
               </Text>
             </View>
@@ -125,37 +136,37 @@ const WorkoutCard: FC<WorkoutCardProps> = ({ workout, onPreview, onDelete, onBut
         </View>
 
         {/* Action Buttons */}
-        <View style={$actionButtons}>
+        <View style={themed($actionButtons)}>
           <Button
             preset="default"
             onPress={() => onPreview(workout)}
-            style={$iconButton}
-            textStyle={$iconButtonText}
+            style={themed($iconButton)}
+            textStyle={themed($iconButtonText)}
           >
-            <EyeIcon size={18} color={colors.tint} />
+            <EyeIcon size={18} color={themed($eyeIconColor)} />
           </Button>
           <Button
             preset="default"
             onPress={() => onDelete(workout.id)}
-            style={$deleteIconButton}
-            textStyle={$iconButtonText}
+            style={themed($deleteIconButton)}
+            textStyle={themed($iconButtonText)}
           >
-            <TrashIcon size={18} color={colors.palette.angry500} />
+            <TrashIcon size={18} color={themed($trashIconColor)} />
           </Button>
         </View>
       </View>
 
       {/* Workout Preview */}
-      <View style={$workoutPreview}>
+      <View style={themed($workoutPreview)}>
         <PreviewWorkoutButton
           workoutPlan={workout.workoutPlan}
           onButtonPress={({ nativeEvent }) => onButtonPress(nativeEvent.message)}
           label="Start Workout"
-          buttonColor={colors.tint}
-          textColor={colors.palette.neutral100}
+          buttonColor={theme.colors.tint}
+          textColor={theme.colors.palette.neutral100}
           cornerRadius={12}
           fontSize={16}
-          style={$startWorkoutButton}
+          style={themed($startWorkoutButton)}
         />
       </View>
     </View>
@@ -163,6 +174,7 @@ const WorkoutCard: FC<WorkoutCardProps> = ({ workout, onPreview, onDelete, onBut
 }
 
 export const SavedWorkoutsScreen: FC = function SavedWorkoutsScreen() {
+  const { themed } = useAppTheme()
   const [savedWorkouts, setSavedWorkouts] = useState<SavedWorkout[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -217,24 +229,27 @@ export const SavedWorkoutsScreen: FC = function SavedWorkoutsScreen() {
 
   if (loading) {
     return (
-      <Screen preset="fixed" contentContainerStyle={$container} safeAreaEdges={["top"]}>
+      <Screen preset="fixed" contentContainerStyle={themed($container)} safeAreaEdges={["top"]}>
         <LoadingState />
       </Screen>
     )
   }
 
   return (
-    <Screen preset="fixed" contentContainerStyle={$container} safeAreaEdges={["top"]}>
-      <View style={$header}>
+    <Screen preset="fixed" contentContainerStyle={themed($container)} safeAreaEdges={["top"]}>
+      <View style={themed($header)}>
         <Text preset="heading">Saved Workouts</Text>
         <Text preset="subheading">Your saved workout plans</Text>
       </View>
 
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={$scrollContent}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={themed($scrollContent)}
+      >
         {savedWorkouts.length === 0 ? (
           <EmptyState />
         ) : (
-          <View style={$workoutsList}>
+          <View style={themed($workoutsList)}>
             {savedWorkouts.map((savedWorkout) => (
               <WorkoutCard
                 key={savedWorkout.id}
@@ -260,26 +275,26 @@ const $loadingContainer: ViewStyle = {
   flex: 1,
 }
 
-const $scrollContent: ViewStyle = {
-  paddingVertical: 40,
-  paddingHorizontal: 24,
-}
+const $scrollContent: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  paddingVertical: spacing.xl,
+  paddingHorizontal: spacing.lg,
+})
 
-const $header: ViewStyle = {
-  paddingHorizontal: 24,
-}
+const $header: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  paddingHorizontal: spacing.lg,
+})
 
-const $workoutsList: ViewStyle = {
-  paddingVertical: 20,
-  gap: 16,
-}
+const $workoutsList: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  paddingVertical: spacing.lg,
+  gap: spacing.md,
+})
 
-const $workoutCard: ViewStyle = {
+const $workoutCard: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
   flexDirection: "row",
   alignItems: "flex-start",
   justifyContent: "space-between",
   backgroundColor: colors.palette.neutral100,
-  padding: 20,
+  padding: spacing.lg,
   borderRadius: 16,
   borderWidth: 1,
   borderColor: colors.border,
@@ -288,50 +303,50 @@ const $workoutCard: ViewStyle = {
   shadowOpacity: 0.08,
   shadowRadius: 8,
   elevation: 3,
-}
+})
 
-const $workoutInfo: ViewStyle = {
+const $workoutInfo: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   flex: 1,
-  marginRight: 16,
+  marginRight: spacing.md,
   paddingTop: 2,
-}
+})
 
-const $workoutName: TextStyle = {
+const $workoutName: ThemedStyle<TextStyle> = ({ colors }) => ({
   color: colors.text,
   marginBottom: 6,
   fontWeight: "600",
-}
+})
 
-const $workoutDescription: TextStyle = {
+const $workoutDescription: ThemedStyle<TextStyle> = ({ colors, spacing }) => ({
   color: colors.textDim,
-  marginBottom: 12,
+  marginBottom: spacing.sm,
   lineHeight: 18,
-}
+})
 
-const $workoutMeta: ViewStyle = {
+const $workoutMeta: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   flexDirection: "row",
-  gap: 16,
+  gap: spacing.md,
   alignItems: "center",
-}
+})
 
-const $metaItem: ViewStyle = {
+const $metaItem: ThemedStyle<ViewStyle> = () => ({
   flexDirection: "row",
   alignItems: "center",
   gap: 4,
-}
+})
 
-const $metaText: TextStyle = {
+const $metaText: ThemedStyle<TextStyle> = ({ colors }) => ({
   color: colors.textDim,
-}
+})
 
-const $actionButtons: ViewStyle = {
+const $actionButtons: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   flexDirection: "row",
-  gap: 12,
+  gap: spacing.sm,
   alignItems: "flex-start",
   paddingTop: 2,
-}
+})
 
-const $iconButton: ViewStyle = {
+const $iconButton: ThemedStyle<ViewStyle> = ({ colors }) => ({
   width: 44,
   height: 44,
   borderRadius: 22,
@@ -345,9 +360,9 @@ const $iconButton: ViewStyle = {
   shadowOpacity: 0.05,
   shadowRadius: 2,
   elevation: 1,
-}
+})
 
-const $deleteIconButton: ViewStyle = {
+const $deleteIconButton: ThemedStyle<ViewStyle> = ({ colors }) => ({
   width: 44,
   height: 44,
   borderRadius: 22,
@@ -361,95 +376,102 @@ const $deleteIconButton: ViewStyle = {
   shadowOpacity: 0.1,
   shadowRadius: 2,
   elevation: 1,
-}
+})
 
 const $iconButtonText: TextStyle = {
   fontSize: 0, // Hide text, only show icon
 }
 
-const $startWorkoutButton: ViewStyle = {
+const $startWorkoutButton: ThemedStyle<ViewStyle> = () => ({
   height: 56,
   borderRadius: 12,
-}
+})
 
-const $workoutPreview: ViewStyle = {
-  marginTop: 16,
+const $workoutPreview: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  marginTop: spacing.md,
   paddingHorizontal: 4,
-}
+})
 
 // Loading States
-const $skeletonCard: ViewStyle = {
+const $skeletonCard: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
   flexDirection: "row",
   alignItems: "center",
   justifyContent: "space-between",
   backgroundColor: colors.palette.neutral100,
-  padding: 16,
+  padding: spacing.md,
   borderRadius: 12,
   borderWidth: 1,
   borderColor: colors.border,
-  marginBottom: 16,
-}
+  marginBottom: spacing.md,
+})
 
-const $skeletonContent: ViewStyle = {
+const $skeletonContent: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   flex: 1,
-  marginRight: 12,
-}
+  marginRight: spacing.sm,
+})
 
-const $skeletonTitle: ViewStyle = {
+const $skeletonTitle: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
   height: 16,
   backgroundColor: colors.palette.neutral200,
   borderRadius: 4,
-  marginBottom: 8,
+  marginBottom: spacing.xs,
   width: "60%",
-}
+})
 
-const $skeletonDescription: ViewStyle = {
+const $skeletonDescription: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
   height: 12,
   backgroundColor: colors.palette.neutral200,
   borderRadius: 4,
-  marginBottom: 8,
+  marginBottom: spacing.xs,
   width: "80%",
-}
+})
 
-const $skeletonMeta: ViewStyle = {
+const $skeletonMeta: ThemedStyle<ViewStyle> = ({ colors }) => ({
   height: 10,
   backgroundColor: colors.palette.neutral200,
   borderRadius: 4,
   width: "40%",
-}
+})
 
-const $skeletonButton: ViewStyle = {
+const $skeletonButton: ThemedStyle<ViewStyle> = ({ colors }) => ({
   height: 32,
   width: 32,
   backgroundColor: colors.palette.neutral200,
   borderRadius: 16,
-}
+})
 
 // Empty State
-const $emptyState: ViewStyle = {
+const $emptyState: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   alignItems: "center",
   paddingVertical: 80,
-  paddingHorizontal: 40,
-}
+  paddingHorizontal: spacing.xl,
+})
 
-const $emptyIconContainer: ViewStyle = {
+const $emptyIconContainer: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
   width: 100,
   height: 100,
   borderRadius: 50,
   backgroundColor: colors.palette.neutral200,
   alignItems: "center",
   justifyContent: "center",
-  marginBottom: 24,
-}
+  marginBottom: spacing.lg,
+})
 
-const $emptyTitle: TextStyle = {
+const $emptyTitle: ThemedStyle<TextStyle> = ({ colors, spacing }) => ({
   color: colors.text,
-  marginBottom: 8,
+  marginBottom: spacing.xs,
   textAlign: "center",
-}
+})
 
-const $emptyDescription: TextStyle = {
+const $emptyDescription: ThemedStyle<TextStyle> = ({ colors }) => ({
   color: colors.textDim,
   textAlign: "center",
   lineHeight: 20,
-}
+})
+
+// Color helpers
+const $emptyIconColor: ThemedStyle<string> = ({ colors }) => colors.palette.neutral400
+const $indoorIconColor: ThemedStyle<string> = ({ colors }) => colors.palette.secondary500
+const $outdoorIconColor: ThemedStyle<string> = ({ colors }) => colors.palette.accent500
+const $eyeIconColor: ThemedStyle<string> = ({ colors }) => colors.tint
+const $trashIconColor: ThemedStyle<string> = ({ colors }) => colors.palette.angry500
