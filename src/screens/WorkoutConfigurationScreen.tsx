@@ -41,7 +41,7 @@ const WORKOUT_TYPES = [
 ]
 
 export const WorkoutConfigurationScreen: FC = function WorkoutConfigurationScreen() {
-  const { themed } = useAppTheme()
+  const { themed, theme } = useAppTheme()
   const params = useLocalSearchParams()
   const activity = (params.activity as HKWorkoutActivityType) || "running"
 
@@ -180,7 +180,7 @@ export const WorkoutConfigurationScreen: FC = function WorkoutConfigurationScree
     <Screen preset="fixed" contentContainerStyle={themed($container)} safeAreaEdges={["top"]}>
       <View style={themed($header)}>
         <TouchableOpacity style={themed($backButton)} onPress={handleBack}>
-          <ArrowLeftIcon size={20} color={themed($backIconColor)} />
+          <ArrowLeftIcon size={20} color={theme.colors.text} />
         </TouchableOpacity>
         <View style={themed($headerContent)}>
           <Text preset="heading" size="lg">
@@ -254,8 +254,3 @@ const $headerContent: ViewStyle = {
 const $section: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   marginBottom: spacing.xl,
 })
-
-// Color helpers
-const $backIconColor: ThemedStyle<string> = ({ colors }) => colors.text
-
-// Location Styles
