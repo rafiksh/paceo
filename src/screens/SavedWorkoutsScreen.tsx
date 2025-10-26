@@ -3,13 +3,14 @@ import { View, ViewStyle, ScrollView, Alert } from "react-native"
 import type { TextStyle } from "react-native"
 import { router, useFocusEffect } from "expo-router"
 import { PreviewWorkoutButton } from "expo-workoutkit"
+import { format } from "date-fns"
 import {
   TrashIcon,
-  HeartIcon,
   EyeIcon,
   SunIcon,
   HomeIcon,
   SparklesIcon,
+  CalendarIcon,
 } from "react-native-heroicons/outline"
 
 import { Badge } from "@/components/Badge"
@@ -19,8 +20,7 @@ import { Text } from "@/components/Text"
 import { WorkoutStorage, type SavedWorkout } from "@/services/WorkoutStorage"
 import { useAppTheme } from "@/theme/context"
 import type { ThemedStyle } from "@/theme/types"
-
-import { getActivityEmoji } from "./ActivitySelectionScreen"
+import { getActivityEmoji } from "@/utils/workoutUtils"
 
 // LoadingState Component
 const LoadingState: FC = () => {
@@ -46,24 +46,6 @@ const LoadingState: FC = () => {
           </View>
         ))}
       </ScrollView>
-    </View>
-  )
-}
-
-// EmptyState Component
-const EmptyState: FC = () => {
-  const { themed, theme } = useAppTheme()
-  return (
-    <View style={themed($emptyState)}>
-      <View style={themed($emptyIconContainer)}>
-        <HeartIcon size={40} color={theme.colors.palette.neutral400} />
-      </View>
-      <Text preset="heading" size="md" style={themed($emptyTitle)}>
-        No Saved Workouts
-      </Text>
-      <Text preset="formHelper" style={themed($emptyDescription)}>
-        Create your first workout to see it here
-      </Text>
     </View>
   )
 }
@@ -196,6 +178,16 @@ const WorkoutCard: FC<WorkoutCardProps> = ({ workout, onPreview, onDelete, onBut
             {workout.location === "indoor" ? "Indoor" : "Outdoor"}
           </Text>
         </View>
+
+        {/* Date Badge - Only show if scheduled */}
+        {workout.scheduledDate && (
+          <View style={themed($dateBadge)}>
+            <CalendarIcon size={12} color={theme.colors.textDim} />
+            <Text preset="formHelper" size="xxs" style={themed($dateText)}>
+              {format(workout.scheduledDate, "MMM d")}
+            </Text>
+          </View>
+        )}
       </View>
 
       {/* Footer Button inside card */}
@@ -215,10 +207,13 @@ const WorkoutCard: FC<WorkoutCardProps> = ({ workout, onPreview, onDelete, onBut
   )
 }
 
+type FilterType = "all" | "upcoming" | "completed"
+
 export const SavedWorkoutsScreen: FC = function SavedWorkoutsScreen() {
   const { themed } = useAppTheme()
   const [savedWorkouts, setSavedWorkouts] = useState<SavedWorkout[]>([])
   const [loading, setLoading] = useState(true)
+  const [filter, setFilter] = useState<FilterType>("all")
 
   useFocusEffect(
     useCallback(() => {
@@ -238,13 +233,28 @@ export const SavedWorkoutsScreen: FC = function SavedWorkoutsScreen() {
     }
   }
 
+  const getFilteredWorkouts = (): SavedWorkout[] => {
+    switch (filter) {
+      case "upcoming":
+        return savedWorkouts.filter(
+          (w) => w.scheduledDate && w.scheduledDate >= new Date() && w.status === "scheduled",
+        )
+      case "completed":
+        return savedWorkouts.filter((w) => w.status === "completed")
+      default:
+        return savedWorkouts
+    }
+  }
+
+  const filteredWorkouts = getFilteredWorkouts()
+
   const handleButtonPress = () => {}
 
   const handlePreviewWorkout = (workout: SavedWorkout) => {
-    // Navigate to workout preview screen as modal
+    // Navigate to workout details screen
     router.push({
-      pathname: "/(tabs)/saved/preview",
-      params: { workoutId: workout.id },
+      pathname: "/(tabs)/saved/[id]",
+      params: { id: workout.id },
     })
   }
 
@@ -282,15 +292,43 @@ export const SavedWorkoutsScreen: FC = function SavedWorkoutsScreen() {
         <Text preset="subheading">Your saved workout plans</Text>
       </View>
 
+      {/* Filter Buttons */}
+      <View style={themed($filterContainer)}>
+        <Button preset={filter === "all" ? "filled" : "default"} onPress={() => setFilter("all")}>
+          All ({savedWorkouts.length})
+        </Button>
+        <Button
+          preset={filter === "upcoming" ? "filled" : "default"}
+          onPress={() => setFilter("upcoming")}
+        >
+          Upcoming (
+          {savedWorkouts.filter((w) => w.scheduledDate && w.status === "scheduled").length})
+        </Button>
+        <Button
+          preset={filter === "completed" ? "filled" : "default"}
+          onPress={() => setFilter("completed")}
+        >
+          Completed ({savedWorkouts.filter((w) => w.status === "completed").length})
+        </Button>
+      </View>
+
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={themed($scrollContent)}
       >
-        {savedWorkouts.length === 0 ? (
-          <EmptyState />
+        {filteredWorkouts.length === 0 ? (
+          <View style={themed($emptyState)}>
+            <Text preset="formHelper" style={themed($emptyDescription)}>
+              {filter === "upcoming"
+                ? "No upcoming workouts scheduled"
+                : filter === "completed"
+                  ? "No completed workouts yet"
+                  : "No saved workouts"}
+            </Text>
+          </View>
         ) : (
           <View style={themed($workoutsList)}>
-            {savedWorkouts.map((savedWorkout) => (
+            {filteredWorkouts.map((savedWorkout) => (
               <WorkoutCard
                 key={savedWorkout.id}
                 workout={savedWorkout}
@@ -316,16 +354,23 @@ const $loadingContainer: ViewStyle = {
 }
 
 const $scrollContent: ThemedStyle<ViewStyle> = ({ spacing }) => ({
-  paddingVertical: spacing.xl,
   paddingHorizontal: spacing.lg,
 })
 
 const $header: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   paddingHorizontal: spacing.lg,
+  marginBottom: spacing.md,
+})
+
+const $filterContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  flexDirection: "row",
+  gap: spacing.xs,
+  paddingHorizontal: spacing.lg,
+  marginBottom: spacing.md,
 })
 
 const $workoutsList: ThemedStyle<ViewStyle> = ({ spacing }) => ({
-  paddingVertical: spacing.lg,
+  paddingBottom: spacing.lg,
   gap: spacing.md,
 })
 
@@ -496,22 +541,6 @@ const $emptyState: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   paddingHorizontal: spacing.xl,
 })
 
-const $emptyIconContainer: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
-  width: 100,
-  height: 100,
-  borderRadius: 50,
-  backgroundColor: colors.palette.neutral200,
-  alignItems: "center",
-  justifyContent: "center",
-  marginBottom: spacing.lg,
-})
-
-const $emptyTitle: ThemedStyle<TextStyle> = ({ colors, spacing }) => ({
-  color: colors.text,
-  marginBottom: spacing.xs,
-  textAlign: "center",
-})
-
 const $emptyDescription: ThemedStyle<TextStyle> = ({ colors }) => ({
   color: colors.textDim,
   textAlign: "center",
@@ -522,4 +551,21 @@ const $metaItem: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   flexDirection: "row",
   alignItems: "center",
   gap: spacing.xxxs,
+})
+
+const $dateBadge: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
+  flexDirection: "row",
+  alignItems: "center",
+  gap: spacing.xxxs,
+  backgroundColor: colors.palette.neutral100,
+  borderRadius: 8,
+  paddingHorizontal: spacing.xs,
+  paddingVertical: spacing.xxs,
+  borderWidth: 1,
+  borderColor: colors.border,
+})
+
+const $dateText: ThemedStyle<TextStyle> = ({ colors }) => ({
+  color: colors.textDim,
+  fontWeight: "500",
 })

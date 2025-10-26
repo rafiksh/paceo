@@ -5,7 +5,7 @@ export default function SavedLayout() {
     <Stack screenOptions={{ headerShown: false }} initialRouteName="index">
       <Stack.Screen name="index" />
       <Stack.Screen
-        name="preview"
+        name="[id]"
         options={{
           presentation: "modal",
         }}
