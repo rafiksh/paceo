@@ -402,7 +402,7 @@ const $toggleSection: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   marginBottom: spacing.lg,
 })
 
-const $toggleContainer: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
+const $toggleContainer: ThemedStyle<ViewStyle> = ({ colors }) => ({
   flexDirection: "row",
   backgroundColor: colors.palette.neutral200,
   borderRadius: 12,

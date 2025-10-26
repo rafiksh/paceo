@@ -81,7 +81,7 @@ const $infoRow: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   paddingVertical: spacing.xs,
 })
 
-const $locationInfo: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+const $locationInfo: ThemedStyle<ViewStyle> = () => ({
   flexDirection: "row",
   alignItems: "center",
   gap: 6,

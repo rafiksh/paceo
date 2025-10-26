@@ -11,6 +11,9 @@ export interface SavedWorkout {
   activity: string
   location: string
   origin: "ai" | "manual"
+  scheduledDate?: Date
+  completedDate?: Date
+  status?: "scheduled" | "completed" | "missed" | "unscheduled"
 }
 
 export class WorkoutStorage {
@@ -31,11 +34,20 @@ export class WorkoutStorage {
       if (!workoutsJson) return []
 
       const workouts = JSON.parse(workoutsJson)
-      // Convert createdAt strings back to Date objects
+      // Convert date strings back to Date objects
       return workouts.map((workout: Record<string, unknown>) => ({
         ...workout,
         createdAt: new Date(workout.createdAt as string),
+        scheduledDate: workout.scheduledDate
+          ? new Date(workout.scheduledDate as string)
+          : undefined,
+        completedDate: workout.completedDate
+          ? new Date(workout.completedDate as string)
+          : undefined,
         origin: (workout.origin as "ai" | "manual" | undefined) ?? "manual",
+        status:
+          (workout.status as "scheduled" | "completed" | "missed" | "unscheduled" | undefined) ??
+          "unscheduled",
       }))
     } catch (error) {
       console.error("Error loading workouts:", error)
@@ -69,5 +81,40 @@ export class WorkoutStorage {
 
   static generateId(): string {
     return Date.now().toString(36) + Math.random().toString(36).substr(2)
+  }
+
+  // Helper methods for filtering workouts
+  static async getUpcomingWorkouts(): Promise<SavedWorkout[]> {
+    const workouts = await this.getWorkouts()
+    const now = new Date()
+    return workouts
+      .filter((w) => w.scheduledDate && w.scheduledDate >= now && w.status === "scheduled")
+      .sort((a, b) => a.scheduledDate!.getTime() - b.scheduledDate!.getTime())
+  }
+
+  static async getCompletedWorkouts(): Promise<SavedWorkout[]> {
+    const workouts = await this.getWorkouts()
+    return workouts
+      .filter((w) => w.status === "completed")
+      .sort((a, b) => (b.completedDate?.getTime() || 0) - (a.completedDate?.getTime() || 0))
+  }
+
+  static async getWorkoutStats(): Promise<{
+    totalCompleted: number
+    thisWeekCompleted: number
+    thisMonthCompleted: number
+  }> {
+    const workouts = await this.getCompletedWorkouts()
+    const now = new Date()
+    const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
+    const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
+
+    return {
+      totalCompleted: workouts.length,
+      thisWeekCompleted: workouts.filter((w) => w.completedDate && w.completedDate >= weekAgo)
+        .length,
+      thisMonthCompleted: workouts.filter((w) => w.completedDate && w.completedDate >= monthAgo)
+        .length,
+    }
   }
 }

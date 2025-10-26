@@ -63,3 +63,35 @@ export const getBlockSummary = (
 
   return { iterations, totalSteps, stepTypes }
 }
+
+export const ACTIVITY_CATEGORIES = {
+  cardio: [
+    { value: "running", label: "Running", icon: "🏃‍♂️", color: "#FF6B6B" },
+    { value: "cycling", label: "Cycling", icon: "🚴‍♂️", color: "#4ECDC4" },
+    { value: "swimming", label: "Swimming", icon: "🏊‍♂️", color: "#45B7D1" },
+    { value: "walking", label: "Walking", icon: "🚶‍♂️", color: "#96CEB4" },
+    { value: "mixedCardio", label: "Mixed Cardio", icon: "💪", color: "#FECA57" },
+  ],
+  strength: [
+    { value: "strengthTraining", label: "Strength", icon: "🏋️‍♂️", color: "#FF9FF3" },
+    { value: "yoga", label: "Yoga", icon: "🧘‍♀️", color: "#A8E6CF" },
+    { value: "pilates", label: "Pilates", icon: "🤸‍♀️", color: "#FFD93D" },
+    { value: "crossTraining", label: "Cross Training", icon: "⚡", color: "#FF6B9D" },
+  ],
+  sports: [
+    { value: "tennis", label: "Tennis", icon: "🎾", color: "#6C5CE7" },
+    { value: "basketball", label: "Basketball", icon: "🏀", color: "#FD79A8" },
+    { value: "soccer", label: "Soccer", icon: "⚽", color: "#00B894" },
+    { value: "boxing", label: "Boxing", icon: "🥊", color: "#E17055" },
+  ],
+}
+
+export const getActivityEmoji = (activity: string) => {
+  const activityCategory = Object.values(ACTIVITY_CATEGORIES).find((category) =>
+    category.some((a) => a.value === activity),
+  )
+  const activityIcon = activityCategory?.find((a) => a.value === activity)?.icon
+  if (!activityIcon) return "🏃‍♂️‍➡️"
+
+  return activityIcon
+}

@@ -107,7 +107,7 @@ const $alertContent: ViewStyle = {
   flex: 1,
 }
 
-const $alertLabel: ThemedStyle<TextStyle> = ({ spacing }) => ({
+const $alertLabel: ThemedStyle<TextStyle> = () => ({
   marginBottom: 2,
 })
 

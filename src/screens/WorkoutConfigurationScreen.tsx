@@ -1,5 +1,5 @@
 import { FC, useState } from "react"
-import { View, ViewStyle, ScrollView, TouchableOpacity, Alert } from "react-native"
+import { View, ViewStyle, TextStyle, ScrollView, TouchableOpacity, Alert } from "react-native"
 import { router, useLocalSearchParams } from "expo-router"
 import type {
   WorkoutPlan,
@@ -7,7 +7,8 @@ import type {
   SingleGoalWorkout,
   PacerWorkout,
 } from "expo-workoutkit"
-import { ArrowLeftIcon } from "react-native-heroicons/outline"
+import { format } from "date-fns"
+import { ArrowLeftIcon, CalendarIcon } from "react-native-heroicons/outline"
 
 import { Screen } from "@/components/Screen"
 import { Text } from "@/components/Text"
@@ -15,6 +16,7 @@ import { SimpleWorkoutForm, PacerWorkoutForm, CustomWorkoutForm } from "@/compon
 import { ButtonSelector } from "@/components/WorkoutForm/ButtonSelector"
 import { WorkoutStorage } from "@/services/WorkoutStorage"
 import { useAppTheme } from "@/theme/context"
+import { radius } from "@/theme/spacing"
 import type { ThemedStyle } from "@/theme/types"
 import type {
   SimpleWorkoutFormData,
@@ -44,6 +46,7 @@ export const WorkoutConfigurationScreen: FC = function WorkoutConfigurationScree
   const { themed, theme } = useAppTheme()
   const params = useLocalSearchParams()
   const activity = (params.activity as HKWorkoutActivityType) || "running"
+  const scheduledDate = params.scheduledDate ? new Date(params.scheduledDate as string) : undefined
 
   const [selectedType, setSelectedType] = useState<"goal" | "pacer" | "custom">("goal")
 
@@ -165,11 +168,13 @@ export const WorkoutConfigurationScreen: FC = function WorkoutConfigurationScree
       activity: activity,
       location: location,
       origin: "manual" as const,
+      scheduledDate,
+      status: scheduledDate ? ("scheduled" as const) : ("unscheduled" as const),
     }
 
     await WorkoutStorage.saveWorkout(savedWorkout)
     Alert.alert("Success", "Workout saved successfully!")
-    router.back()
+    router.replace("/home")
   }
 
   const handleBack = () => {
@@ -195,6 +200,16 @@ export const WorkoutConfigurationScreen: FC = function WorkoutConfigurationScree
         showsVerticalScrollIndicator={false}
         contentContainerStyle={themed($scrollContent)}
       >
+        {/* Scheduled Date Badge */}
+        {scheduledDate && (
+          <View style={themed($dateBadge)}>
+            <CalendarIcon size={16} color={theme.colors.tint} />
+            <Text preset="formHelper" style={themed($dateText)}>
+              Scheduled for {format(scheduledDate, "EEE, MMM d 'at' h:mm a")}
+            </Text>
+          </View>
+        )}
+
         {/* Workout Type Selection */}
         <View style={themed($section)}>
           <Text preset="subheading" size="md">
@@ -254,3 +269,19 @@ const $headerContent: ViewStyle = {
 const $section: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   marginBottom: spacing.xl,
 })
+
+const $dateBadge: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
+  flexDirection: "row",
+  alignItems: "center",
+  gap: spacing.xs,
+  backgroundColor: colors.palette.neutral100,
+  borderRadius: radius.md,
+  paddingHorizontal: spacing.md,
+  paddingVertical: spacing.sm,
+  marginBottom: spacing.lg,
+  alignSelf: "flex-start",
+})
+
+const $dateText: TextStyle = {
+  // No theme-specific styling needed here
+}

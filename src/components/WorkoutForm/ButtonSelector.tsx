@@ -1,5 +1,6 @@
 import { FC } from "react"
 import { View, ViewStyle, TouchableOpacity, TextStyle } from "react-native"
+
 import { Text } from "@/components/Text"
 import { useAppTheme } from "@/theme/context"
 import type { ThemedStyle } from "@/theme/types"
@@ -89,7 +90,7 @@ const $buttonTextSelected: ThemedStyle<TextStyle> = ({ colors }) => ({
   color: colors.palette.neutral100,
 })
 
-const $errorText: ThemedStyle<TextStyle> = ({ colors, spacing }) => ({
+const $errorText: ThemedStyle<TextStyle> = ({ colors }) => ({
   color: colors.error,
   marginTop: 4,
 })
