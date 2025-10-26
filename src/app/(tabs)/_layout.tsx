@@ -1,11 +1,7 @@
 import { Tabs } from "expo-router"
+import { HomeIcon, BookmarkIcon, ChatBubbleLeftRightIcon } from "react-native-heroicons/outline"
 import {
-  WrenchScrewdriverIcon,
-  BookmarkIcon,
-  ChatBubbleLeftRightIcon,
-} from "react-native-heroicons/outline"
-import {
-  WrenchScrewdriverIcon as WrenchScrewdriverIconSolid,
+  HomeIcon as HomeIconSolid,
   BookmarkIcon as BookmarkIconSolid,
   ChatBubbleLeftRightIcon as ChatBubbleLeftRightIconSolid,
 } from "react-native-heroicons/solid"
@@ -25,18 +21,14 @@ export default function TabLayout() {
         tabBarActiveTintColor: theme.colors.tint,
         tabBarInactiveTintColor: theme.colors.textDim,
       }}
-      initialRouteName="builder"
+      initialRouteName="home"
     >
       <Tabs.Screen
-        name="builder"
+        name="home"
         options={{
-          title: "Builder",
+          title: "Home",
           tabBarIcon: ({ color, focused, size }) => (
-            <TabIcon
-              Icon={focused ? WrenchScrewdriverIconSolid : WrenchScrewdriverIcon}
-              color={color}
-              size={size}
-            />
+            <TabIcon Icon={focused ? HomeIconSolid : HomeIcon} color={color} size={size} />
           ),
         }}
       />

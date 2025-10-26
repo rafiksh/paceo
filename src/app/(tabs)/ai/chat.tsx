@@ -163,10 +163,18 @@ const AIConversation: FC = () => {
         activity: pendingWorkout.activity,
         location: pendingWorkout.location,
         origin: "ai" as const,
+        status: "unscheduled" as const,
       }
       await WorkoutStorage.saveWorkout(savedWorkout)
       setPendingWorkout(null)
-      Alert.alert("Success", `Workout "${pendingWorkout.name}" saved successfully!`)
+      Alert.alert("Success", `Workout "${pendingWorkout.name}" saved successfully!`, [
+        {
+          text: "View",
+          onPress: () =>
+            router.push({ pathname: "/(tabs)/saved/[id]", params: { id: savedWorkout.id } }),
+        },
+        { text: "OK" },
+      ])
     } catch (e) {
       console.error("Error saving workout:", e)
       setErrorMessage("Failed to save workout")
