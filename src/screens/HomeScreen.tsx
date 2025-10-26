@@ -113,7 +113,7 @@ export const HomeScreen: FC = function HomeScreen() {
   return (
     <Screen preset="fixed" contentContainerStyle={themed($container)} safeAreaEdges={["top"]}>
       <View style={$header}>
-        <Text preset="heading">Home</Text>
+        <Text preset="heading">Hola peceo!</Text>
         <Button preset="ghost" onPress={toggleTheme}>
           {themeContext === "dark" ? (
             <SunIcon size={20} color={theme.colors.text} />
