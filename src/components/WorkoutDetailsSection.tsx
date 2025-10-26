@@ -304,12 +304,12 @@ const $sectionTitle: ThemedStyle<TextStyle> = ({ colors, spacing }) => ({
 })
 
 const $goalCard: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
-  backgroundColor: colors.palette.accent100,
+  backgroundColor: colors.palette.neutral300,
   padding: spacing.lg,
   borderRadius: 12,
   alignItems: "center",
   borderWidth: 1,
-  borderColor: colors.palette.accent200,
+  borderColor: colors.palette.neutral400,
 })
 
 const $goalValue: ThemedStyle<TextStyle> = ({ colors, spacing }) => ({
