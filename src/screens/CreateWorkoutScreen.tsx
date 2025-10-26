@@ -1,13 +1,13 @@
 import { FC, useState } from "react"
-import { View, ViewStyle, TextStyle, ScrollView, TouchableOpacity, Platform } from "react-native"
+import { View, ViewStyle, TextStyle, ScrollView, TouchableOpacity } from "react-native"
 import { router } from "expo-router"
 import type { HKWorkoutActivityType } from "expo-workoutkit"
-import DateTimePicker from "@react-native-community/datetimepicker"
 import { format } from "date-fns"
 import { ArrowLeftIcon, CalendarIcon, XMarkIcon } from "react-native-heroicons/outline"
 
 import { ActivityCard } from "@/components/ActivityCard"
 import { Button } from "@/components/Button"
+import { DatePickerModal } from "@/components/DatePickerModal"
 import { Screen } from "@/components/Screen"
 import { Text } from "@/components/Text"
 import { useAppTheme } from "@/theme/context"
@@ -30,13 +30,13 @@ export const CreateWorkoutScreen: FC = function CreateWorkoutScreen() {
     })
   }
 
-  const handleDateChange = (event: any, date?: Date) => {
-    if (Platform.OS === "android") {
-      setShowDatePicker(false)
-    }
-    if (date) {
-      setSelectedDate(date)
-    }
+  const handleDateConfirm = (date: Date) => {
+    setSelectedDate(date)
+    setShowDatePicker(false)
+  }
+
+  const handleDateCancel = () => {
+    setShowDatePicker(false)
   }
 
   const handleClearDate = () => {
@@ -119,15 +119,14 @@ export const CreateWorkoutScreen: FC = function CreateWorkoutScreen() {
       </ScrollView>
 
       {/* Date Picker Modal */}
-      {showDatePicker && (
-        <DateTimePicker
-          value={selectedDate || new Date()}
-          mode="datetime"
-          display={Platform.OS === "ios" ? "spinner" : "default"}
-          onChange={handleDateChange}
-          minimumDate={new Date()}
-        />
-      )}
+      <DatePickerModal
+        visible={showDatePicker}
+        value={selectedDate || new Date()}
+        onConfirm={handleDateConfirm}
+        onCancel={handleDateCancel}
+        minimumDate={new Date()}
+        mode="datetime"
+      />
     </Screen>
   )
 }
