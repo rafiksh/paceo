@@ -1,6 +1,9 @@
 import { Tabs } from "expo-router"
 import { HomeIcon, BookmarkIcon } from "react-native-heroicons/outline"
-import { HomeIcon as HomeIconSolid, BookmarkIcon as BookmarkIconSolid } from "react-native-heroicons/solid"
+import {
+  HomeIcon as HomeIconSolid,
+  BookmarkIcon as BookmarkIconSolid,
+} from "react-native-heroicons/solid"
 
 import { useAppTheme } from "@/theme/context"
 import type { ThemedStyle } from "@/theme/types"
