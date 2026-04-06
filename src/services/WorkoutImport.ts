@@ -28,6 +28,15 @@ export function decodePayload(data: string): WorkoutLinkPayload {
   }
 }
 
+export function encodeShareUrl(workout: SavedWorkout): string {
+  const payload: WorkoutLinkPayload = { v: 1, n: workout.name, p: workout.workoutPlan }
+  const bytes = pako.deflate(JSON.stringify(payload))
+  let binary = ""
+  bytes.forEach((b) => (binary += String.fromCharCode(b)))
+  const b64 = btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=/g, "")
+  return `paceo://workout?d=${b64}`
+}
+
 export function toSavedWorkout(payload: WorkoutLinkPayload): SavedWorkout {
   return {
     id: WorkoutStorage.generateId(),

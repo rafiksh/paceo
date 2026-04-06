@@ -1,7 +1,9 @@
 import { useState, useEffect, useCallback } from "react"
+import { Share } from "react-native"
 import { useLocalSearchParams, router } from "expo-router"
 
 import { WorkoutPreviewScreen } from "@/screens/WorkoutPreviewScreen"
+import { encodeShareUrl } from "@/services/WorkoutImport"
 import { WorkoutStorage, type SavedWorkout } from "@/services/WorkoutStorage"
 
 export default function WorkoutDetailsModal() {
@@ -67,6 +69,16 @@ export default function WorkoutDetailsModal() {
     }
   }
 
+  const handleShare = async () => {
+    if (!workout) return
+    try {
+      const url = encodeShareUrl(workout)
+      await Share.share({ message: url, url })
+    } catch (error) {
+      console.error("Error sharing workout:", error)
+    }
+  }
+
   const handleDelete = async () => {
     if (!workout) return
     try {
@@ -88,6 +100,7 @@ export default function WorkoutDetailsModal() {
       onEditDate={handleEditDate}
       onMarkComplete={handleMarkComplete}
       onDelete={handleDelete}
+      onShare={handleShare}
     />
   )
 }

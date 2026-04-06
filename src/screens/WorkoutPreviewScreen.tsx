@@ -2,7 +2,7 @@ import { FC, useState } from "react"
 import { ScrollView, ViewStyle, View, Alert, Platform } from "react-native"
 import DateTimePicker from "@react-native-community/datetimepicker"
 import { format } from "date-fns"
-import { CalendarIcon, CheckCircleIcon, TrashIcon } from "react-native-heroicons/outline"
+import { CalendarIcon, CheckCircleIcon, ShareIcon, TrashIcon } from "react-native-heroicons/outline"
 
 import { Button } from "@/components/Button"
 import { Screen } from "@/components/Screen"
@@ -21,6 +21,7 @@ interface WorkoutPreviewScreenProps {
   onEditDate?: (date: Date | undefined) => void
   onMarkComplete?: () => void
   onDelete?: () => void
+  onShare?: () => void
 }
 
 export const WorkoutPreviewScreen: FC<WorkoutPreviewScreenProps> = function WorkoutPreviewScreen({
@@ -29,6 +30,7 @@ export const WorkoutPreviewScreen: FC<WorkoutPreviewScreenProps> = function Work
   onEditDate,
   onMarkComplete,
   onDelete,
+  onShare,
 }) {
   const { themed, theme } = useAppTheme()
   const { workoutPlan } = workout
@@ -102,8 +104,19 @@ export const WorkoutPreviewScreen: FC<WorkoutPreviewScreenProps> = function Work
         />
 
         {/* Action Buttons */}
-        {(onEditDate || onMarkComplete || onDelete) && (
+        {(onEditDate || onMarkComplete || onDelete || onShare) && (
           <View style={themed($actionsSection)}>
+            {onShare && (
+              <Button
+                preset="default"
+                onPress={onShare}
+                LeftAccessory={() => (
+                  <ShareIcon size={20} color={theme.colors.palette.neutral100} />
+                )}
+              >
+                Share Workout
+              </Button>
+            )}
             {onEditDate && !isCompleted && (
               <>
                 <Button
